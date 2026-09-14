@@ -1,26 +1,41 @@
 ---
 import CalculatorInput from './CalculatorInput.astro';
 import { AlertCircle } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
+import { getWidgetTranslation } from '../../lib/i18n/calculators/widgets';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const wt = getWidgetTranslation('conversion-rate', locale);
 ---
 
-<div id="conversion-rate-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+<div
+  id="conversion-rate-app"
+  class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10"
+  data-locale={locale}
+>
   <!-- Presets & Reset Bar -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-      Conversion Rate
+      {wt.title || 'Conversion Rate'}
     </div>
 
     <!-- Presets & Reset -->
     <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
       <div class="flex items-center gap-1.5">
-        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">{t.common.presets}:</span>
         <button
           type="button"
           class="cvr-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
           data-conv="85"
           data-vis="2500"
         >
-          85 / 2,500 (3.4%)
+          {wt.presets[0]}
         </button>
         <button
           type="button"
@@ -28,7 +43,7 @@ import { AlertCircle } from 'lucide-astro';
           data-conv="120"
           data-vis="5000"
         >
-          120 / 5,000 (2.4%)
+          {wt.presets[1]}
         </button>
         <button
           type="button"
@@ -36,7 +51,7 @@ import { AlertCircle } from 'lucide-astro';
           data-conv="50"
           data-vis="1000"
         >
-          50 / 1,000 (5.0%)
+          {wt.presets[2]}
         </button>
       </div>
 
@@ -46,7 +61,7 @@ import { AlertCircle } from 'lucide-astro';
         class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
         title="Reset inputs to default"
       >
-        Reset
+        {t.actions.reset}
       </button>
     </div>
   </div>
@@ -57,7 +72,7 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-5 space-y-6">
       <div>
         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
-          Funnel Traffic
+          {t.common.yourNumbers}
         </span>
 
         <div
@@ -66,34 +81,34 @@ import { AlertCircle } from 'lucide-astro';
           role="alert"
         >
           <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
-          <span id="cvr-error-msg">Total visitors must be greater than 0.</span>
+          <span id="cvr-error-msg">{wt.errors.general || 'Total visitors must be greater than 0.'}</span>
         </div>
 
         <form id="cvr-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
           <CalculatorInput
             id="cvr-input-conv"
             name="conversions"
-            label="Successful Conversions"
+            label={wt.labels.conversions}
             value="85"
             placeholder="0"
-            helperText="Number of purchases, signups, or goal completions."
+            helperText={wt.helpers.conversions}
             required
           />
 
           <CalculatorInput
             id="cvr-input-vis"
             name="visitors"
-            label="Total Visitors / Interactions"
+            label={wt.labels.visitors}
             value="2500"
             placeholder="0"
-            helperText="Total sessions, visits, or ad clicks in the same timeframe."
+            helperText={wt.helpers.visitors}
             required
           />
         </form>
       </div>
 
       <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
-        <span>Instant calculation</span>
+        <span>{t.common.automaticRecalculation}</span>
         <span>Standard CVR metric</span>
       </div>
     </div>
@@ -101,19 +116,19 @@ import { AlertCircle } from 'lucide-astro';
     <!-- Right: Dominant Result -->
     <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
       <div id="cvr-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
-        <p class="text-sm font-medium text-[var(--text-primary)]">Enter conversions and total visitors.</p>
-        <p class="text-xs text-[var(--text-muted)]">Determine funnel completion rate and drop-off counts.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{wt.emptyState.title}</p>
+        <p class="text-xs text-[var(--text-muted)]">{wt.emptyState.desc}</p>
       </div>
 
       <div id="cvr-active-container" class="space-y-7">
         <div>
           <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
-            Funnel Efficiency
+            {t.common.yourResult}
           </span>
 
           <div class="py-1">
             <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
-              Conversion Rate
+              {wt.results.rate || 'Conversion Rate'}
             </span>
             <div
               id="cvr-result-primary"
@@ -130,21 +145,21 @@ import { AlertCircle } from 'lucide-astro';
         <!-- Secondary Metrics -->
         <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Funnel drop-off rate</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.dropOff || 'Funnel drop-off rate'}</span>
             <span id="cvr-res-drop-rate" class="font-medium text-[var(--text-primary)] tabular-nums">
               96.60%
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Lost / dropped-off visitors</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.nonConverting || 'Lost / dropped-off visitors'}</span>
             <span id="cvr-res-drop-count" class="font-medium text-[var(--text-primary)] tabular-nums">
               2,415 visitors
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Completed goal actions</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.labels.conversions || 'Completed goal actions'}</span>
             <span id="cvr-res-actions" class="font-medium text-[var(--positive-text)] tabular-nums">
               85 conversions
             </span>
@@ -161,6 +176,11 @@ import { AlertCircle } from 'lucide-astro';
   import { parseCleanNumber } from '../../lib/utils/math';
 
   function setupConversionRateCalculator() {
+    const root = document.getElementById('conversion-rate-app');
+    if (!root) return;
+
+    const locale = (root.getAttribute('data-locale') as any) || 'en';
+
     const convInput = document.getElementById('cvr-input-conv') as HTMLInputElement | null;
     const visInput = document.getElementById('cvr-input-vis') as HTMLInputElement | null;
 
@@ -202,13 +222,13 @@ import { AlertCircle } from 'lucide-astro';
 
       errorBox?.classList.add('hidden');
 
-      if (primaryEl) primaryEl.textContent = formatPercent(result.conversionRate);
-      if (dropRateEl) dropRateEl.textContent = formatPercent(result.dropOffRate);
-      if (dropCountEl) dropCountEl.textContent = `${formatNumber(result.dropOffCount, 0)} visitors`;
-      if (actionsEl) actionsEl.textContent = `${formatNumber(result.conversions, 0)} conversions`;
+      if (primaryEl) primaryEl.textContent = formatPercent(result.conversionRate, 2, locale);
+      if (dropRateEl) dropRateEl.textContent = formatPercent(result.dropOffRate, 2, locale);
+      if (dropCountEl) dropCountEl.textContent = `${formatNumber(result.dropOffCount, 0, locale)} visitors`;
+      if (actionsEl) actionsEl.textContent = `${formatNumber(result.conversions, 0, locale)} conversions`;
 
       if (summaryEl) {
-        summaryEl.innerHTML = `Generating ${formatNumber(result.conversions, 0)} conversions from ${formatNumber(result.visitors, 0)} visitors produces a <strong class="text-[var(--text-primary)] font-semibold">${formatPercent(result.conversionRate)}</strong> conversion rate.`;
+        summaryEl.innerHTML = `Generating ${formatNumber(result.conversions, 0, locale)} conversions from ${formatNumber(result.visitors, 0, locale)} visitors produces a <strong class="text-[var(--text-primary)] font-semibold">${formatPercent(result.conversionRate, 2, locale)}</strong> conversion rate.`;
       }
     }
 

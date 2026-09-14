@@ -1,26 +1,44 @@
 ---
 import CalculatorInput from './CalculatorInput.astro';
 import { AlertCircle } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
+import { getWidgetTranslation, getCalcCurrency, formatCalcMoney } from '../../lib/i18n/calculators/widgets';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const wt = getWidgetTranslation('ltv-cac', locale);
+const curr = getCalcCurrency(locale);
 ---
 
-<div id="ltv-cac-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+<div
+  id="ltv-cac-app"
+  class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10"
+  data-locale={locale}
+  data-curr-code={curr.code}
+  data-curr-decimals={curr.decimals}
+>
   <!-- Presets & Reset Bar -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-      Unit Economics Ratio
+      {wt.title || 'Unit Economics Ratio'}
     </div>
 
     <!-- Presets & Reset -->
     <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
       <div class="flex items-center gap-1.5">
-        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">{t.common.presets}:</span>
         <button
           type="button"
           class="ltv-cac-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
           data-ltv="900"
           data-cac="200"
         >
-          $900 / $200 (4.5x)
+          {wt.presets[0]}
         </button>
         <button
           type="button"
@@ -28,7 +46,7 @@ import { AlertCircle } from 'lucide-astro';
           data-ltv="600"
           data-cac="200"
         >
-          $600 / $200 (3.0x)
+          {wt.presets[1]}
         </button>
         <button
           type="button"
@@ -36,7 +54,7 @@ import { AlertCircle } from 'lucide-astro';
           data-ltv="300"
           data-cac="250"
         >
-          $300 / $250 (1.2x)
+          {wt.presets[2]}
         </button>
       </div>
 
@@ -46,7 +64,7 @@ import { AlertCircle } from 'lucide-astro';
         class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
         title="Reset inputs to default"
       >
-        Reset
+        {t.actions.reset}
       </button>
     </div>
   </div>
@@ -57,7 +75,7 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-5 space-y-6">
       <div>
         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
-          Unit Economics
+          {t.common.yourNumbers}
         </span>
 
         <div
@@ -66,36 +84,36 @@ import { AlertCircle } from 'lucide-astro';
           role="alert"
         >
           <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
-          <span id="ltv-cac-error-msg">CAC must be greater than 0.</span>
+          <span id="ltv-cac-error-msg">{wt.errors.general || 'CAC must be greater than 0.'}</span>
         </div>
 
         <form id="ltv-cac-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
           <CalculatorInput
             id="ltv-cac-input-ltv"
             name="ltv"
-            label="Customer Lifetime Value (LTV)"
+            label={wt.labels.ltv}
             value="900"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Expected total revenue or gross margin generated per customer."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.ltv}
             required
           />
 
           <CalculatorInput
             id="ltv-cac-input-cac"
             name="cac"
-            label="Customer Acquisition Cost (CAC)"
+            label={wt.labels.cac}
             value="200"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Direct marketing and sales expenditure to acquire a customer."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.cac}
             required
           />
         </form>
       </div>
 
       <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
-        <span>Instant calculation</span>
+        <span>{t.common.automaticRecalculation}</span>
         <span>Standard benchmark: 3.00:1</span>
       </div>
     </div>
@@ -103,19 +121,19 @@ import { AlertCircle } from 'lucide-astro';
     <!-- Right: Dominant Result -->
     <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
       <div id="ltv-cac-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
-        <p class="text-sm font-medium text-[var(--text-primary)]">Enter LTV and CAC to calculate ratio.</p>
-        <p class="text-xs text-[var(--text-muted)]">Benchmark customer acquisition sustainability.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{wt.emptyState.title}</p>
+        <p class="text-xs text-[var(--text-muted)]">{wt.emptyState.desc}</p>
       </div>
 
       <div id="ltv-cac-active-container" class="space-y-7">
         <div>
           <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
-            Acquisition Multiple
+            {t.common.yourResult}
           </span>
 
           <div class="py-1">
             <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
-              LTV : CAC Ratio
+              {wt.results.ratio || 'LTV : CAC Ratio'}
             </span>
             <div
               id="ltv-cac-result-primary"
@@ -124,7 +142,7 @@ import { AlertCircle } from 'lucide-astro';
               4.50:1
             </div>
             <p id="ltv-cac-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
-              Every $1.00 spent on acquisition yields <strong class="text-[var(--text-primary)] font-semibold">$4.50</strong> in customer lifetime value.
+              Every {curr.symbol}1.00 spent on acquisition yields <strong class="text-[var(--text-primary)] font-semibold">{formatCalcMoney(4.5, locale)}</strong> in customer lifetime value.
             </p>
           </div>
         </div>
@@ -132,16 +150,16 @@ import { AlertCircle } from 'lucide-astro';
         <!-- Secondary Metrics -->
         <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Economics health status</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.status || 'Economics health status'}</span>
             <span id="ltv-cac-res-status" class="font-semibold text-[var(--positive-text)]">
               Healthy (Optimal growth benchmark)
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Net value per customer (LTV - CAC)</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.netValue || 'Net value per customer (LTV - CAC)'}</span>
             <span id="ltv-cac-res-net" class="font-medium text-[var(--text-primary)] tabular-nums">
-              $700.00
+              {formatCalcMoney(700, locale)}
             </span>
           </div>
 
@@ -163,6 +181,17 @@ import { AlertCircle } from 'lucide-astro';
   import { parseCleanNumber } from '../../lib/utils/math';
 
   function setupLtvCacCalculator() {
+    const root = document.getElementById('ltv-cac-app');
+    if (!root) return;
+
+    const locale = (root.getAttribute('data-locale') as any) || 'en';
+    const currCode = root.getAttribute('data-curr-code') || 'USD';
+    const currDecimals = parseInt(root.getAttribute('data-curr-decimals') || '2', 10);
+
+    function formatMoney(val: number | null | undefined): string {
+      return formatCurrency(val, currCode, currDecimals, currDecimals, locale);
+    }
+
     const ltvInput = document.getElementById('ltv-cac-input-ltv') as HTMLInputElement | null;
     const cacInput = document.getElementById('ltv-cac-input-cac') as HTMLInputElement | null;
 
@@ -206,7 +235,7 @@ import { AlertCircle } from 'lucide-astro';
 
       const cacShare = result.ltv > 0 ? (result.cac / result.ltv) * 100 : 0;
 
-      if (primaryEl) primaryEl.textContent = `${formatNumber(result.ratio, 2)}:1`;
+      if (primaryEl) primaryEl.textContent = `${formatNumber(result.ratio, 2, locale)}:1`;
       if (statusEl) {
         statusEl.textContent = result.healthStatus;
         if (result.ratio < 1) {
@@ -217,11 +246,11 @@ import { AlertCircle } from 'lucide-astro';
           statusEl.className = 'font-semibold text-[var(--positive-text)]';
         }
       }
-      if (netEl) netEl.textContent = formatCurrency(result.netValue);
-      if (shareEl) shareEl.textContent = `${formatPercent(cacShare)} of LTV`;
+      if (netEl) netEl.textContent = formatMoney(result.netValue);
+      if (shareEl) shareEl.textContent = `${formatPercent(cacShare, 2, locale)} of LTV`;
 
       if (summaryEl) {
-        summaryEl.innerHTML = `Every $1.00 spent on acquisition yields <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.ratio)}</strong> in customer lifetime value.`;
+        summaryEl.innerHTML = `Every 1.00 unit spent on acquisition yields <strong class="text-[var(--text-primary)] font-semibold">${formatMoney(result.ratio)}</strong> in customer lifetime value.`;
       }
     }
 

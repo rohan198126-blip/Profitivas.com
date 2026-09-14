@@ -48,19 +48,19 @@ const { content, lang } = Astro.props;
 ---
 
 <CalculatorLayout content={content} locale={lang}>
-  {content.meta.id === 'profit-margin' && <ProfitMarginCalculator />}
-  {content.meta.id === 'markup' && <MarkupCalculator />}
-  {content.meta.id === 'selling-price' && <SellingPriceCalculator />}
-  {content.meta.id === 'discount' && <DiscountCalculator />}
-  {content.meta.id === 'gross-profit' && <GrossProfitCalculator />}
-  {content.meta.id === 'break-even' && <BreakEvenCalculator />}
-  {content.meta.id === 'target-profit' && <TargetProfitCalculator />}
-  {content.meta.id === 'revenue' && <RevenueCalculator />}
-  {content.meta.id === 'commission' && <CommissionCalculator />}
-  {content.meta.id === 'roi' && <RoiCalculator />}
-  {content.meta.id === 'roas' && <RoasCalculator />}
-  {content.meta.id === 'cac' && <CacCalculator />}
-  {content.meta.id === 'ltv' && <LtvCalculator />}
-  {content.meta.id === 'ltv-cac' && <LtvCacCalculator />}
-  {content.meta.id === 'conversion-rate' && <ConversionRateCalculator />}
+  {content.meta.id === 'profit-margin' && <ProfitMarginCalculator locale={lang} />}
+  {content.meta.id === 'markup' && <MarkupCalculator locale={lang} />}
+  {content.meta.id === 'selling-price' && <SellingPriceCalculator locale={lang} />}
+  {content.meta.id === 'discount' && <DiscountCalculator locale={lang} />}
+  {content.meta.id === 'gross-profit' && <GrossProfitCalculator locale={lang} />}
+  {content.meta.id === 'break-even' && <BreakEvenCalculator locale={lang} />}
+  {content.meta.id === 'target-profit' && <TargetProfitCalculator locale={lang} />}
+  {content.meta.id === 'revenue' && <RevenueCalculator locale={lang} />}
+  {content.meta.id === 'commission' && <CommissionCalculator locale={lang} />}
+  {content.meta.id === 'roi' && <RoiCalculator locale={lang} />}
+  {content.meta.id === 'roas' && <RoasCalculator locale={lang} />}
+  {content.meta.id === 'cac' && <CacCalculator locale={lang} />}
+  {content.meta.id === 'ltv' && <LtvCalculator locale={lang} />}
+  {content.meta.id === 'ltv-cac' && <LtvCacCalculator locale={lang} />}
+  {content.meta.id === 'conversion-rate' && <ConversionRateCalculator locale={lang} />}
 </CalculatorLayout>

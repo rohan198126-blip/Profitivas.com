@@ -1,9 +1,34 @@
 ---
 import CalculatorInput from './CalculatorInput.astro';
 import { AlertCircle } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
+import { getWidgetTranslation, getCalcCurrency, formatCalcMoney } from '../../lib/i18n/calculators/widgets';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const wt = getWidgetTranslation('markup', locale);
+const curr = getCalcCurrency(locale);
 ---
 
-<div id="markup-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+<div
+  id="markup-app"
+  class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10"
+  data-locale={locale}
+  data-curr-code={curr.code}
+  data-curr-decimals={curr.decimals}
+  data-lbl-markup={wt.results.markup || 'Markup'}
+  data-lbl-selling-price={wt.results.sellingPrice || 'Selling price'}
+  data-lbl-req-selling-price={wt.results.requiredPrice || 'Required Selling Price'}
+  data-lbl-target-markup={wt.results.targetMarkup || 'Target markup'}
+  data-err-cost={wt.errors.cost || 'Please enter a valid non-negative cost.'}
+  data-err-rev={wt.errors.revenue || 'Please enter a valid non-negative selling price.'}
+  data-err-target={wt.errors.target || 'Please enter a valid target markup percentage.'}
+>
   <!-- Mode Switcher & Secondary Utility Controls -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
     <!-- Compact Segmented Mode Switcher -->
@@ -21,7 +46,7 @@ import { AlertCircle } from 'lucide-astro';
         class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)] shadow-2xs"
         data-mode="standard"
       >
-        Cost &amp; Selling Price
+        {wt.modes?.standard || 'Cost & Selling Price'}
       </button>
       <button
         type="button"
@@ -32,14 +57,14 @@ import { AlertCircle } from 'lucide-astro';
         class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]"
         data-mode="target"
       >
-        Target Markup (Reverse)
+        {wt.modes?.target || 'Target Markup (Reverse)'}
       </button>
     </div>
 
     <!-- Secondary Presets & Reset -->
     <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
       <div class="flex items-center gap-1.5">
-        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">{t.common.presets}:</span>
         <button
           type="button"
           class="preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
@@ -47,7 +72,7 @@ import { AlertCircle } from 'lucide-astro';
           data-revenue="100"
           data-target="150"
         >
-          $40 &rarr; $100
+          {wt.presets[0]}
         </button>
         <button
           type="button"
@@ -56,7 +81,7 @@ import { AlertCircle } from 'lucide-astro';
           data-revenue="75"
           data-target="50"
         >
-          $50 &rarr; $75
+          {wt.presets[1]}
         </button>
         <button
           type="button"
@@ -65,7 +90,7 @@ import { AlertCircle } from 'lucide-astro';
           data-revenue="60"
           data-target="200"
         >
-          $20 &rarr; $60
+          {wt.presets[2]}
         </button>
       </div>
 
@@ -75,7 +100,7 @@ import { AlertCircle } from 'lucide-astro';
         class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
         title="Reset inputs to default"
       >
-        Reset
+        {t.actions.reset}
       </button>
     </div>
   </div>
@@ -86,7 +111,7 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-5 space-y-6">
       <div>
         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
-          Your Numbers
+          {t.common.yourNumbers}
         </span>
 
         <!-- Calm Inline Validation Alert -->
@@ -96,7 +121,7 @@ import { AlertCircle } from 'lucide-astro';
           role="alert"
         >
           <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
-          <span id="calc-error-msg">Please enter valid positive numbers.</span>
+          <span id="calc-error-msg">{wt.errors.general || 'Please enter valid positive numbers.'}</span>
         </div>
 
         <form id="markup-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
@@ -104,11 +129,11 @@ import { AlertCircle } from 'lucide-astro';
           <CalculatorInput
             id="input-cost"
             name="cost"
-            label="Unit Cost"
+            label={wt.labels.cost}
             value="40"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Direct acquisition, manufacturing, or wholesale cost."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.cost}
             required
           />
 
@@ -117,11 +142,11 @@ import { AlertCircle } from 'lucide-astro';
             <CalculatorInput
               id="input-revenue"
               name="revenue"
-              label="Selling Price"
+              label={wt.labels.revenue}
               value="100"
-              prefix="$"
-              placeholder="0.00"
-              helperText="Final customer or retail selling price."
+              prefix={curr.symbol}
+              placeholder={curr.decimals === 0 ? '0' : '0.00'}
+              helperText={wt.helpers.revenue}
               required
             />
           </div>
@@ -131,11 +156,11 @@ import { AlertCircle } from 'lucide-astro';
             <CalculatorInput
               id="input-target-markup"
               name="targetMarkup"
-              label="Target Markup"
+              label={wt.labels.targetMarkup}
               value="150"
               suffix="%"
-              placeholder="0.00"
-              helperText="Percentage markup added on top of cost (e.g. 150% = 2.5x cost)."
+              placeholder={curr.decimals === 0 ? '0' : '0.00'}
+              helperText={wt.helpers.targetMarkup}
               min="0"
             />
           </div>
@@ -144,8 +169,8 @@ import { AlertCircle } from 'lucide-astro';
 
       <!-- Quiet Metadata Line -->
       <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
-        <span>Automatic recalculation</span>
-        <span>Pre-tax</span>
+        <span>{t.common.automaticRecalculation}</span>
+        <span>{t.common.preTax}</span>
       </div>
     </div>
 
@@ -153,21 +178,21 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
       <!-- Calm Empty State (When inputs are empty) -->
       <div id="result-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
-        <p class="text-sm font-medium text-[var(--text-primary)]">Enter your numbers to calculate your markup.</p>
-        <p class="text-xs text-[var(--text-muted)]">Input unit cost and selling price to view instant markup analysis.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{wt.emptyState.title}</p>
+        <p class="text-xs text-[var(--text-muted)]">{wt.emptyState.desc}</p>
       </div>
 
       <!-- Active Result Composition Area -->
       <div id="result-active-container" class="space-y-7">
         <div>
           <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
-            Your Result
+            {t.common.yourResult}
           </span>
 
           <!-- Dominant Hero Result Value with generous breathing room -->
           <div class="py-1">
             <span id="primary-result-label" class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
-              Markup
+              {wt.results.markup}
             </span>
             <div
               id="result-primary-value"
@@ -176,7 +201,7 @@ import { AlertCircle } from 'lucide-astro';
               150.00%
             </div>
             <p id="result-summary-detail" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
-              A <strong class="text-[var(--text-primary)] font-semibold">150.00% markup</strong> adds $60.00 in gross profit per unit, yielding a <strong class="text-[var(--text-primary)] font-semibold">60.00% profit margin</strong>.
+              A <strong class="text-[var(--text-primary)] font-semibold">150.00% markup</strong> adds {formatCalcMoney(60, locale)} in gross profit per unit, yielding a <strong class="text-[var(--text-primary)] font-semibold">60.00% profit margin</strong>.
             </p>
           </div>
         </div>
@@ -185,15 +210,15 @@ import { AlertCircle } from 'lucide-astro';
         <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
           <!-- Gross Profit Row -->
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Gross profit</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.grossProfit}</span>
             <span id="result-profit" class="font-semibold text-[var(--positive-text)] tabular-nums">
-              $60.00
+              {formatCalcMoney(60, locale)}
             </span>
           </div>
 
           <!-- Profit Margin Row -->
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Profit margin</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.profitMargin}</span>
             <span id="result-margin" class="font-medium text-[var(--text-primary)] tabular-nums">
               60.00%
             </span>
@@ -201,15 +226,15 @@ import { AlertCircle } from 'lucide-astro';
 
           <!-- Mode-specific Secondary Row (Selling price in standard mode, Target markup in reverse mode) -->
           <div id="row-secondary-mode-specific" class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span id="label-secondary-mode-specific" class="text-[var(--text-secondary)] font-normal">Selling price</span>
+            <span id="label-secondary-mode-specific" class="text-[var(--text-secondary)] font-normal">{wt.results.sellingPrice}</span>
             <span id="value-secondary-mode-specific" class="font-medium text-[var(--text-primary)] tabular-nums">
-              $100.00
+              {formatCalcMoney(100, locale)}
             </span>
           </div>
 
           <!-- Return on Cost Row -->
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Return on cost</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.returnOnCost}</span>
             <span id="result-return" class="font-medium text-[var(--text-primary)] tabular-nums">
               150.00%
             </span>
@@ -219,29 +244,29 @@ import { AlertCircle } from 'lucide-astro';
     </div>
   </div>
 
-  <!-- Secondary Editorial Analysis: Per $100 Sale Breakdown Strip -->
+  <!-- Secondary Editorial Analysis: Per 100 Breakdown Strip -->
   <div id="per-100-analysis" class="mt-8 pt-8 border-t border-[var(--border)] text-xs text-[var(--text-secondary)]">
     <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
       <div>
         <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-1">
-          Per $100 Sale
+          {wt.sub?.per100 || 'Per 100 Sale'}
         </span>
         <p class="text-xs text-[var(--text-secondary)]">
-          Every $100 in revenue yields <strong id="per-100-profit-summary" class="text-[var(--text-primary)] font-semibold">$60.00</strong> in gross margin after covering direct costs.
+          Every {curr.symbol}100 in revenue yields <strong id="per-100-profit-summary" class="text-[var(--text-primary)] font-semibold">{formatCalcMoney(60, locale)}</strong> in gross margin after covering direct costs.
         </p>
       </div>
       <div class="flex items-center gap-6 sm:gap-8 font-mono text-xs sm:text-sm tabular-nums shrink-0">
         <div>
-          <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">Revenue</span>
-          <span class="font-medium text-[var(--text-primary)]">$100.00</span>
+          <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">{wt.sub?.revenue || 'Revenue'}</span>
+          <span class="font-medium text-[var(--text-primary)]">{formatCalcMoney(100, locale)}</span>
         </div>
         <div>
-          <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">Cost</span>
-          <span id="per-100-cost" class="font-medium text-[var(--text-secondary)]">$40.00</span>
+          <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">{wt.sub?.cost || 'Cost'}</span>
+          <span id="per-100-cost" class="font-medium text-[var(--text-secondary)]">{formatCalcMoney(40, locale)}</span>
         </div>
         <div>
-          <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">Profit</span>
-          <span id="per-100-profit" class="font-semibold text-[var(--positive-text)]">$60.00</span>
+          <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">{wt.sub?.profit || wt.results.grossProfit || 'Profit'}</span>
+          <span id="per-100-profit" class="font-semibold text-[var(--positive-text)]">{formatCalcMoney(60, locale)}</span>
         </div>
       </div>
     </div>
@@ -256,6 +281,21 @@ import { AlertCircle } from 'lucide-astro';
   function initMarkupCalculator() {
     const root = document.getElementById('markup-app');
     if (!root) return;
+
+    const locale = (root.getAttribute('data-locale') as any) || 'en';
+    const currCode = root.getAttribute('data-curr-code') || 'USD';
+    const currDecimals = parseInt(root.getAttribute('data-curr-decimals') || '2', 10);
+    const lblMarkup = root.getAttribute('data-lbl-markup') || 'Markup';
+    const lblSellingPrice = root.getAttribute('data-lbl-selling-price') || 'Selling price';
+    const lblReqSellingPrice = root.getAttribute('data-lbl-req-selling-price') || 'Required Selling Price';
+    const lblTargetMarkup = root.getAttribute('data-lbl-target-markup') || 'Target markup';
+    const errCost = root.getAttribute('data-err-cost') || 'Please enter a valid non-negative cost.';
+    const errRev = root.getAttribute('data-err-rev') || 'Please enter a valid non-negative selling price.';
+    const errTarget = root.getAttribute('data-err-target') || 'Please enter a valid target markup percentage.';
+
+    function formatMoney(val: number | null | undefined): string {
+      return formatCurrency(val, currCode, currDecimals, currDecimals, locale);
+    }
 
     let currentMode: 'standard' | 'target' = 'standard';
 
@@ -291,7 +331,7 @@ import { AlertCircle } from 'lucide-astro';
     const labelSecondaryModeSpecific = document.getElementById('label-secondary-mode-specific');
     const valueSecondaryModeSpecific = document.getElementById('value-secondary-mode-specific');
 
-    // Per $100 elements
+    // Per 100 elements
     const per100Cost = document.getElementById('per-100-cost');
     const per100Profit = document.getElementById('per-100-profit');
     const per100ProfitSummary = document.getElementById('per-100-profit-summary');
@@ -314,8 +354,8 @@ import { AlertCircle } from 'lucide-astro';
         revenueWrap?.classList.remove('hidden');
         targetWrap?.classList.add('hidden');
 
-        if (primaryLabel) primaryLabel.textContent = 'Markup';
-        if (labelSecondaryModeSpecific) labelSecondaryModeSpecific.textContent = 'Selling price';
+        if (primaryLabel) primaryLabel.textContent = lblMarkup;
+        if (labelSecondaryModeSpecific) labelSecondaryModeSpecific.textContent = lblSellingPrice;
       } else {
         tabTarget?.setAttribute('aria-selected', 'true');
         tabStandard?.setAttribute('aria-selected', 'false');
@@ -327,8 +367,8 @@ import { AlertCircle } from 'lucide-astro';
         revenueWrap?.classList.add('hidden');
         targetWrap?.classList.remove('hidden');
 
-        if (primaryLabel) primaryLabel.textContent = 'Required Selling Price';
-        if (labelSecondaryModeSpecific) labelSecondaryModeSpecific.textContent = 'Target markup';
+        if (primaryLabel) primaryLabel.textContent = lblReqSellingPrice;
+        if (labelSecondaryModeSpecific) labelSecondaryModeSpecific.textContent = lblTargetMarkup;
       }
 
       recalculate();
@@ -368,7 +408,7 @@ import { AlertCircle } from 'lucide-astro';
       }
 
       if (costVal === null || costVal < 0) {
-        showError('Please enter a valid non-negative cost.');
+        showError(errCost);
         showEmptyState();
         return;
       }
@@ -382,7 +422,7 @@ import { AlertCircle } from 'lucide-astro';
         }
         const revVal = parseCleanNumber(revRaw);
         if (revVal === null || revVal < 0) {
-          showError('Please enter a valid non-negative selling price.');
+          showError(errRev);
           showEmptyState();
           return;
         }
@@ -395,7 +435,7 @@ import { AlertCircle } from 'lucide-astro';
         }
         const targetVal = parseCleanNumber(targetRaw);
         if (targetVal === null || targetVal < 0) {
-          showError('Please enter a valid non-negative target markup percentage.');
+          showError(errTarget);
           showEmptyState();
           return;
         }
@@ -413,19 +453,19 @@ import { AlertCircle } from 'lucide-astro';
       // Update Dominant Primary Metric based on active mode
       if (currentMode === 'standard') {
         if (primaryValue) {
-          primaryValue.textContent = res.isZeroCost && res.revenue > 0 ? 'Undefined' : formatPercent(res.markup);
+          primaryValue.textContent = res.isZeroCost && res.revenue > 0 ? 'Undefined' : formatPercent(res.markup, 2, locale);
         }
-        if (valueSecondaryModeSpecific) valueSecondaryModeSpecific.textContent = formatCurrency(res.revenue);
+        if (valueSecondaryModeSpecific) valueSecondaryModeSpecific.textContent = formatMoney(res.revenue);
       } else {
-        if (primaryValue) primaryValue.textContent = formatCurrency(res.revenue);
+        if (primaryValue) primaryValue.textContent = formatMoney(res.revenue);
         if (valueSecondaryModeSpecific) {
-          valueSecondaryModeSpecific.textContent = res.isZeroCost && res.revenue > 0 ? 'Undefined' : formatPercent(res.markup);
+          valueSecondaryModeSpecific.textContent = res.isZeroCost && res.revenue > 0 ? 'Undefined' : formatPercent(res.markup, 2, locale);
         }
       }
 
       // Update Primary Supporting Metric (Gross Profit)
       if (resultProfit) {
-        resultProfit.textContent = formatCurrency(res.profit);
+        resultProfit.textContent = formatMoney(res.profit);
         if (res.isLoss) {
           resultProfit.classList.add('text-[var(--negative-text)]');
           resultProfit.classList.remove('text-[var(--positive-text)]');
@@ -436,31 +476,31 @@ import { AlertCircle } from 'lucide-astro';
       }
 
       // Update Secondary Typographic Metrics
-      if (resultMargin) resultMargin.textContent = formatPercent(res.margin);
+      if (resultMargin) resultMargin.textContent = formatPercent(res.margin, 2, locale);
       if (resultReturn) {
-        resultReturn.textContent = res.isZeroCost && res.revenue > 0 ? 'Undefined' : formatPercent(res.returnOnCost);
+        resultReturn.textContent = res.isZeroCost && res.revenue > 0 ? 'Undefined' : formatPercent(res.returnOnCost, 2, locale);
       }
 
       // Detail summary sentence
       if (summaryDetail) {
         if (res.isZeroCost && res.revenue > 0) {
-          summaryDetail.innerHTML = `With a $0.00 cost, the entire ${formatCurrency(res.revenue)} is gross profit (100.00% margin). Markup is mathematically undefined.`;
+          summaryDetail.innerHTML = `With a ${formatMoney(0)} cost, the entire ${formatMoney(res.revenue)} is gross profit (${formatPercent(100, 2, locale)} margin). Markup is mathematically undefined.`;
         } else if (res.isLoss) {
-          summaryDetail.innerHTML = `Selling below cost results in a negative markup of <strong class="text-[var(--negative-text)] font-semibold">${formatPercent(res.markup)}</strong> and a loss of <strong class="text-[var(--negative-text)] font-semibold">${formatCurrency(Math.abs(res.profit))}</strong>.`;
+          summaryDetail.innerHTML = `Selling below cost results in a negative markup of <strong class="text-[var(--negative-text)] font-semibold">${formatPercent(res.markup, 2, locale)}</strong> and a loss of <strong class="text-[var(--negative-text)] font-semibold">${formatMoney(Math.abs(res.profit))}</strong>.`;
         } else {
-          summaryDetail.innerHTML = `A <strong class="text-[var(--text-primary)] font-semibold">${formatPercent(res.markup)} markup</strong> adds ${formatCurrency(res.profit)} in gross profit per unit, yielding a <strong class="text-[var(--text-primary)] font-semibold">${formatPercent(res.margin)} profit margin</strong>.`;
+          summaryDetail.innerHTML = `A <strong class="text-[var(--text-primary)] font-semibold">${formatPercent(res.markup, 2, locale)} markup</strong> adds ${formatMoney(res.profit)} in gross profit per unit, yielding a <strong class="text-[var(--text-primary)] font-semibold">${formatPercent(res.margin, 2, locale)} profit margin</strong>.`;
         }
       }
 
-      // Update Per $100 Breakdown
+      // Update Per 100 Breakdown
       if (per100Cost && per100Profit && res.revenue > 0) {
         const costRatio = (res.cost / res.revenue) * 100;
         const profitRatio = (res.profit / res.revenue) * 100;
 
-        per100Cost.textContent = formatCurrency(costRatio);
-        per100Profit.textContent = formatCurrency(profitRatio);
+        per100Cost.textContent = formatMoney(costRatio);
+        per100Profit.textContent = formatMoney(profitRatio);
         if (per100ProfitSummary) {
-          per100ProfitSummary.textContent = formatCurrency(profitRatio);
+          per100ProfitSummary.textContent = formatMoney(profitRatio);
         }
 
         if (profitRatio < 0) {

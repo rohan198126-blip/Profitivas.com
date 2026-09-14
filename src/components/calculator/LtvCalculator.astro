@@ -1,19 +1,37 @@
 ---
 import CalculatorInput from './CalculatorInput.astro';
 import { AlertCircle } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
+import { getWidgetTranslation, getCalcCurrency, formatCalcMoney } from '../../lib/i18n/calculators/widgets';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const wt = getWidgetTranslation('ltv', locale);
+const curr = getCalcCurrency(locale);
 ---
 
-<div id="ltv-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+<div
+  id="ltv-app"
+  class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10"
+  data-locale={locale}
+  data-curr-code={curr.code}
+  data-curr-decimals={curr.decimals}
+>
   <!-- Presets & Reset Bar -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-      Customer Lifetime Value
+      {wt.title || 'Customer Lifetime Value'}
     </div>
 
     <!-- Presets & Reset -->
     <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
       <div class="flex items-center gap-1.5">
-        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">{t.common.presets}:</span>
         <button
           type="button"
           class="ltv-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
@@ -21,7 +39,7 @@ import { AlertCircle } from 'lucide-astro';
           data-freq="4"
           data-life="3"
         >
-          $60 / 4x / 3 yrs ($720)
+          {wt.presets[0]}
         </button>
         <button
           type="button"
@@ -30,7 +48,7 @@ import { AlertCircle } from 'lucide-astro';
           data-freq="12"
           data-life="2"
         >
-          $100 / 12x / 2 yrs ($2.4k)
+          {wt.presets[1]}
         </button>
         <button
           type="button"
@@ -39,7 +57,7 @@ import { AlertCircle } from 'lucide-astro';
           data-freq="6"
           data-life="1.5"
         >
-          $35 / 6x / 1.5 yrs ($315)
+          {wt.presets[2]}
         </button>
       </div>
 
@@ -49,7 +67,7 @@ import { AlertCircle } from 'lucide-astro';
         class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
         title="Reset inputs to default"
       >
-        Reset
+        {t.actions.reset}
       </button>
     </div>
   </div>
@@ -60,7 +78,7 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-5 space-y-6">
       <div>
         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
-          Customer Dynamics
+          {t.common.yourNumbers}
         </span>
 
         <div
@@ -69,74 +87,74 @@ import { AlertCircle } from 'lucide-astro';
           role="alert"
         >
           <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
-          <span id="ltv-error-msg">Please enter valid non-negative numbers.</span>
+          <span id="ltv-error-msg">{wt.errors.general || 'Please enter valid non-negative numbers.'}</span>
         </div>
 
         <form id="ltv-form" class="space-y-4 sm:space-y-5" onsubmit="return false;">
           <CalculatorInput
             id="ltv-input-val"
             name="averagePurchaseValue"
-            label="Average Purchase Value (AOV)"
+            label={wt.labels.averagePurchaseValue}
             value="60"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Average revenue generated per customer transaction."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.averagePurchaseValue}
             required
           />
 
           <CalculatorInput
             id="ltv-input-freq"
             name="purchaseFrequency"
-            label="Purchase Frequency (per year)"
+            label={wt.labels.purchaseFrequency}
             value="4"
             placeholder="0"
-            helperText="Number of repeat purchases completed annually."
+            helperText={wt.helpers.purchaseFrequency}
             required
           />
 
           <CalculatorInput
             id="ltv-input-life"
             name="customerLifespan"
-            label="Customer Lifespan (years)"
+            label={wt.labels.customerLifespan}
             value="3"
             placeholder="0"
-            helperText="Average years a customer maintains an active relationship."
+            helperText={wt.helpers.customerLifespan}
             required
           />
         </form>
       </div>
 
       <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
-        <span>Instant calculation</span>
-        <span>Customer lifetime gross</span>
+        <span>{t.common.automaticRecalculation}</span>
+        <span>{t.common.preTax}</span>
       </div>
     </div>
 
     <!-- Right: Dominant Result -->
     <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
       <div id="ltv-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
-        <p class="text-sm font-medium text-[var(--text-primary)]">Enter order value, frequency, and lifespan.</p>
-        <p class="text-xs text-[var(--text-muted)]">Project total lifetime revenue per customer relationship.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{wt.emptyState.title}</p>
+        <p class="text-xs text-[var(--text-muted)]">{wt.emptyState.desc}</p>
       </div>
 
       <div id="ltv-active-container" class="space-y-7">
         <div>
           <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
-            Expected Revenue
+            {t.common.yourResult}
           </span>
 
           <div class="py-1">
             <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
-              Customer Lifetime Value
+              {wt.results.ltv || 'Customer Lifetime Value'}
             </span>
             <div
               id="ltv-result-primary"
               class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
             >
-              $720.00
+              {formatCalcMoney(720, locale)}
             </div>
             <p id="ltv-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
-              A customer spending $60.00 4 times/year across 3 years delivers <strong class="text-[var(--text-primary)] font-semibold">$720.00</strong> in expected lifetime value.
+              A customer spending {formatCalcMoney(60, locale)} 4 times/year across 3 years delivers <strong class="text-[var(--text-primary)] font-semibold">{formatCalcMoney(720, locale)}</strong> in expected lifetime value.
             </p>
           </div>
         </div>
@@ -144,23 +162,23 @@ import { AlertCircle } from 'lucide-astro';
         <!-- Secondary Metrics -->
         <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Annual customer value</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.annual || 'Annual customer value'}</span>
             <span id="ltv-res-annual" class="font-semibold text-[var(--text-primary)] tabular-nums">
-              $240.00
+              {formatCalcMoney(240, locale)}
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Lifetime purchase transactions</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.purchases || 'Lifetime purchase transactions'}</span>
             <span id="ltv-res-orders" class="font-medium text-[var(--text-primary)] tabular-nums">
               12 orders
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Average transaction value</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.labels.averagePurchaseValue || 'Average transaction value'}</span>
             <span id="ltv-res-val" class="font-medium text-[var(--text-primary)] tabular-nums">
-              $60.00
+              {formatCalcMoney(60, locale)}
             </span>
           </div>
         </div>
@@ -175,6 +193,17 @@ import { AlertCircle } from 'lucide-astro';
   import { parseCleanNumber } from '../../lib/utils/math';
 
   function setupLtvCalculator() {
+    const root = document.getElementById('ltv-app');
+    if (!root) return;
+
+    const locale = (root.getAttribute('data-locale') as any) || 'en';
+    const currCode = root.getAttribute('data-curr-code') || 'USD';
+    const currDecimals = parseInt(root.getAttribute('data-curr-decimals') || '2', 10);
+
+    function formatMoney(val: number | null | undefined): string {
+      return formatCurrency(val, currCode, currDecimals, currDecimals, locale);
+    }
+
     const valInput = document.getElementById('ltv-input-val') as HTMLInputElement | null;
     const freqInput = document.getElementById('ltv-input-freq') as HTMLInputElement | null;
     const lifeInput = document.getElementById('ltv-input-life') as HTMLInputElement | null;
@@ -224,13 +253,13 @@ import { AlertCircle } from 'lucide-astro';
 
       const totalOrders = result.purchaseFrequency * result.customerLifespan;
 
-      if (primaryEl) primaryEl.textContent = formatCurrency(result.ltv);
-      if (annualEl) annualEl.textContent = formatCurrency(result.annualValue);
-      if (ordersEl) ordersEl.textContent = `${formatNumber(totalOrders, totalOrders % 1 === 0 ? 0 : 1)} orders`;
-      if (avgValEl) avgValEl.textContent = formatCurrency(result.averagePurchaseValue);
+      if (primaryEl) primaryEl.textContent = formatMoney(result.ltv);
+      if (annualEl) annualEl.textContent = formatMoney(result.annualValue);
+      if (ordersEl) ordersEl.textContent = `${formatNumber(totalOrders, totalOrders % 1 === 0 ? 0 : 1, locale)} orders`;
+      if (avgValEl) avgValEl.textContent = formatMoney(result.averagePurchaseValue);
 
       if (summaryEl) {
-        summaryEl.innerHTML = `A customer spending ${formatCurrency(result.averagePurchaseValue)} ${formatNumber(result.purchaseFrequency, result.purchaseFrequency % 1 === 0 ? 0 : 1)} times/year across ${formatNumber(result.customerLifespan, result.customerLifespan % 1 === 0 ? 0 : 1)} years delivers <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.ltv)}</strong> in expected lifetime value.`;
+        summaryEl.innerHTML = `A customer spending ${formatMoney(result.averagePurchaseValue)} ${formatNumber(result.purchaseFrequency, result.purchaseFrequency % 1 === 0 ? 0 : 1, locale)} times/year across ${formatNumber(result.customerLifespan, result.customerLifespan % 1 === 0 ? 0 : 1, locale)} years delivers <strong class="text-[var(--text-primary)] font-semibold">${formatMoney(result.ltv)}</strong> in expected lifetime value.`;
       }
     }
 

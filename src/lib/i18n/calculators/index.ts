@@ -11,6 +11,7 @@ import { jaCalculators } from './ja';
 import { koCalculators } from './ko';
 
 export * from './types';
+export * from './widgets';
 
 const LOCALE_MAP: Record<Exclude<SupportedLocale, 'en'>, Record<string, LocalizedCalcEntry>> = {
   es: esCalculators,

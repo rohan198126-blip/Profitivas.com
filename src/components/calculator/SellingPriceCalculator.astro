@@ -1,9 +1,27 @@
 ---
 import CalculatorInput from './CalculatorInput.astro';
 import { AlertCircle } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
+import { getWidgetTranslation, getCalcCurrency, formatCalcMoney } from '../../lib/i18n/calculators/widgets';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const wt = getWidgetTranslation('selling-price', locale);
+const curr = getCalcCurrency(locale);
 ---
 
-<div id="selling-price-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+<div
+  id="selling-price-app"
+  class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10"
+  data-locale={locale}
+  data-curr-code={curr.code}
+  data-curr-decimals={curr.decimals}
+>
   <!-- Mode Switcher & Presets -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
     <div
@@ -19,7 +37,7 @@ import { AlertCircle } from 'lucide-astro';
         class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)] shadow-2xs"
         data-mode="margin"
       >
-        Target Margin
+        {wt.modes?.margin || 'Target Margin'}
       </button>
       <button
         type="button"
@@ -29,21 +47,21 @@ import { AlertCircle } from 'lucide-astro';
         class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]"
         data-mode="markup"
       >
-        Target Markup
+        {wt.modes?.markup || 'Target Markup'}
       </button>
     </div>
 
     <!-- Presets & Reset -->
     <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
       <div class="flex items-center gap-1.5">
-        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">{t.common.presets}:</span>
         <button
           type="button"
           class="sp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
           data-cost="40"
           data-val="60"
         >
-          $40 / 60%
+          {wt.presets[0]}
         </button>
         <button
           type="button"
@@ -51,7 +69,7 @@ import { AlertCircle } from 'lucide-astro';
           data-cost="25"
           data-val="40"
         >
-          $25 / 40%
+          {wt.presets[1]}
         </button>
         <button
           type="button"
@@ -59,7 +77,7 @@ import { AlertCircle } from 'lucide-astro';
           data-cost="100"
           data-val="50"
         >
-          $100 / 50%
+          {wt.presets[2]}
         </button>
       </div>
 
@@ -69,7 +87,7 @@ import { AlertCircle } from 'lucide-astro';
         class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
         title="Reset inputs to default"
       >
-        Reset
+        {t.actions.reset}
       </button>
     </div>
   </div>
@@ -80,7 +98,7 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-5 space-y-6">
       <div>
         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
-          Your Numbers
+          {t.common.yourNumbers}
         </span>
 
         <div
@@ -89,18 +107,18 @@ import { AlertCircle } from 'lucide-astro';
           role="alert"
         >
           <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
-          <span id="sp-error-msg">Please enter valid positive numbers.</span>
+          <span id="sp-error-msg">{wt.errors.general || 'Please enter valid positive numbers.'}</span>
         </div>
 
         <form id="sp-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
           <CalculatorInput
             id="sp-input-cost"
             name="cost"
-            label="Unit Cost"
+            label={wt.labels.cost}
             value="40"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Direct acquisition, manufacturing, or wholesale cost."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.cost}
             required
           />
 
@@ -108,11 +126,11 @@ import { AlertCircle } from 'lucide-astro';
             <CalculatorInput
               id="sp-input-margin"
               name="targetMargin"
-              label="Target Margin"
+              label={wt.labels.margin}
               value="60"
               suffix="%"
-              placeholder="0.00"
-              helperText="Desired profit percentage of selling price (< 100%)."
+              placeholder={curr.decimals === 0 ? '0' : '0.00'}
+              helperText={wt.helpers.margin}
               max="99.99"
             />
           </div>
@@ -121,11 +139,11 @@ import { AlertCircle } from 'lucide-astro';
             <CalculatorInput
               id="sp-input-markup"
               name="targetMarkup"
-              label="Target Markup"
+              label={wt.labels.markup}
               value="150"
               suffix="%"
-              placeholder="0.00"
-              helperText="Desired percentage added on top of unit cost."
+              placeholder={curr.decimals === 0 ? '0' : '0.00'}
+              helperText={wt.helpers.markup}
               min="0"
             />
           </div>
@@ -133,36 +151,36 @@ import { AlertCircle } from 'lucide-astro';
       </div>
 
       <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
-        <span>Instant calculation</span>
-        <span>Pre-tax</span>
+        <span>{t.common.automaticRecalculation}</span>
+        <span>{t.common.preTax}</span>
       </div>
     </div>
 
     <!-- Right: Dominant Result -->
     <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
       <div id="sp-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
-        <p class="text-sm font-medium text-[var(--text-primary)]">Enter unit cost and target to calculate price.</p>
-        <p class="text-xs text-[var(--text-muted)]">Calculate required customer selling price instantly.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{wt.emptyState.title}</p>
+        <p class="text-xs text-[var(--text-muted)]">{wt.emptyState.desc}</p>
       </div>
 
       <div id="sp-active-container" class="space-y-7">
         <div>
           <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
-            Your Result
+            {t.common.yourResult}
           </span>
 
           <div class="py-1">
             <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
-              Required Selling Price
+              {wt.results.primary}
             </span>
             <div
               id="sp-result-primary"
               class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
             >
-              $100.00
+              {formatCalcMoney(100, locale)}
             </div>
             <p id="sp-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
-              A <strong class="text-[var(--text-primary)] font-semibold">$100.00</strong> selling price yields <strong class="text-[var(--text-primary)] font-semibold">$60.00</strong> profit on $40.00 cost.
+              A <strong class="text-[var(--text-primary)] font-semibold">{formatCalcMoney(100, locale)}</strong> selling price yields <strong class="text-[var(--text-primary)] font-semibold">{formatCalcMoney(60, locale)}</strong> profit on {formatCalcMoney(40, locale)} cost.
             </p>
           </div>
         </div>
@@ -170,21 +188,21 @@ import { AlertCircle } from 'lucide-astro';
         <!-- Secondary Metrics -->
         <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Gross profit</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.grossProfit}</span>
             <span id="sp-res-profit" class="font-semibold text-[var(--positive-text)] tabular-nums">
-              $60.00
+              {formatCalcMoney(60, locale)}
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Profit margin</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.profitMargin}</span>
             <span id="sp-res-margin" class="font-medium text-[var(--text-primary)] tabular-nums">
               60.00%
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Markup</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.markup}</span>
             <span id="sp-res-markup" class="font-medium text-[var(--text-primary)] tabular-nums">
               150.00%
             </span>
@@ -201,6 +219,17 @@ import { AlertCircle } from 'lucide-astro';
   import { parseCleanNumber } from '../../lib/utils/math';
 
   function setupSellingPriceCalculator() {
+    const root = document.getElementById('selling-price-app');
+    if (!root) return;
+
+    const locale = (root.getAttribute('data-locale') as any) || 'en';
+    const currCode = root.getAttribute('data-curr-code') || 'USD';
+    const currDecimals = parseInt(root.getAttribute('data-curr-decimals') || '2', 10);
+
+    function formatMoney(val: number | null | undefined): string {
+      return formatCurrency(val, currCode, currDecimals, currDecimals, locale);
+    }
+
     const costInput = document.getElementById('sp-input-cost') as HTMLInputElement | null;
     const marginInput = document.getElementById('sp-input-margin') as HTMLInputElement | null;
     const markupInput = document.getElementById('sp-input-markup') as HTMLInputElement | null;
@@ -282,12 +311,12 @@ import { AlertCircle } from 'lucide-astro';
 
       errorBox?.classList.add('hidden');
 
-      if (primaryEl) primaryEl.textContent = formatCurrency(result.sellingPrice);
-      if (profitEl) profitEl.textContent = formatCurrency(result.profit);
-      if (marginEl) marginEl.textContent = formatPercent(result.margin);
-      if (markupEl) markupEl.textContent = formatPercent(result.markup);
+      if (primaryEl) primaryEl.textContent = formatMoney(result.sellingPrice);
+      if (profitEl) profitEl.textContent = formatMoney(result.profit);
+      if (marginEl) marginEl.textContent = formatPercent(result.margin, 2, locale);
+      if (markupEl) markupEl.textContent = formatPercent(result.markup, 2, locale);
       if (summaryEl) {
-        summaryEl.innerHTML = `A <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.sellingPrice)}</strong> selling price yields <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.profit)}</strong> profit on ${formatCurrency(result.cost)} cost.`;
+        summaryEl.innerHTML = `A <strong class="text-[var(--text-primary)] font-semibold">${formatMoney(result.sellingPrice)}</strong> selling price yields <strong class="text-[var(--text-primary)] font-semibold">${formatMoney(result.profit)}</strong> profit on ${formatMoney(result.cost)} cost.`;
       }
     }
 

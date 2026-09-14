@@ -1,9 +1,29 @@
 ---
 import CalculatorInput from './CalculatorInput.astro';
 import { AlertCircle } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
+import { getWidgetTranslation, getCalcCurrency, formatCalcMoney } from '../../lib/i18n/calculators/widgets';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const wt = getWidgetTranslation('discount', locale);
+const curr = getCalcCurrency(locale);
 ---
 
-<div id="discount-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+<div
+  id="discount-app"
+  class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10"
+  data-locale={locale}
+  data-curr-code={curr.code}
+  data-curr-decimals={curr.decimals}
+  data-lbl-final-price={wt.results.finalPrice || 'Final Sale Price'}
+  data-lbl-eff-discount={wt.results.discount || 'Effective Discount'}
+>
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
     <div
       class="inline-flex p-0.5 bg-[var(--surface-subtle)] border border-[var(--border)] rounded-lg w-full sm:w-auto"
@@ -18,7 +38,7 @@ import { AlertCircle } from 'lucide-astro';
         class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)] shadow-2xs"
         data-mode="standard"
       >
-        Percentage Off
+        {wt.modes?.standard || 'Percentage Off'}
       </button>
       <button
         type="button"
@@ -28,21 +48,21 @@ import { AlertCircle } from 'lucide-astro';
         class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]"
         data-mode="reverse"
       >
-        Calculate % from Price
+        {wt.modes?.reverse || 'Calculate % from Price'}
       </button>
     </div>
 
     <!-- Presets & Reset -->
     <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
       <div class="flex items-center gap-1.5">
-        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">{t.common.presets}:</span>
         <button
           type="button"
           class="dc-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
           data-orig="100"
           data-val="20"
         >
-          20% off $100
+          {wt.presets[0]}
         </button>
         <button
           type="button"
@@ -50,7 +70,7 @@ import { AlertCircle } from 'lucide-astro';
           data-orig="50"
           data-val="15"
         >
-          15% off $50
+          {wt.presets[1]}
         </button>
         <button
           type="button"
@@ -58,7 +78,7 @@ import { AlertCircle } from 'lucide-astro';
           data-orig="250"
           data-val="30"
         >
-          30% off $250
+          {wt.presets[2]}
         </button>
       </div>
 
@@ -68,7 +88,7 @@ import { AlertCircle } from 'lucide-astro';
         class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
         title="Reset inputs to default"
       >
-        Reset
+        {t.actions.reset}
       </button>
     </div>
   </div>
@@ -78,7 +98,7 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-5 space-y-6">
       <div>
         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
-          Your Numbers
+          {t.common.yourNumbers}
         </span>
 
         <div
@@ -87,18 +107,18 @@ import { AlertCircle } from 'lucide-astro';
           role="alert"
         >
           <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
-          <span id="dc-error-msg">Please enter valid positive numbers.</span>
+          <span id="dc-error-msg">{wt.errors.general || 'Please enter valid positive numbers.'}</span>
         </div>
 
         <form id="dc-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
           <CalculatorInput
             id="dc-input-orig"
             name="originalPrice"
-            label="Original Price"
+            label={wt.labels.originalPrice}
             value="100"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Regular retail or catalog price before discounts."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.originalPrice}
             required
           />
 
@@ -106,11 +126,11 @@ import { AlertCircle } from 'lucide-astro';
             <CalculatorInput
               id="dc-input-pct"
               name="discountPercent"
-              label="Discount"
+              label={wt.labels.discountPercent}
               value="20"
               suffix="%"
-              placeholder="0.00"
-              helperText="Percentage reduction (0% to 100%)."
+              placeholder={curr.decimals === 0 ? '0' : '0.00'}
+              helperText={wt.helpers.discountPercent}
               min="0"
               max="100"
             />
@@ -120,11 +140,11 @@ import { AlertCircle } from 'lucide-astro';
             <CalculatorInput
               id="dc-input-final"
               name="finalPrice"
-              label="Final Sale Price"
+              label={wt.labels.salePrice}
               value="80"
-              prefix="$"
-              placeholder="0.00"
-              helperText="Actual promotional price paid at checkout."
+              prefix={curr.symbol}
+              placeholder={curr.decimals === 0 ? '0' : '0.00'}
+              helperText={wt.helpers.salePrice}
               min="0"
             />
           </div>
@@ -132,59 +152,59 @@ import { AlertCircle } from 'lucide-astro';
       </div>
 
       <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
-        <span>Instant calculation</span>
-        <span>Pre-tax</span>
+        <span>{t.common.automaticRecalculation}</span>
+        <span>{t.common.preTax}</span>
       </div>
     </div>
 
     <!-- Right: Result -->
     <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
       <div id="dc-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
-        <p class="text-sm font-medium text-[var(--text-primary)]">Enter prices to calculate your discount.</p>
-        <p class="text-xs text-[var(--text-muted)]">View final sale price and total customer savings.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{wt.emptyState.title}</p>
+        <p class="text-xs text-[var(--text-muted)]">{wt.emptyState.desc}</p>
       </div>
 
       <div id="dc-active-container" class="space-y-7">
         <div>
           <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
-            Your Result
+            {t.common.yourResult}
           </span>
 
           <div class="py-1">
             <span id="dc-result-label" class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
-              Final Sale Price
+              {wt.results.finalPrice}
             </span>
             <div
               id="dc-result-primary"
               class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
             >
-              $80.00
+              {formatCalcMoney(80, locale)}
             </div>
             <p id="dc-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
-              Save <strong class="text-[var(--positive-text)] font-semibold">$20.00 (20.00%)</strong> off the $100.00 list price.
+              Save <strong class="text-[var(--positive-text)] font-semibold">{formatCalcMoney(20, locale)} (20.00%)</strong> off the {formatCalcMoney(100, locale)} list price.
             </p>
           </div>
         </div>
 
         <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Discount savings</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.savings}</span>
             <span id="dc-res-savings" class="font-semibold text-[var(--positive-text)] tabular-nums">
-              $20.00
+              {formatCalcMoney(20, locale)}
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Discount percentage</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.discount}</span>
             <span id="dc-res-pct" class="font-medium text-[var(--text-primary)] tabular-nums">
               20.00%
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Original price</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.labels.originalPrice}</span>
             <span id="dc-res-orig" class="font-medium text-[var(--text-primary)] tabular-nums">
-              $100.00
+              {formatCalcMoney(100, locale)}
             </span>
           </div>
         </div>
@@ -199,6 +219,19 @@ import { AlertCircle } from 'lucide-astro';
   import { parseCleanNumber } from '../../lib/utils/math';
 
   function setupDiscountCalculator() {
+    const root = document.getElementById('discount-app');
+    if (!root) return;
+
+    const locale = (root.getAttribute('data-locale') as any) || 'en';
+    const currCode = root.getAttribute('data-curr-code') || 'USD';
+    const currDecimals = parseInt(root.getAttribute('data-curr-decimals') || '2', 10);
+    const lblFinalPrice = root.getAttribute('data-lbl-final-price') || 'Final Sale Price';
+    const lblEffDiscount = root.getAttribute('data-lbl-eff-discount') || 'Effective Discount';
+
+    function formatMoney(val: number | null | undefined): string {
+      return formatCurrency(val, currCode, currDecimals, currDecimals, locale);
+    }
+
     const origInput = document.getElementById('dc-input-orig') as HTMLInputElement | null;
     const pctInput = document.getElementById('dc-input-pct') as HTMLInputElement | null;
     const finalInput = document.getElementById('dc-input-final') as HTMLInputElement | null;
@@ -237,7 +270,7 @@ import { AlertCircle } from 'lucide-astro';
 
         stdWrap?.classList.remove('hidden');
         revWrap?.classList.add('hidden');
-        if (labelEl) labelEl.textContent = 'Final Sale Price';
+        if (labelEl) labelEl.textContent = lblFinalPrice;
       } else {
         tabRev?.setAttribute('aria-selected', 'true');
         tabStd?.setAttribute('aria-selected', 'false');
@@ -248,7 +281,7 @@ import { AlertCircle } from 'lucide-astro';
 
         revWrap?.classList.remove('hidden');
         stdWrap?.classList.add('hidden');
-        if (labelEl) labelEl.textContent = 'Effective Discount';
+        if (labelEl) labelEl.textContent = lblEffDiscount;
       }
       recalculate();
     }
@@ -284,17 +317,17 @@ import { AlertCircle } from 'lucide-astro';
       errorBox?.classList.add('hidden');
 
       if (currentMode === 'standard') {
-        if (primaryEl) primaryEl.textContent = formatCurrency(result.finalPrice);
+        if (primaryEl) primaryEl.textContent = formatMoney(result.finalPrice);
       } else {
-        if (primaryEl) primaryEl.textContent = formatPercent(result.discountPercent);
+        if (primaryEl) primaryEl.textContent = formatPercent(result.discountPercent, 2, locale);
       }
 
-      if (savingsEl) savingsEl.textContent = formatCurrency(result.discountAmount);
-      if (pctEl) pctEl.textContent = formatPercent(result.discountPercent);
-      if (origEl) origEl.textContent = formatCurrency(result.originalPrice);
+      if (savingsEl) savingsEl.textContent = formatMoney(result.discountAmount);
+      if (pctEl) pctEl.textContent = formatPercent(result.discountPercent, 2, locale);
+      if (origEl) origEl.textContent = formatMoney(result.originalPrice);
 
       if (summaryEl) {
-        summaryEl.innerHTML = `Save <strong class="text-[var(--positive-text)] font-semibold">${formatCurrency(result.discountAmount)} (${formatPercent(result.discountPercent)})</strong> off the ${formatCurrency(result.originalPrice)} list price.`;
+        summaryEl.innerHTML = `Save <strong class="text-[var(--positive-text)] font-semibold">${formatMoney(result.discountAmount)} (${formatPercent(result.discountPercent, 2, locale)})</strong> off the ${formatMoney(result.originalPrice)} list price.`;
       }
     }
 

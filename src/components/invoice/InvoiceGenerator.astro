@@ -36,7 +36,7 @@ const defaultDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOStri
   <!-- Primary Workspace Grid -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
     <!-- LEFT COLUMN: Editor Controls -->
-    <div id="invoice-editor-col" class="lg:col-span-6 space-y-6 no-print">
+    <div id="invoice-editor-col" class="lg:block lg:col-span-6 space-y-6 no-print">
       <!-- Action Toolbar (Top Quick Actions) -->
       <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
         <div class="flex items-center gap-2">
@@ -393,7 +393,7 @@ New York, NY 10013</textarea>
     </div>
 
     <!-- RIGHT COLUMN: Professional Paper Live Preview -->
-    <div id="invoice-preview-col" class="lg:col-span-6 lg:sticky lg:top-24">
+    <div id="invoice-preview-col" class="hidden lg:block lg:col-span-6 lg:sticky lg:top-24">
       <!-- Printable Sheet Container (Styled like standard document paper) -->
       <div
         id="invoice-paper-sheet"
@@ -1260,7 +1260,7 @@ New York, NY 10013</textarea>
         tabBtnPreview?.classList.add('text-[var(--text-secondary)]');
 
         editorCol?.classList.remove('hidden');
-        previewCol?.classList.add('hidden', 'lg:block');
+        previewCol?.classList.add('hidden');
       } else {
         tabBtnPreview?.classList.add('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border');
         tabBtnPreview?.classList.remove('text-[var(--text-secondary)]');
@@ -1275,10 +1275,21 @@ New York, NY 10013</textarea>
     tabBtnEditor?.addEventListener('click', () => setMobileView('editor'));
     tabBtnPreview?.addEventListener('click', () => setMobileView('preview'));
 
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        editorCol?.classList.remove('hidden');
+        previewCol?.classList.remove('hidden');
+      }
+    });
+
     // Initialize display
     populateFormFields();
     renderEditorLineItems();
     updatePreview();
+
+    if (window.innerWidth < 1024) {
+      setMobileView('editor');
+    }
   }
 
   if (document.readyState === 'loading') {

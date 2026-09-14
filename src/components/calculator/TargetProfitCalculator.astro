@@ -1,19 +1,37 @@
 ---
 import CalculatorInput from './CalculatorInput.astro';
 import { AlertCircle } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
+import { getWidgetTranslation, getCalcCurrency, formatCalcMoney } from '../../lib/i18n/calculators/widgets';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const wt = getWidgetTranslation('target-profit', locale);
+const curr = getCalcCurrency(locale);
 ---
 
-<div id="target-profit-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+<div
+  id="target-profit-app"
+  class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10"
+  data-locale={locale}
+  data-curr-code={curr.code}
+  data-curr-decimals={curr.decimals}
+>
   <!-- Presets & Reset Bar -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-      Target Profit Planning
+      {wt.title || 'Target Profit Planning'}
     </div>
 
     <!-- Presets & Reset -->
     <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
       <div class="flex items-center gap-1.5">
-        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">{t.common.presets}:</span>
         <button
           type="button"
           class="tp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
@@ -22,7 +40,7 @@ import { AlertCircle } from 'lucide-astro';
           data-price="50"
           data-var="30"
         >
-          $10k / $5k profit
+          {wt.presets[0]}
         </button>
         <button
           type="button"
@@ -32,7 +50,7 @@ import { AlertCircle } from 'lucide-astro';
           data-price="100"
           data-var="40"
         >
-          $20k / $10k profit
+          {wt.presets[1]}
         </button>
         <button
           type="button"
@@ -42,7 +60,7 @@ import { AlertCircle } from 'lucide-astro';
           data-price="250"
           data-var="150"
         >
-          $50k / $25k profit
+          {wt.presets[2]}
         </button>
       </div>
 
@@ -52,7 +70,7 @@ import { AlertCircle } from 'lucide-astro';
         class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
         title="Reset inputs to default"
       >
-        Reset
+        {t.actions.reset}
       </button>
     </div>
   </div>
@@ -63,7 +81,7 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-5 space-y-6">
       <div>
         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
-          Cost & Target Parameters
+          {t.common.yourNumbers}
         </span>
 
         <div
@@ -72,29 +90,29 @@ import { AlertCircle } from 'lucide-astro';
           role="alert"
         >
           <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
-          <span id="tp-error-msg">Selling price must be greater than variable cost per unit.</span>
+          <span id="tp-error-msg">{wt.errors.priceGreater || 'Selling price must be greater than variable cost per unit.'}</span>
         </div>
 
         <form id="tp-form" class="space-y-4 sm:space-y-5" onsubmit="return false;">
           <CalculatorInput
             id="tp-input-fixed"
             name="fixedCosts"
-            label="Total Fixed Costs"
+            label={wt.labels.fixedCosts}
             value="10000"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Base monthly/annual overhead obligations."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.fixedCosts}
             required
           />
 
           <CalculatorInput
             id="tp-input-target"
             name="targetProfit"
-            label="Desired Target Profit"
+            label={wt.labels.targetProfit}
             value="5000"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Target operating income before income taxes."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.targetProfit}
             required
           />
 
@@ -102,22 +120,22 @@ import { AlertCircle } from 'lucide-astro';
             <CalculatorInput
               id="tp-input-price"
               name="pricePerUnit"
-              label="Selling Price"
+              label={wt.labels.pricePerUnit}
               value="50"
-              prefix="$"
-              placeholder="0.00"
-              helperText="Per unit."
+              prefix={curr.symbol}
+              placeholder={curr.decimals === 0 ? '0' : '0.00'}
+              helperText={wt.helpers.pricePerUnit}
               required
             />
 
             <CalculatorInput
               id="tp-input-var"
               name="variableCostPerUnit"
-              label="Variable Cost"
+              label={wt.labels.variableCostPerUnit}
               value="30"
-              prefix="$"
-              placeholder="0.00"
-              helperText="Per unit."
+              prefix={curr.symbol}
+              placeholder={curr.decimals === 0 ? '0' : '0.00'}
+              helperText={wt.helpers.variableCostPerUnit}
               required
             />
           </div>
@@ -125,27 +143,27 @@ import { AlertCircle } from 'lucide-astro';
       </div>
 
       <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
-        <span>Instant calculation</span>
-        <span>Target profit planning</span>
+        <span>{t.common.automaticRecalculation}</span>
+        <span>{t.common.preTax}</span>
       </div>
     </div>
 
     <!-- Right: Dominant Result -->
     <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
       <div id="tp-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
-        <p class="text-sm font-medium text-[var(--text-primary)]">Enter costs, target profit, and unit pricing.</p>
-        <p class="text-xs text-[var(--text-muted)]">Find the exact volume needed to reach your profit goal.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{wt.emptyState.title}</p>
+        <p class="text-xs text-[var(--text-muted)]">{wt.emptyState.desc}</p>
       </div>
 
       <div id="tp-active-container" class="space-y-7">
         <div>
           <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
-            Required Volume
+            {t.common.yourResult}
           </span>
 
           <div class="py-1">
             <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
-              Units Needed
+              {wt.results.primaryUnits || 'Units Needed'}
             </span>
             <div class="flex items-baseline gap-2">
               <span
@@ -157,7 +175,7 @@ import { AlertCircle } from 'lucide-astro';
               <span class="text-xl sm:text-2xl font-medium text-[var(--text-secondary)]">units</span>
             </div>
             <p id="tp-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
-              Selling <strong class="text-[var(--text-primary)] font-semibold">750 units</strong> generates <strong class="text-[var(--text-primary)] font-semibold">$37,500.00</strong> revenue to deliver $5,000.00 profit.
+              Selling <strong class="text-[var(--text-primary)] font-semibold">750 units</strong> generates <strong class="text-[var(--text-primary)] font-semibold">{formatCalcMoney(37500, locale)}</strong> revenue to deliver {formatCalcMoney(5000, locale)} profit.
             </p>
           </div>
         </div>
@@ -165,23 +183,23 @@ import { AlertCircle } from 'lucide-astro';
         <!-- Secondary Metrics -->
         <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Required sales revenue</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.primaryRevenue || 'Required sales revenue'}</span>
             <span id="tp-res-revenue" class="font-semibold text-[var(--text-primary)] tabular-nums">
-              $37,500.00
+              {formatCalcMoney(37500, locale)}
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Contribution margin per unit</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.unitMargin || 'Contribution margin per unit'}</span>
             <span id="tp-res-cm" class="font-medium text-[var(--positive-text)] tabular-nums">
-              $20.00
+              {formatCalcMoney(20, locale)}
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Total cost burden (fixed + target)</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.totalBurden || 'Total cost burden (fixed + target)'}</span>
             <span id="tp-res-burden" class="font-medium text-[var(--text-primary)] tabular-nums">
-              $15,000.00
+              {formatCalcMoney(15000, locale)}
             </span>
           </div>
         </div>
@@ -196,6 +214,17 @@ import { AlertCircle } from 'lucide-astro';
   import { parseCleanNumber } from '../../lib/utils/math';
 
   function setupTargetProfitCalculator() {
+    const root = document.getElementById('target-profit-app');
+    if (!root) return;
+
+    const locale = (root.getAttribute('data-locale') as any) || 'en';
+    const currCode = root.getAttribute('data-curr-code') || 'USD';
+    const currDecimals = parseInt(root.getAttribute('data-curr-decimals') || '2', 10);
+
+    function formatMoney(val: number | null | undefined): string {
+      return formatCurrency(val, currCode, currDecimals, currDecimals, locale);
+    }
+
     const fixedInput = document.getElementById('tp-input-fixed') as HTMLInputElement | null;
     const targetInput = document.getElementById('tp-input-target') as HTMLInputElement | null;
     const priceInput = document.getElementById('tp-input-price') as HTMLInputElement | null;
@@ -248,13 +277,13 @@ import { AlertCircle } from 'lucide-astro';
 
       const totalBurden = result.fixedCosts + result.targetProfit;
 
-      if (primaryEl) primaryEl.textContent = formatNumber(result.requiredUnits, result.requiredUnits % 1 === 0 ? 0 : 2);
-      if (revenueEl) revenueEl.textContent = formatCurrency(result.requiredRevenue);
-      if (cmEl) cmEl.textContent = formatCurrency(result.contributionMargin);
-      if (burdenEl) burdenEl.textContent = formatCurrency(totalBurden);
+      if (primaryEl) primaryEl.textContent = formatNumber(result.requiredUnits, result.requiredUnits % 1 === 0 ? 0 : 2, locale);
+      if (revenueEl) revenueEl.textContent = formatMoney(result.requiredRevenue);
+      if (cmEl) cmEl.textContent = formatMoney(result.contributionMargin);
+      if (burdenEl) burdenEl.textContent = formatMoney(totalBurden);
 
       if (summaryEl) {
-        summaryEl.innerHTML = `Selling <strong class="text-[var(--text-primary)] font-semibold">${formatNumber(result.requiredUnits, result.requiredUnits % 1 === 0 ? 0 : 2)} units</strong> generates <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.requiredRevenue)}</strong> revenue to deliver ${formatCurrency(result.targetProfit)} profit.`;
+        summaryEl.innerHTML = `Selling <strong class="text-[var(--text-primary)] font-semibold">${formatNumber(result.requiredUnits, result.requiredUnits % 1 === 0 ? 0 : 2, locale)} units</strong> generates <strong class="text-[var(--text-primary)] font-semibold">${formatMoney(result.requiredRevenue)}</strong> revenue to deliver ${formatMoney(result.targetProfit)} profit.`;
       }
     }
 

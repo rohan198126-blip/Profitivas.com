@@ -1,26 +1,44 @@
 ---
 import CalculatorInput from './CalculatorInput.astro';
 import { AlertCircle } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
+import { getWidgetTranslation, getCalcCurrency, formatCalcMoney } from '../../lib/i18n/calculators/widgets';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const wt = getWidgetTranslation('cac', locale);
+const curr = getCalcCurrency(locale);
 ---
 
-<div id="cac-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+<div
+  id="cac-app"
+  class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10"
+  data-locale={locale}
+  data-curr-code={curr.code}
+  data-curr-decimals={curr.decimals}
+>
   <!-- Presets & Reset Bar -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-      Customer Acquisition Cost
+      {wt.title || 'Customer Acquisition Cost'}
     </div>
 
     <!-- Presets & Reset -->
     <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
       <div class="flex items-center gap-1.5">
-        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">{t.common.presets}:</span>
         <button
           type="button"
           class="cac-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
           data-cost="8000"
           data-cust="160"
         >
-          $8k / 160 ($50)
+          {wt.presets[0]}
         </button>
         <button
           type="button"
@@ -28,7 +46,7 @@ import { AlertCircle } from 'lucide-astro';
           data-cost="15000"
           data-cust="100"
         >
-          $15k / 100 ($150)
+          {wt.presets[1]}
         </button>
         <button
           type="button"
@@ -36,7 +54,7 @@ import { AlertCircle } from 'lucide-astro';
           data-cost="3000"
           data-cust="30"
         >
-          $3k / 30 ($100)
+          {wt.presets[2]}
         </button>
       </div>
 
@@ -46,7 +64,7 @@ import { AlertCircle } from 'lucide-astro';
         class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
         title="Reset inputs to default"
       >
-        Reset
+        {t.actions.reset}
       </button>
     </div>
   </div>
@@ -57,7 +75,7 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-5 space-y-6">
       <div>
         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
-          Acquisition Investment
+          {t.common.yourNumbers}
         </span>
 
         <div
@@ -66,64 +84,64 @@ import { AlertCircle } from 'lucide-astro';
           role="alert"
         >
           <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
-          <span id="cac-error-msg">New customers acquired must be greater than 0.</span>
+          <span id="cac-error-msg">{wt.errors.general || 'New customers acquired must be greater than 0.'}</span>
         </div>
 
         <form id="cac-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
           <CalculatorInput
             id="cac-input-cost"
             name="acquisitionCosts"
-            label="Total Sales & Marketing Spend"
+            label={wt.labels.acquisitionCosts}
             value="8000"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Ad spend, salaries, software tools, agency fees."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.acquisitionCosts}
             required
           />
 
           <CalculatorInput
             id="cac-input-cust"
             name="newCustomers"
-            label="New Customers Acquired"
+            label={wt.labels.newCustomers}
             value="160"
             placeholder="0"
-            helperText="Count of newly onboarded paying customers."
+            helperText={wt.helpers.newCustomers}
             required
           />
         </form>
       </div>
 
       <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
-        <span>Instant calculation</span>
-        <span>Per-customer unit cost</span>
+        <span>{t.common.automaticRecalculation}</span>
+        <span>{t.common.preTax}</span>
       </div>
     </div>
 
     <!-- Right: Dominant Result -->
     <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
       <div id="cac-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
-        <p class="text-sm font-medium text-[var(--text-primary)]">Enter total marketing costs and new customer count.</p>
-        <p class="text-xs text-[var(--text-muted)]">Determine exact unit cost per paying customer acquired.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{wt.emptyState.title}</p>
+        <p class="text-xs text-[var(--text-muted)]">{wt.emptyState.desc}</p>
       </div>
 
       <div id="cac-active-container" class="space-y-7">
         <div>
           <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
-            Unit Acquisition Cost
+            {t.common.yourResult}
           </span>
 
           <div class="py-1">
             <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
-              Customer Acquisition Cost
+              {wt.results.cac || 'Customer Acquisition Cost'}
             </span>
             <div
               id="cac-result-primary"
               class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
             >
-              $50.00
+              {formatCalcMoney(50, locale)}
             </div>
             <p id="cac-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
-              Acquiring 160 customers for $8,000.00 requires an average acquisition investment of <strong class="text-[var(--text-primary)] font-semibold">$50.00</strong> per customer.
+              Acquiring 160 customers for {formatCalcMoney(8000, locale)} requires an average acquisition investment of <strong class="text-[var(--text-primary)] font-semibold">{formatCalcMoney(50, locale)}</strong> per customer.
             </p>
           </div>
         </div>
@@ -131,14 +149,14 @@ import { AlertCircle } from 'lucide-astro';
         <!-- Secondary Metrics -->
         <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Total acquisition spend</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.spend || 'Total acquisition spend'}</span>
             <span id="cac-res-spend" class="font-medium text-[var(--text-primary)] tabular-nums">
-              $8,000.00
+              {formatCalcMoney(8000, locale)}
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">New customers acquired</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.customers || 'New customers acquired'}</span>
             <span id="cac-res-cust" class="font-medium text-[var(--text-primary)] tabular-nums">
               160
             </span>
@@ -155,6 +173,17 @@ import { AlertCircle } from 'lucide-astro';
   import { parseCleanNumber } from '../../lib/utils/math';
 
   function setupCacCalculator() {
+    const root = document.getElementById('cac-app');
+    if (!root) return;
+
+    const locale = (root.getAttribute('data-locale') as any) || 'en';
+    const currCode = root.getAttribute('data-curr-code') || 'USD';
+    const currDecimals = parseInt(root.getAttribute('data-curr-decimals') || '2', 10);
+
+    function formatMoney(val: number | null | undefined): string {
+      return formatCurrency(val, currCode, currDecimals, currDecimals, locale);
+    }
+
     const costInput = document.getElementById('cac-input-cost') as HTMLInputElement | null;
     const custInput = document.getElementById('cac-input-cust') as HTMLInputElement | null;
 
@@ -195,12 +224,12 @@ import { AlertCircle } from 'lucide-astro';
 
       errorBox?.classList.add('hidden');
 
-      if (primaryEl) primaryEl.textContent = formatCurrency(result.cac);
-      if (spendEl) spendEl.textContent = formatCurrency(result.acquisitionCosts);
-      if (custEl) custEl.textContent = formatNumber(result.newCustomers, result.newCustomers % 1 === 0 ? 0 : 2);
+      if (primaryEl) primaryEl.textContent = formatMoney(result.cac);
+      if (spendEl) spendEl.textContent = formatMoney(result.acquisitionCosts);
+      if (custEl) custEl.textContent = formatNumber(result.newCustomers, result.newCustomers % 1 === 0 ? 0 : 2, locale);
 
       if (summaryEl) {
-        summaryEl.innerHTML = `Acquiring ${formatNumber(result.newCustomers, result.newCustomers % 1 === 0 ? 0 : 2)} customers for ${formatCurrency(result.acquisitionCosts)} requires an average acquisition investment of <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.cac)}</strong> per customer.`;
+        summaryEl.innerHTML = `Acquiring ${formatNumber(result.newCustomers, result.newCustomers % 1 === 0 ? 0 : 2, locale)} customers for ${formatMoney(result.acquisitionCosts)} requires an average acquisition investment of <strong class="text-[var(--text-primary)] font-semibold">${formatMoney(result.cac)}</strong> per customer.`;
       }
     }
 

@@ -1,26 +1,44 @@
 ---
 import CalculatorInput from './CalculatorInput.astro';
 import { AlertCircle } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
+import { getWidgetTranslation, getCalcCurrency, formatCalcMoney } from '../../lib/i18n/calculators/widgets';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const wt = getWidgetTranslation('roas', locale);
+const curr = getCalcCurrency(locale);
 ---
 
-<div id="roas-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+<div
+  id="roas-app"
+  class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10"
+  data-locale={locale}
+  data-curr-code={curr.code}
+  data-curr-decimals={curr.decimals}
+>
   <!-- Presets & Reset Bar -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-      Return on Ad Spend
+      {wt.title || 'Return on Ad Spend'}
     </div>
 
     <!-- Presets & Reset -->
     <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
       <div class="flex items-center gap-1.5">
-        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">{t.common.presets}:</span>
         <button
           type="button"
           class="roas-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
           data-rev="12000"
           data-spend="3000"
         >
-          $12k / $3k (4x)
+          {wt.presets[0]}
         </button>
         <button
           type="button"
@@ -28,7 +46,7 @@ import { AlertCircle } from 'lucide-astro';
           data-rev="25000"
           data-spend="5000"
         >
-          $25k / $5k (5x)
+          {wt.presets[1]}
         </button>
         <button
           type="button"
@@ -36,7 +54,7 @@ import { AlertCircle } from 'lucide-astro';
           data-rev="5000"
           data-spend="2500"
         >
-          $5k / $2.5k (2x)
+          {wt.presets[2]}
         </button>
       </div>
 
@@ -46,7 +64,7 @@ import { AlertCircle } from 'lucide-astro';
         class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
         title="Reset inputs to default"
       >
-        Reset
+        {t.actions.reset}
       </button>
     </div>
   </div>
@@ -57,7 +75,7 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-5 space-y-6">
       <div>
         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
-          Campaign Metrics
+          {t.common.yourNumbers}
         </span>
 
         <div
@@ -66,56 +84,56 @@ import { AlertCircle } from 'lucide-astro';
           role="alert"
         >
           <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
-          <span id="roas-error-msg">Ad spend must be greater than 0.</span>
+          <span id="roas-error-msg">{wt.errors.general || 'Ad spend must be greater than 0.'}</span>
         </div>
 
         <form id="roas-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
           <CalculatorInput
             id="roas-input-rev"
             name="revenue"
-            label="Attributed Ad Revenue"
+            label={wt.labels.revenue}
             value="12000"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Total customer sales tracked directly to ad campaigns."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.revenue}
             required
           />
 
           <CalculatorInput
             id="roas-input-spend"
             name="adSpend"
-            label="Total Ad Spend"
+            label={wt.labels.adSpend}
             value="3000"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Media cost paid across advertising platforms."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.adSpend}
             required
           />
         </form>
       </div>
 
       <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
-        <span>Instant calculation</span>
-        <span>Top-line ad yield</span>
+        <span>{t.common.automaticRecalculation}</span>
+        <span>{t.common.preTax}</span>
       </div>
     </div>
 
     <!-- Right: Dominant Result -->
     <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
       <div id="roas-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
-        <p class="text-sm font-medium text-[var(--text-primary)]">Enter revenue and ad spend to calculate ROAS.</p>
-        <p class="text-xs text-[var(--text-muted)]">Measure campaign efficiency and revenue yield per dollar spent.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{wt.emptyState.title}</p>
+        <p class="text-xs text-[var(--text-muted)]">{wt.emptyState.desc}</p>
       </div>
 
       <div id="roas-active-container" class="space-y-7">
         <div>
           <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
-            Ad Efficiency
+            {t.common.yourResult}
           </span>
 
           <div class="py-1">
             <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
-              Return on Ad Spend
+              {wt.results.roas || 'Return on Ad Spend'}
             </span>
             <div
               id="roas-result-primary"
@@ -124,7 +142,7 @@ import { AlertCircle } from 'lucide-astro';
               4.00x
             </div>
             <p id="roas-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
-              Every $1.00 of advertising generates <strong class="text-[var(--text-primary)] font-semibold">$4.00</strong> in attributed sales revenue.
+              Every {curr.symbol}1.00 of advertising generates <strong class="text-[var(--text-primary)] font-semibold">{formatCalcMoney(4, locale)}</strong> in attributed sales revenue.
             </p>
           </div>
         </div>
@@ -132,21 +150,21 @@ import { AlertCircle } from 'lucide-astro';
         <!-- Secondary Metrics -->
         <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">ROAS percentage</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.percent || 'ROAS percentage'}</span>
             <span id="roas-res-pct" class="font-semibold text-[var(--text-primary)] tabular-nums">
               400.00%
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Gross revenue after ad spend</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.netProfit || 'Gross revenue after ad spend'}</span>
             <span id="roas-res-net" class="font-medium text-[var(--positive-text)] tabular-nums">
-              $9,000.00
+              {formatCalcMoney(9000, locale)}
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Advertising cost of sales (ACoS)</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.costShare || 'Advertising cost of sales (ACoS)'}</span>
             <span id="roas-res-acos" class="font-medium text-[var(--text-primary)] tabular-nums">
               25.00%
             </span>
@@ -163,6 +181,17 @@ import { AlertCircle } from 'lucide-astro';
   import { parseCleanNumber } from '../../lib/utils/math';
 
   function setupRoasCalculator() {
+    const root = document.getElementById('roas-app');
+    if (!root) return;
+
+    const locale = (root.getAttribute('data-locale') as any) || 'en';
+    const currCode = root.getAttribute('data-curr-code') || 'USD';
+    const currDecimals = parseInt(root.getAttribute('data-curr-decimals') || '2', 10);
+
+    function formatMoney(val: number | null | undefined): string {
+      return formatCurrency(val, currCode, currDecimals, currDecimals, locale);
+    }
+
     const revInput = document.getElementById('roas-input-rev') as HTMLInputElement | null;
     const spendInput = document.getElementById('roas-input-spend') as HTMLInputElement | null;
 
@@ -206,10 +235,10 @@ import { AlertCircle } from 'lucide-astro';
 
       const acos = result.revenue > 0 ? (result.adSpend / result.revenue) * 100 : 0;
 
-      if (primaryEl) primaryEl.textContent = `${formatNumber(result.roasMultiple, 2)}x`;
-      if (pctEl) pctEl.textContent = formatPercent(result.roasPercentage);
+      if (primaryEl) primaryEl.textContent = `${formatNumber(result.roasMultiple, 2, locale)}x`;
+      if (pctEl) pctEl.textContent = formatPercent(result.roasPercentage, 2, locale);
       if (netEl) {
-        netEl.textContent = formatCurrency(result.netReturn);
+        netEl.textContent = formatMoney(result.netReturn);
         if (result.netReturn < 0) {
           netEl.classList.remove('text-[var(--positive-text)]');
           netEl.classList.add('text-[var(--negative-text)]');
@@ -218,10 +247,10 @@ import { AlertCircle } from 'lucide-astro';
           netEl.classList.add('text-[var(--positive-text)]');
         }
       }
-      if (acosEl) acosEl.textContent = formatPercent(acos);
+      if (acosEl) acosEl.textContent = formatPercent(acos, 2, locale);
 
       if (summaryEl) {
-        summaryEl.innerHTML = `Every $1.00 of advertising generates <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.roasMultiple)}</strong> in attributed sales revenue.`;
+        summaryEl.innerHTML = `Every 1.00 unit of advertising generates <strong class="text-[var(--text-primary)] font-semibold">${formatMoney(result.roasMultiple)}</strong> in attributed sales revenue.`;
       }
     }
 

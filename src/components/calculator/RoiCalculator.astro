@@ -1,26 +1,44 @@
 ---
 import CalculatorInput from './CalculatorInput.astro';
 import { AlertCircle } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
+import { getWidgetTranslation, getCalcCurrency, formatCalcMoney } from '../../lib/i18n/calculators/widgets';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const wt = getWidgetTranslation('roi', locale);
+const curr = getCalcCurrency(locale);
 ---
 
-<div id="roi-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+<div
+  id="roi-app"
+  class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10"
+  data-locale={locale}
+  data-curr-code={curr.code}
+  data-curr-decimals={curr.decimals}
+>
   <!-- Presets & Reset Bar -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
     <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-      Return on Investment
+      {wt.title || 'Return on Investment'}
     </div>
 
     <!-- Presets & Reset -->
     <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
       <div class="flex items-center gap-1.5">
-        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">{t.common.presets}:</span>
         <button
           type="button"
           class="roi-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
           data-invest="5000"
           data-ret="8500"
         >
-          $5k → $8.5k
+          {wt.presets[0]}
         </button>
         <button
           type="button"
@@ -28,7 +46,7 @@ import { AlertCircle } from 'lucide-astro';
           data-invest="10000"
           data-ret="25000"
         >
-          $10k → $25k
+          {wt.presets[1]}
         </button>
         <button
           type="button"
@@ -36,7 +54,7 @@ import { AlertCircle } from 'lucide-astro';
           data-invest="20000"
           data-ret="18000"
         >
-          $20k → $18k
+          {wt.presets[2]}
         </button>
       </div>
 
@@ -46,7 +64,7 @@ import { AlertCircle } from 'lucide-astro';
         class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
         title="Reset inputs to default"
       >
-        Reset
+        {t.actions.reset}
       </button>
     </div>
   </div>
@@ -57,7 +75,7 @@ import { AlertCircle } from 'lucide-astro';
     <div class="lg:col-span-5 space-y-6">
       <div>
         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
-          Capital & Yield
+          {t.common.yourNumbers}
         </span>
 
         <div
@@ -66,56 +84,56 @@ import { AlertCircle } from 'lucide-astro';
           role="alert"
         >
           <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
-          <span id="roi-error-msg">Initial investment must be greater than 0.</span>
+          <span id="roi-error-msg">{wt.errors.general || 'Initial investment must be greater than 0.'}</span>
         </div>
 
         <form id="roi-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
           <CalculatorInput
             id="roi-input-invest"
             name="initialInvestment"
-            label="Initial Investment"
+            label={wt.labels.initialInvestment}
             value="5000"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Total capital committed to project, campaign, or asset."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.initialInvestment}
             required
           />
 
           <CalculatorInput
             id="roi-input-return"
             name="finalReturn"
-            label="Total Return / Revenue"
+            label={wt.labels.finalReturn}
             value="8500"
-            prefix="$"
-            placeholder="0.00"
-            helperText="Gross cash or revenue generated from the investment."
+            prefix={curr.symbol}
+            placeholder={curr.decimals === 0 ? '0' : '0.00'}
+            helperText={wt.helpers.finalReturn}
             required
           />
         </form>
       </div>
 
       <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
-        <span>Instant calculation</span>
-        <span>Net yield</span>
+        <span>{t.common.automaticRecalculation}</span>
+        <span>{t.common.preTax}</span>
       </div>
     </div>
 
     <!-- Right: Dominant Result -->
     <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
       <div id="roi-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
-        <p class="text-sm font-medium text-[var(--text-primary)]">Enter initial capital and return.</p>
-        <p class="text-xs text-[var(--text-muted)]">Evaluate capital efficiency and net profit.</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{wt.emptyState.title}</p>
+        <p class="text-xs text-[var(--text-muted)]">{wt.emptyState.desc}</p>
       </div>
 
       <div id="roi-active-container" class="space-y-7">
         <div>
           <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
-            Investment Yield
+            {t.common.yourResult}
           </span>
 
           <div class="py-1">
             <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
-              Return on Investment
+              {wt.results.roi || 'Return on Investment'}
             </span>
             <div
               id="roi-result-primary"
@@ -124,7 +142,7 @@ import { AlertCircle } from 'lucide-astro';
               70.00%
             </div>
             <p id="roi-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
-              A $5,000.00 investment returned $8,500.00, generating <strong class="text-[var(--text-primary)] font-semibold">$3,500.00</strong> in net profit.
+              A {formatCalcMoney(5000, locale)} investment returned {formatCalcMoney(8500, locale)}, generating <strong class="text-[var(--text-primary)] font-semibold">{formatCalcMoney(3500, locale)}</strong> in net profit.
             </p>
           </div>
         </div>
@@ -132,23 +150,23 @@ import { AlertCircle } from 'lucide-astro';
         <!-- Secondary Metrics -->
         <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Net dollar profit</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.netProfit || 'Net dollar profit'}</span>
             <span id="roi-res-profit" class="font-semibold text-[var(--positive-text)] tabular-nums">
-              $3,500.00
+              {formatCalcMoney(3500, locale)}
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Return multiple</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.results.multiple || 'Return multiple'}</span>
             <span id="roi-res-multiple" class="font-medium text-[var(--text-primary)] tabular-nums">
               1.70x
             </span>
           </div>
 
           <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
-            <span class="text-[var(--text-secondary)] font-normal">Invested capital</span>
+            <span class="text-[var(--text-secondary)] font-normal">{wt.labels.initialInvestment || 'Invested capital'}</span>
             <span id="roi-res-capital" class="font-medium text-[var(--text-primary)] tabular-nums">
-              $5,000.00
+              {formatCalcMoney(5000, locale)}
             </span>
           </div>
         </div>
@@ -163,6 +181,17 @@ import { AlertCircle } from 'lucide-astro';
   import { parseCleanNumber } from '../../lib/utils/math';
 
   function setupRoiCalculator() {
+    const root = document.getElementById('roi-app');
+    if (!root) return;
+
+    const locale = (root.getAttribute('data-locale') as any) || 'en';
+    const currCode = root.getAttribute('data-curr-code') || 'USD';
+    const currDecimals = parseInt(root.getAttribute('data-curr-decimals') || '2', 10);
+
+    function formatMoney(val: number | null | undefined): string {
+      return formatCurrency(val, currCode, currDecimals, currDecimals, locale);
+    }
+
     const investInput = document.getElementById('roi-input-invest') as HTMLInputElement | null;
     const returnInput = document.getElementById('roi-input-return') as HTMLInputElement | null;
 
@@ -205,7 +234,7 @@ import { AlertCircle } from 'lucide-astro';
       errorBox?.classList.add('hidden');
 
       if (primaryEl) {
-        primaryEl.textContent = formatPercent(result.roiPercentage);
+        primaryEl.textContent = formatPercent(result.roiPercentage, 2, locale);
         if (result.roiPercentage < 0) {
           primaryEl.classList.remove('text-[var(--positive-text)]');
           primaryEl.classList.add('text-[var(--negative-text)]');
@@ -216,7 +245,7 @@ import { AlertCircle } from 'lucide-astro';
       }
 
       if (profitEl) {
-        profitEl.textContent = formatCurrency(result.netProfit);
+        profitEl.textContent = formatMoney(result.netProfit);
         if (result.netProfit < 0) {
           profitEl.classList.remove('text-[var(--positive-text)]');
           profitEl.classList.add('text-[var(--negative-text)]');
@@ -226,11 +255,11 @@ import { AlertCircle } from 'lucide-astro';
         }
       }
 
-      if (multipleEl) multipleEl.textContent = `${formatNumber(result.roiMultiple, 2)}x`;
-      if (capitalEl) capitalEl.textContent = formatCurrency(result.initialInvestment);
+      if (multipleEl) multipleEl.textContent = `${formatNumber(result.roiMultiple, 2, locale)}x`;
+      if (capitalEl) capitalEl.textContent = formatMoney(result.initialInvestment);
 
       if (summaryEl) {
-        summaryEl.innerHTML = `A ${formatCurrency(result.initialInvestment)} investment returned ${formatCurrency(result.finalReturn)}, generating <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.netProfit)}</strong> in net profit.`;
+        summaryEl.innerHTML = `A ${formatMoney(result.initialInvestment)} investment returned ${formatMoney(result.finalReturn)}, generating <strong class="text-[var(--text-primary)] font-semibold">${formatMoney(result.netProfit)}</strong> in net profit.`;
       }
     }
 

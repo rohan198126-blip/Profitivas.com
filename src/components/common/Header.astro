@@ -132,7 +132,7 @@ const navItems = [
 <script>
   function setupHeaderInteractions() {
     function triggerCalculatorSearch() {
-      const pickerDialog = document.getElementById('calc-picker-dialog');
+      const pickerDialog = document.getElementById('calculator-picker-modal') || document.getElementById('picker-dialog');
       if (pickerDialog) {
         window.dispatchEvent(new CustomEvent('profitivas:open-picker'));
       } else {
