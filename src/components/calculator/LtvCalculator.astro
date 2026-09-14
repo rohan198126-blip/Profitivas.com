@@ -1,0 +1,266 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="ltv-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <!-- Presets & Reset Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+      Customer Lifetime Value
+    </div>
+
+    <!-- Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="ltv-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-val="60"
+          data-freq="4"
+          data-life="3"
+        >
+          $60 / 4x / 3 yrs ($720)
+        </button>
+        <button
+          type="button"
+          class="ltv-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-val="100"
+          data-freq="12"
+          data-life="2"
+        >
+          $100 / 12x / 2 yrs ($2.4k)
+        </button>
+        <button
+          type="button"
+          class="ltv-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-val="35"
+          data-freq="6"
+          data-life="1.5"
+        >
+          $35 / 6x / 1.5 yrs ($315)
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="ltv-btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Customer Dynamics
+        </span>
+
+        <div
+          id="ltv-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="ltv-error-msg">Please enter valid non-negative numbers.</span>
+        </div>
+
+        <form id="ltv-form" class="space-y-4 sm:space-y-5" onsubmit="return false;">
+          <CalculatorInput
+            id="ltv-input-val"
+            name="averagePurchaseValue"
+            label="Average Purchase Value (AOV)"
+            value="60"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Average revenue generated per customer transaction."
+            required
+          />
+
+          <CalculatorInput
+            id="ltv-input-freq"
+            name="purchaseFrequency"
+            label="Purchase Frequency (per year)"
+            value="4"
+            placeholder="0"
+            helperText="Number of repeat purchases completed annually."
+            required
+          />
+
+          <CalculatorInput
+            id="ltv-input-life"
+            name="customerLifespan"
+            label="Customer Lifespan (years)"
+            value="3"
+            placeholder="0"
+            helperText="Average years a customer maintains an active relationship."
+            required
+          />
+        </form>
+      </div>
+
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Instant calculation</span>
+        <span>Customer lifetime gross</span>
+      </div>
+    </div>
+
+    <!-- Right: Dominant Result -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <div id="ltv-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter order value, frequency, and lifespan.</p>
+        <p class="text-xs text-[var(--text-muted)]">Project total lifetime revenue per customer relationship.</p>
+      </div>
+
+      <div id="ltv-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Expected Revenue
+          </span>
+
+          <div class="py-1">
+            <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              Customer Lifetime Value
+            </span>
+            <div
+              id="ltv-result-primary"
+              class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
+            >
+              $720.00
+            </div>
+            <p id="ltv-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              A customer spending $60.00 4 times/year across 3 years delivers <strong class="text-[var(--text-primary)] font-semibold">$720.00</strong> in expected lifetime value.
+            </p>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Annual customer value</span>
+            <span id="ltv-res-annual" class="font-semibold text-[var(--text-primary)] tabular-nums">
+              $240.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Lifetime purchase transactions</span>
+            <span id="ltv-res-orders" class="font-medium text-[var(--text-primary)] tabular-nums">
+              12 orders
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Average transaction value</span>
+            <span id="ltv-res-val" class="font-medium text-[var(--text-primary)] tabular-nums">
+              $60.00
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateLtv } from '../../lib/calculators/ltv/formulas';
+  import { formatCurrency, formatNumber } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function setupLtvCalculator() {
+    const valInput = document.getElementById('ltv-input-val') as HTMLInputElement | null;
+    const freqInput = document.getElementById('ltv-input-freq') as HTMLInputElement | null;
+    const lifeInput = document.getElementById('ltv-input-life') as HTMLInputElement | null;
+
+    const primaryEl = document.getElementById('ltv-result-primary');
+    const annualEl = document.getElementById('ltv-res-annual');
+    const ordersEl = document.getElementById('ltv-res-orders');
+    const avgValEl = document.getElementById('ltv-res-val');
+    const summaryEl = document.getElementById('ltv-result-summary');
+
+    const errorBox = document.getElementById('ltv-error-box');
+    const errorMsg = document.getElementById('ltv-error-msg');
+    const emptyState = document.getElementById('ltv-empty-state');
+    const activeContainer = document.getElementById('ltv-active-container');
+    const resetBtn = document.getElementById('ltv-btn-reset');
+
+    if (!valInput || !freqInput || !lifeInput) return;
+
+    function recalculate() {
+      const val = parseCleanNumber(valInput?.value);
+      const freq = parseCleanNumber(freqInput?.value);
+      const life = parseCleanNumber(lifeInput?.value);
+
+      if (val === null || freq === null || life === null) {
+        activeContainer?.classList.add('hidden');
+        emptyState?.classList.remove('hidden');
+        errorBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+
+      const result = calculateLtv({
+        averagePurchaseValue: val,
+        purchaseFrequency: freq,
+        customerLifespan: life,
+      });
+
+      if (!result.isValid) {
+        errorBox?.classList.remove('hidden');
+        if (errorMsg) errorMsg.textContent = result.errorMessage || 'Invalid inputs.';
+        return;
+      }
+
+      errorBox?.classList.add('hidden');
+
+      const totalOrders = result.purchaseFrequency * result.customerLifespan;
+
+      if (primaryEl) primaryEl.textContent = formatCurrency(result.ltv);
+      if (annualEl) annualEl.textContent = formatCurrency(result.annualValue);
+      if (ordersEl) ordersEl.textContent = `${formatNumber(totalOrders, totalOrders % 1 === 0 ? 0 : 1)} orders`;
+      if (avgValEl) avgValEl.textContent = formatCurrency(result.averagePurchaseValue);
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `A customer spending ${formatCurrency(result.averagePurchaseValue)} ${formatNumber(result.purchaseFrequency, result.purchaseFrequency % 1 === 0 ? 0 : 1)} times/year across ${formatNumber(result.customerLifespan, result.customerLifespan % 1 === 0 ? 0 : 1)} years delivers <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.ltv)}</strong> in expected lifetime value.`;
+      }
+    }
+
+    valInput.addEventListener('input', recalculate);
+    freqInput.addEventListener('input', recalculate);
+    lifeInput.addEventListener('input', recalculate);
+
+    document.querySelectorAll<HTMLButtonElement>('.ltv-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (valInput) valInput.value = btn.dataset.val || '60';
+        if (freqInput) freqInput.value = btn.dataset.freq || '4';
+        if (lifeInput) lifeInput.value = btn.dataset.life || '3';
+        recalculate();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (valInput) valInput.value = '60';
+      if (freqInput) freqInput.value = '4';
+      if (lifeInput) lifeInput.value = '3';
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupLtvCalculator);
+  } else {
+    setupLtvCalculator();
+  }
+  document.addEventListener('astro:page-load', setupLtvCalculator);
+</script>

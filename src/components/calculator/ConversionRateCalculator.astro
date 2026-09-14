@@ -1,0 +1,241 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="conversion-rate-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <!-- Presets & Reset Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+      Conversion Rate
+    </div>
+
+    <!-- Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="cvr-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-conv="85"
+          data-vis="2500"
+        >
+          85 / 2,500 (3.4%)
+        </button>
+        <button
+          type="button"
+          class="cvr-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-conv="120"
+          data-vis="5000"
+        >
+          120 / 5,000 (2.4%)
+        </button>
+        <button
+          type="button"
+          class="cvr-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-conv="50"
+          data-vis="1000"
+        >
+          50 / 1,000 (5.0%)
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="cvr-btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Funnel Traffic
+        </span>
+
+        <div
+          id="cvr-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="cvr-error-msg">Total visitors must be greater than 0.</span>
+        </div>
+
+        <form id="cvr-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
+          <CalculatorInput
+            id="cvr-input-conv"
+            name="conversions"
+            label="Successful Conversions"
+            value="85"
+            placeholder="0"
+            helperText="Number of purchases, signups, or goal completions."
+            required
+          />
+
+          <CalculatorInput
+            id="cvr-input-vis"
+            name="visitors"
+            label="Total Visitors / Interactions"
+            value="2500"
+            placeholder="0"
+            helperText="Total sessions, visits, or ad clicks in the same timeframe."
+            required
+          />
+        </form>
+      </div>
+
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Instant calculation</span>
+        <span>Standard CVR metric</span>
+      </div>
+    </div>
+
+    <!-- Right: Dominant Result -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <div id="cvr-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter conversions and total visitors.</p>
+        <p class="text-xs text-[var(--text-muted)]">Determine funnel completion rate and drop-off counts.</p>
+      </div>
+
+      <div id="cvr-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Funnel Efficiency
+          </span>
+
+          <div class="py-1">
+            <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              Conversion Rate
+            </span>
+            <div
+              id="cvr-result-primary"
+              class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--positive-text)] tabular-nums leading-none"
+            >
+              3.40%
+            </div>
+            <p id="cvr-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              Generating 85 conversions from 2,500 visitors produces a <strong class="text-[var(--text-primary)] font-semibold">3.40%</strong> conversion rate.
+            </p>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Funnel drop-off rate</span>
+            <span id="cvr-res-drop-rate" class="font-medium text-[var(--text-primary)] tabular-nums">
+              96.60%
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Lost / dropped-off visitors</span>
+            <span id="cvr-res-drop-count" class="font-medium text-[var(--text-primary)] tabular-nums">
+              2,415 visitors
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Completed goal actions</span>
+            <span id="cvr-res-actions" class="font-medium text-[var(--positive-text)] tabular-nums">
+              85 conversions
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateConversionRate } from '../../lib/calculators/conversion-rate/formulas';
+  import { formatNumber, formatPercent } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function setupConversionRateCalculator() {
+    const convInput = document.getElementById('cvr-input-conv') as HTMLInputElement | null;
+    const visInput = document.getElementById('cvr-input-vis') as HTMLInputElement | null;
+
+    const primaryEl = document.getElementById('cvr-result-primary');
+    const dropRateEl = document.getElementById('cvr-res-drop-rate');
+    const dropCountEl = document.getElementById('cvr-res-drop-count');
+    const actionsEl = document.getElementById('cvr-res-actions');
+    const summaryEl = document.getElementById('cvr-result-summary');
+
+    const errorBox = document.getElementById('cvr-error-box');
+    const errorMsg = document.getElementById('cvr-error-msg');
+    const emptyState = document.getElementById('cvr-empty-state');
+    const activeContainer = document.getElementById('cvr-active-container');
+    const resetBtn = document.getElementById('cvr-btn-reset');
+
+    if (!convInput || !visInput) return;
+
+    function recalculate() {
+      const convVal = parseCleanNumber(convInput?.value);
+      const visVal = parseCleanNumber(visInput?.value);
+
+      if (convVal === null || visVal === null) {
+        activeContainer?.classList.add('hidden');
+        emptyState?.classList.remove('hidden');
+        errorBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+
+      const result = calculateConversionRate({ conversions: convVal, visitors: visVal });
+
+      if (!result.isValid) {
+        errorBox?.classList.remove('hidden');
+        if (errorMsg) errorMsg.textContent = result.errorMessage || 'Invalid inputs.';
+        return;
+      }
+
+      errorBox?.classList.add('hidden');
+
+      if (primaryEl) primaryEl.textContent = formatPercent(result.conversionRate);
+      if (dropRateEl) dropRateEl.textContent = formatPercent(result.dropOffRate);
+      if (dropCountEl) dropCountEl.textContent = `${formatNumber(result.dropOffCount, 0)} visitors`;
+      if (actionsEl) actionsEl.textContent = `${formatNumber(result.conversions, 0)} conversions`;
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `Generating ${formatNumber(result.conversions, 0)} conversions from ${formatNumber(result.visitors, 0)} visitors produces a <strong class="text-[var(--text-primary)] font-semibold">${formatPercent(result.conversionRate)}</strong> conversion rate.`;
+      }
+    }
+
+    convInput.addEventListener('input', recalculate);
+    visInput.addEventListener('input', recalculate);
+
+    document.querySelectorAll<HTMLButtonElement>('.cvr-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (convInput) convInput.value = btn.dataset.conv || '85';
+        if (visInput) visInput.value = btn.dataset.vis || '2500';
+        recalculate();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (convInput) convInput.value = '85';
+      if (visInput) visInput.value = '2500';
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupConversionRateCalculator);
+  } else {
+    setupConversionRateCalculator();
+  }
+  document.addEventListener('astro:page-load', setupConversionRateCalculator);
+</script>

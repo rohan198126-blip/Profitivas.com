@@ -1,0 +1,254 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="ltv-cac-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <!-- Presets & Reset Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+      Unit Economics Ratio
+    </div>
+
+    <!-- Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="ltv-cac-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-ltv="900"
+          data-cac="200"
+        >
+          $900 / $200 (4.5x)
+        </button>
+        <button
+          type="button"
+          class="ltv-cac-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-ltv="600"
+          data-cac="200"
+        >
+          $600 / $200 (3.0x)
+        </button>
+        <button
+          type="button"
+          class="ltv-cac-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-ltv="300"
+          data-cac="250"
+        >
+          $300 / $250 (1.2x)
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="ltv-cac-btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Unit Economics
+        </span>
+
+        <div
+          id="ltv-cac-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="ltv-cac-error-msg">CAC must be greater than 0.</span>
+        </div>
+
+        <form id="ltv-cac-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
+          <CalculatorInput
+            id="ltv-cac-input-ltv"
+            name="ltv"
+            label="Customer Lifetime Value (LTV)"
+            value="900"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Expected total revenue or gross margin generated per customer."
+            required
+          />
+
+          <CalculatorInput
+            id="ltv-cac-input-cac"
+            name="cac"
+            label="Customer Acquisition Cost (CAC)"
+            value="200"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Direct marketing and sales expenditure to acquire a customer."
+            required
+          />
+        </form>
+      </div>
+
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Instant calculation</span>
+        <span>Standard benchmark: 3.00:1</span>
+      </div>
+    </div>
+
+    <!-- Right: Dominant Result -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <div id="ltv-cac-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter LTV and CAC to calculate ratio.</p>
+        <p class="text-xs text-[var(--text-muted)]">Benchmark customer acquisition sustainability.</p>
+      </div>
+
+      <div id="ltv-cac-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Acquisition Multiple
+          </span>
+
+          <div class="py-1">
+            <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              LTV : CAC Ratio
+            </span>
+            <div
+              id="ltv-cac-result-primary"
+              class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
+            >
+              4.50:1
+            </div>
+            <p id="ltv-cac-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              Every $1.00 spent on acquisition yields <strong class="text-[var(--text-primary)] font-semibold">$4.50</strong> in customer lifetime value.
+            </p>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Economics health status</span>
+            <span id="ltv-cac-res-status" class="font-semibold text-[var(--positive-text)]">
+              Healthy (Optimal growth benchmark)
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Net value per customer (LTV - CAC)</span>
+            <span id="ltv-cac-res-net" class="font-medium text-[var(--text-primary)] tabular-nums">
+              $700.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">CAC recovery target (payback)</span>
+            <span id="ltv-cac-res-share" class="font-medium text-[var(--text-primary)] tabular-nums">
+              22.22% of LTV
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateLtvCac } from '../../lib/calculators/ltv-cac/formulas';
+  import { formatCurrency, formatNumber, formatPercent } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function setupLtvCacCalculator() {
+    const ltvInput = document.getElementById('ltv-cac-input-ltv') as HTMLInputElement | null;
+    const cacInput = document.getElementById('ltv-cac-input-cac') as HTMLInputElement | null;
+
+    const primaryEl = document.getElementById('ltv-cac-result-primary');
+    const statusEl = document.getElementById('ltv-cac-res-status');
+    const netEl = document.getElementById('ltv-cac-res-net');
+    const shareEl = document.getElementById('ltv-cac-res-share');
+    const summaryEl = document.getElementById('ltv-cac-result-summary');
+
+    const errorBox = document.getElementById('ltv-cac-error-box');
+    const errorMsg = document.getElementById('ltv-cac-error-msg');
+    const emptyState = document.getElementById('ltv-cac-empty-state');
+    const activeContainer = document.getElementById('ltv-cac-active-container');
+    const resetBtn = document.getElementById('ltv-cac-btn-reset');
+
+    if (!ltvInput || !cacInput) return;
+
+    function recalculate() {
+      const ltvVal = parseCleanNumber(ltvInput?.value);
+      const cacVal = parseCleanNumber(cacInput?.value);
+
+      if (ltvVal === null || cacVal === null) {
+        activeContainer?.classList.add('hidden');
+        emptyState?.classList.remove('hidden');
+        errorBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+
+      const result = calculateLtvCac({ ltv: ltvVal, cac: cacVal });
+
+      if (!result.isValid) {
+        errorBox?.classList.remove('hidden');
+        if (errorMsg) errorMsg.textContent = result.errorMessage || 'Invalid inputs.';
+        return;
+      }
+
+      errorBox?.classList.add('hidden');
+
+      const cacShare = result.ltv > 0 ? (result.cac / result.ltv) * 100 : 0;
+
+      if (primaryEl) primaryEl.textContent = `${formatNumber(result.ratio, 2)}:1`;
+      if (statusEl) {
+        statusEl.textContent = result.healthStatus;
+        if (result.ratio < 1) {
+          statusEl.className = 'font-semibold text-[var(--negative-text)]';
+        } else if (result.ratio < 3) {
+          statusEl.className = 'font-semibold text-[var(--text-secondary)]';
+        } else {
+          statusEl.className = 'font-semibold text-[var(--positive-text)]';
+        }
+      }
+      if (netEl) netEl.textContent = formatCurrency(result.netValue);
+      if (shareEl) shareEl.textContent = `${formatPercent(cacShare)} of LTV`;
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `Every $1.00 spent on acquisition yields <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.ratio)}</strong> in customer lifetime value.`;
+      }
+    }
+
+    ltvInput.addEventListener('input', recalculate);
+    cacInput.addEventListener('input', recalculate);
+
+    document.querySelectorAll<HTMLButtonElement>('.ltv-cac-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (ltvInput) ltvInput.value = btn.dataset.ltv || '900';
+        if (cacInput) cacInput.value = btn.dataset.cac || '200';
+        recalculate();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (ltvInput) ltvInput.value = '900';
+      if (cacInput) cacInput.value = '200';
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupLtvCacCalculator);
+  } else {
+    setupLtvCacCalculator();
+  }
+  document.addEventListener('astro:page-load', setupLtvCacCalculator);
+</script>

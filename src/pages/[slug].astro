@@ -3,6 +3,19 @@ import { getActiveCalculators } from '../lib/calculators/registry';
 import CalculatorLayout from '../layouts/CalculatorLayout.astro';
 import ProfitMarginCalculator from '../components/calculator/ProfitMarginCalculator.astro';
 import MarkupCalculator from '../components/calculator/MarkupCalculator.astro';
+import SellingPriceCalculator from '../components/calculator/SellingPriceCalculator.astro';
+import DiscountCalculator from '../components/calculator/DiscountCalculator.astro';
+import GrossProfitCalculator from '../components/calculator/GrossProfitCalculator.astro';
+import BreakEvenCalculator from '../components/calculator/BreakEvenCalculator.astro';
+import TargetProfitCalculator from '../components/calculator/TargetProfitCalculator.astro';
+import RevenueCalculator from '../components/calculator/RevenueCalculator.astro';
+import CommissionCalculator from '../components/calculator/CommissionCalculator.astro';
+import RoiCalculator from '../components/calculator/RoiCalculator.astro';
+import RoasCalculator from '../components/calculator/RoasCalculator.astro';
+import CacCalculator from '../components/calculator/CacCalculator.astro';
+import LtvCalculator from '../components/calculator/LtvCalculator.astro';
+import LtvCacCalculator from '../components/calculator/LtvCacCalculator.astro';
+import ConversionRateCalculator from '../components/calculator/ConversionRateCalculator.astro';
 import type { CalculatorContent } from '../lib/calculators/types';
 
 export async function getStaticPaths() {
@@ -23,4 +36,17 @@ const { content } = Astro.props;
 <CalculatorLayout content={content}>
   {content.meta.id === 'profit-margin' && <ProfitMarginCalculator />}
   {content.meta.id === 'markup' && <MarkupCalculator />}
+  {content.meta.id === 'selling-price' && <SellingPriceCalculator />}
+  {content.meta.id === 'discount' && <DiscountCalculator />}
+  {content.meta.id === 'gross-profit' && <GrossProfitCalculator />}
+  {content.meta.id === 'break-even' && <BreakEvenCalculator />}
+  {content.meta.id === 'target-profit' && <TargetProfitCalculator />}
+  {content.meta.id === 'revenue' && <RevenueCalculator />}
+  {content.meta.id === 'commission' && <CommissionCalculator />}
+  {content.meta.id === 'roi' && <RoiCalculator />}
+  {content.meta.id === 'roas' && <RoasCalculator />}
+  {content.meta.id === 'cac' && <CacCalculator />}
+  {content.meta.id === 'ltv' && <LtvCalculator />}
+  {content.meta.id === 'ltv-cac' && <LtvCacCalculator />}
+  {content.meta.id === 'conversion-rate' && <ConversionRateCalculator />}
 </CalculatorLayout>

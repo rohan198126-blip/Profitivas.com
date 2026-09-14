@@ -1,0 +1,25 @@
+---
+import { ADS_CONFIG } from '../../lib/ads/config';
+
+/**
+ * ConsentBoundary Component
+ *
+ * Provides an isolated architectural boundary for Consent Management Platforms (CMP)
+ * such as Google Funding Choices / IAB Europe TCF v2.2 certified solutions.
+ *
+ * Current State:
+ * - No tracking cookies or advertising technologies are active.
+ * - Renders zero scripts and zero banner DOM nodes.
+ *
+ * Future Activation:
+ * - When ADS_CONFIG.enabled is toggled on with an active AdSense account,
+ *   the Google-certified CMP tags can be loaded exclusively through this boundary.
+ */
+const isConsentRequired = ADS_CONFIG.enabled && ADS_CONFIG.publisherId !== null;
+---
+
+{isConsentRequired && (
+  <div id="profitivas-consent-root" class="profitivas-cmp-boundary" aria-hidden="true">
+    {/* CMP injection hook */}
+  </div>
+)}

@@ -1,5 +1,7 @@
 ---
 import { SITE } from '../../lib/seo/site';
+import type { SupportedLocale } from '../../lib/i18n';
+import { getAlternateLanguageLinks } from '../../lib/i18n';
 
 export interface Props {
   title?: string;
@@ -7,6 +9,8 @@ export interface Props {
   canonicalUrl?: string;
   ogImage?: string;
   noindex?: boolean;
+  locale?: SupportedLocale;
+  alternateLinks?: Array<{ href: string; hreflang: string }>;
 }
 
 const {
@@ -15,12 +19,16 @@ const {
   canonicalUrl: propCanonical,
   ogImage = new URL(SITE.defaultOgImage, SITE.url).href,
   noindex = false,
+  locale = 'en',
+  alternateLinks: propAlternateLinks,
 } = Astro.props;
 
 // Ensure clean, production canonical URLs without trailing slashes (except root)
 const rawPath = Astro.url.pathname.replace(/\/$/, '') || '';
 const defaultCanonical = `${SITE.url}${rawPath || '/'}`;
 const canonicalUrl = propCanonical || defaultCanonical;
+
+const alternateLinks = propAlternateLinks || getAlternateLanguageLinks(SITE.url, Astro.url.pathname);
 
 const formattedTitle = title;
 ---
@@ -53,6 +61,11 @@ const formattedTitle = title;
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalUrl} />
 
+<!-- Alternate Language Links (Active Multilingual Deployments Only) -->
+{alternateLinks && alternateLinks.map((alt) => (
+  <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+))}
+
 <!-- Primary Meta Tags -->
 <title>{formattedTitle}</title>
 <meta name="title" content={formattedTitle} />
@@ -66,6 +79,7 @@ const formattedTitle = title;
 <meta property="og:description" content={description} />
 <meta property="og:image" content={ogImage} />
 <meta property="og:site_name" content={SITE.name} />
+<meta property="og:locale" content={locale === 'en' ? 'en_US' : locale} />
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />

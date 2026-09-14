@@ -2,7 +2,11 @@
 import BaseHead from '../components/seo/BaseHead.astro';
 import Header from '../components/common/Header.astro';
 import Footer from '../components/common/Footer.astro';
+import ConsentBoundary from '../components/common/ConsentBoundary.astro';
 import '../styles/global.css';
+
+import type { SupportedLocale } from '../lib/i18n';
+import { getLocaleFromUrl } from '../lib/i18n';
 
 export interface Props {
   title?: string;
@@ -10,15 +14,17 @@ export interface Props {
   canonicalUrl?: string;
   ogImage?: string;
   noindex?: boolean;
+  locale?: SupportedLocale;
 }
 
 const props = Astro.props;
+const locale = props.locale || getLocaleFromUrl(Astro.url);
 ---
 
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang={locale} data-theme="dark">
   <head>
-    <BaseHead {...props} />
+    <BaseHead {...props} locale={locale} />
   </head>
   <body class="min-h-screen flex flex-col bg-[var(--background)] text-[var(--text-primary)] antialiased selection:bg-neutral-700/40 selection:text-[var(--text-primary)] transition-colors relative overflow-x-hidden">
     <!-- Accessible Skip Link -->
@@ -42,5 +48,6 @@ const props = Astro.props;
     </main>
 
     <Footer />
+    <ConsentBoundary />
   </body>
 </html>

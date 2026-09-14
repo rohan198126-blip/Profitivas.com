@@ -1,0 +1,327 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="selling-price-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <!-- Mode Switcher & Presets -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <div
+      class="inline-flex p-0.5 bg-[var(--surface-subtle)] border border-[var(--border)] rounded-lg w-full sm:w-auto"
+      role="tablist"
+      aria-label="Pricing Mode"
+    >
+      <button
+        type="button"
+        id="sp-tab-margin"
+        role="tab"
+        aria-selected="true"
+        class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)] shadow-2xs"
+        data-mode="margin"
+      >
+        Target Margin
+      </button>
+      <button
+        type="button"
+        id="sp-tab-markup"
+        role="tab"
+        aria-selected="false"
+        class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+        data-mode="markup"
+      >
+        Target Markup
+      </button>
+    </div>
+
+    <!-- Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="sp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-cost="40"
+          data-val="60"
+        >
+          $40 / 60%
+        </button>
+        <button
+          type="button"
+          class="sp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-cost="25"
+          data-val="40"
+        >
+          $25 / 40%
+        </button>
+        <button
+          type="button"
+          class="sp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-cost="100"
+          data-val="50"
+        >
+          $100 / 50%
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="sp-btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Your Numbers
+        </span>
+
+        <div
+          id="sp-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="sp-error-msg">Please enter valid positive numbers.</span>
+        </div>
+
+        <form id="sp-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
+          <CalculatorInput
+            id="sp-input-cost"
+            name="cost"
+            label="Unit Cost"
+            value="40"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Direct acquisition, manufacturing, or wholesale cost."
+            required
+          />
+
+          <div id="sp-margin-wrap">
+            <CalculatorInput
+              id="sp-input-margin"
+              name="targetMargin"
+              label="Target Margin"
+              value="60"
+              suffix="%"
+              placeholder="0.00"
+              helperText="Desired profit percentage of selling price (< 100%)."
+              max="99.99"
+            />
+          </div>
+
+          <div id="sp-markup-wrap" class="hidden">
+            <CalculatorInput
+              id="sp-input-markup"
+              name="targetMarkup"
+              label="Target Markup"
+              value="150"
+              suffix="%"
+              placeholder="0.00"
+              helperText="Desired percentage added on top of unit cost."
+              min="0"
+            />
+          </div>
+        </form>
+      </div>
+
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Instant calculation</span>
+        <span>Pre-tax</span>
+      </div>
+    </div>
+
+    <!-- Right: Dominant Result -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <div id="sp-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter unit cost and target to calculate price.</p>
+        <p class="text-xs text-[var(--text-muted)]">Calculate required customer selling price instantly.</p>
+      </div>
+
+      <div id="sp-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Your Result
+          </span>
+
+          <div class="py-1">
+            <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              Required Selling Price
+            </span>
+            <div
+              id="sp-result-primary"
+              class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
+            >
+              $100.00
+            </div>
+            <p id="sp-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              A <strong class="text-[var(--text-primary)] font-semibold">$100.00</strong> selling price yields <strong class="text-[var(--text-primary)] font-semibold">$60.00</strong> profit on $40.00 cost.
+            </p>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Gross profit</span>
+            <span id="sp-res-profit" class="font-semibold text-[var(--positive-text)] tabular-nums">
+              $60.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Profit margin</span>
+            <span id="sp-res-margin" class="font-medium text-[var(--text-primary)] tabular-nums">
+              60.00%
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Markup</span>
+            <span id="sp-res-markup" class="font-medium text-[var(--text-primary)] tabular-nums">
+              150.00%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateSellingPriceFromMargin, calculateSellingPriceFromMarkup } from '../../lib/calculators/selling-price/formulas';
+  import { formatCurrency, formatPercent } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function setupSellingPriceCalculator() {
+    const costInput = document.getElementById('sp-input-cost') as HTMLInputElement | null;
+    const marginInput = document.getElementById('sp-input-margin') as HTMLInputElement | null;
+    const markupInput = document.getElementById('sp-input-markup') as HTMLInputElement | null;
+
+    const tabMargin = document.getElementById('sp-tab-margin');
+    const tabMarkup = document.getElementById('sp-tab-markup');
+    const marginWrap = document.getElementById('sp-margin-wrap');
+    const markupWrap = document.getElementById('sp-markup-wrap');
+
+    const primaryEl = document.getElementById('sp-result-primary');
+    const profitEl = document.getElementById('sp-res-profit');
+    const marginEl = document.getElementById('sp-res-margin');
+    const markupEl = document.getElementById('sp-res-markup');
+    const summaryEl = document.getElementById('sp-result-summary');
+
+    const errorBox = document.getElementById('sp-error-box');
+    const errorMsg = document.getElementById('sp-error-msg');
+    const emptyState = document.getElementById('sp-empty-state');
+    const activeContainer = document.getElementById('sp-active-container');
+    const resetBtn = document.getElementById('sp-btn-reset');
+
+    if (!costInput) return;
+
+    let currentMode: 'margin' | 'markup' = 'margin';
+
+    function setMode(mode: 'margin' | 'markup') {
+      currentMode = mode;
+      if (mode === 'margin') {
+        tabMargin?.setAttribute('aria-selected', 'true');
+        tabMarkup?.setAttribute('aria-selected', 'false');
+        tabMargin?.classList.add('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border-[var(--border)]');
+        tabMargin?.classList.remove('text-[var(--text-muted)]');
+        tabMarkup?.classList.remove('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border-[var(--border)]');
+        tabMarkup?.classList.add('text-[var(--text-muted)]');
+
+        marginWrap?.classList.remove('hidden');
+        markupWrap?.classList.add('hidden');
+      } else {
+        tabMarkup?.setAttribute('aria-selected', 'true');
+        tabMargin?.setAttribute('aria-selected', 'false');
+        tabMarkup?.classList.add('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border-[var(--border)]');
+        tabMarkup?.classList.remove('text-[var(--text-muted)]');
+        tabMargin?.classList.remove('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border-[var(--border)]');
+        tabMargin?.classList.add('text-[var(--text-muted)]');
+
+        markupWrap?.classList.remove('hidden');
+        marginWrap?.classList.add('hidden');
+      }
+      recalculate();
+    }
+
+    tabMargin?.addEventListener('click', () => setMode('margin'));
+    tabMarkup?.addEventListener('click', () => setMode('markup'));
+
+    function recalculate() {
+      const costVal = parseCleanNumber(costInput?.value);
+      const marginVal = parseCleanNumber(marginInput?.value);
+      const markupVal = parseCleanNumber(markupInput?.value);
+
+      if (costVal === null || (currentMode === 'margin' ? marginVal === null : markupVal === null)) {
+        activeContainer?.classList.add('hidden');
+        emptyState?.classList.remove('hidden');
+        errorBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+
+      const result = currentMode === 'margin'
+        ? calculateSellingPriceFromMargin({ cost: costVal, targetMargin: marginVal! })
+        : calculateSellingPriceFromMarkup({ cost: costVal, targetMarkup: markupVal! });
+
+      if (!result.isValid) {
+        errorBox?.classList.remove('hidden');
+        if (errorMsg) errorMsg.textContent = result.errorMessage || 'Invalid input values.';
+        return;
+      }
+
+      errorBox?.classList.add('hidden');
+
+      if (primaryEl) primaryEl.textContent = formatCurrency(result.sellingPrice);
+      if (profitEl) profitEl.textContent = formatCurrency(result.profit);
+      if (marginEl) marginEl.textContent = formatPercent(result.margin);
+      if (markupEl) markupEl.textContent = formatPercent(result.markup);
+      if (summaryEl) {
+        summaryEl.innerHTML = `A <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.sellingPrice)}</strong> selling price yields <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.profit)}</strong> profit on ${formatCurrency(result.cost)} cost.`;
+      }
+    }
+
+    costInput.addEventListener('input', recalculate);
+    marginInput?.addEventListener('input', recalculate);
+    markupInput?.addEventListener('input', recalculate);
+
+    document.querySelectorAll<HTMLButtonElement>('.sp-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (costInput) costInput.value = btn.dataset.cost || '40';
+        if (currentMode === 'margin' && marginInput) {
+          marginInput.value = btn.dataset.val || '60';
+        } else if (currentMode === 'markup' && markupInput) {
+          markupInput.value = btn.dataset.val === '60' ? '150' : '100';
+        }
+        recalculate();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (costInput) costInput.value = '40';
+      if (marginInput) marginInput.value = '60';
+      if (markupInput) markupInput.value = '150';
+      setMode('margin');
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupSellingPriceCalculator);
+  } else {
+    setupSellingPriceCalculator();
+  }
+  document.addEventListener('astro:page-load', setupSellingPriceCalculator);
+</script>

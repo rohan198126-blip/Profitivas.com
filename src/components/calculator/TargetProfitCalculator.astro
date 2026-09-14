@@ -1,0 +1,293 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="target-profit-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <!-- Presets & Reset Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+      Target Profit Planning
+    </div>
+
+    <!-- Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="tp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-fixed="10000"
+          data-target="5000"
+          data-price="50"
+          data-var="30"
+        >
+          $10k / $5k profit
+        </button>
+        <button
+          type="button"
+          class="tp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-fixed="20000"
+          data-target="10000"
+          data-price="100"
+          data-var="40"
+        >
+          $20k / $10k profit
+        </button>
+        <button
+          type="button"
+          class="tp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-fixed="50000"
+          data-target="25000"
+          data-price="250"
+          data-var="150"
+        >
+          $50k / $25k profit
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="tp-btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Cost & Target Parameters
+        </span>
+
+        <div
+          id="tp-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="tp-error-msg">Selling price must be greater than variable cost per unit.</span>
+        </div>
+
+        <form id="tp-form" class="space-y-4 sm:space-y-5" onsubmit="return false;">
+          <CalculatorInput
+            id="tp-input-fixed"
+            name="fixedCosts"
+            label="Total Fixed Costs"
+            value="10000"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Base monthly/annual overhead obligations."
+            required
+          />
+
+          <CalculatorInput
+            id="tp-input-target"
+            name="targetProfit"
+            label="Desired Target Profit"
+            value="5000"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Target operating income before income taxes."
+            required
+          />
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <CalculatorInput
+              id="tp-input-price"
+              name="pricePerUnit"
+              label="Selling Price"
+              value="50"
+              prefix="$"
+              placeholder="0.00"
+              helperText="Per unit."
+              required
+            />
+
+            <CalculatorInput
+              id="tp-input-var"
+              name="variableCostPerUnit"
+              label="Variable Cost"
+              value="30"
+              prefix="$"
+              placeholder="0.00"
+              helperText="Per unit."
+              required
+            />
+          </div>
+        </form>
+      </div>
+
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Instant calculation</span>
+        <span>Target profit planning</span>
+      </div>
+    </div>
+
+    <!-- Right: Dominant Result -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <div id="tp-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter costs, target profit, and unit pricing.</p>
+        <p class="text-xs text-[var(--text-muted)]">Find the exact volume needed to reach your profit goal.</p>
+      </div>
+
+      <div id="tp-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Required Volume
+          </span>
+
+          <div class="py-1">
+            <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              Units Needed
+            </span>
+            <div class="flex items-baseline gap-2">
+              <span
+                id="tp-result-primary"
+                class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
+              >
+                750
+              </span>
+              <span class="text-xl sm:text-2xl font-medium text-[var(--text-secondary)]">units</span>
+            </div>
+            <p id="tp-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              Selling <strong class="text-[var(--text-primary)] font-semibold">750 units</strong> generates <strong class="text-[var(--text-primary)] font-semibold">$37,500.00</strong> revenue to deliver $5,000.00 profit.
+            </p>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Required sales revenue</span>
+            <span id="tp-res-revenue" class="font-semibold text-[var(--text-primary)] tabular-nums">
+              $37,500.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Contribution margin per unit</span>
+            <span id="tp-res-cm" class="font-medium text-[var(--positive-text)] tabular-nums">
+              $20.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Total cost burden (fixed + target)</span>
+            <span id="tp-res-burden" class="font-medium text-[var(--text-primary)] tabular-nums">
+              $15,000.00
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateTargetProfit } from '../../lib/calculators/target-profit/formulas';
+  import { formatCurrency, formatNumber } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function setupTargetProfitCalculator() {
+    const fixedInput = document.getElementById('tp-input-fixed') as HTMLInputElement | null;
+    const targetInput = document.getElementById('tp-input-target') as HTMLInputElement | null;
+    const priceInput = document.getElementById('tp-input-price') as HTMLInputElement | null;
+    const varInput = document.getElementById('tp-input-var') as HTMLInputElement | null;
+
+    const primaryEl = document.getElementById('tp-result-primary');
+    const revenueEl = document.getElementById('tp-res-revenue');
+    const cmEl = document.getElementById('tp-res-cm');
+    const burdenEl = document.getElementById('tp-res-burden');
+    const summaryEl = document.getElementById('tp-result-summary');
+
+    const errorBox = document.getElementById('tp-error-box');
+    const errorMsg = document.getElementById('tp-error-msg');
+    const emptyState = document.getElementById('tp-empty-state');
+    const activeContainer = document.getElementById('tp-active-container');
+    const resetBtn = document.getElementById('tp-btn-reset');
+
+    if (!fixedInput || !targetInput || !priceInput || !varInput) return;
+
+    function recalculate() {
+      const fixedVal = parseCleanNumber(fixedInput?.value);
+      const targetVal = parseCleanNumber(targetInput?.value);
+      const priceVal = parseCleanNumber(priceInput?.value);
+      const varVal = parseCleanNumber(varInput?.value);
+
+      if (fixedVal === null || targetVal === null || priceVal === null || varVal === null) {
+        activeContainer?.classList.add('hidden');
+        emptyState?.classList.remove('hidden');
+        errorBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+
+      const result = calculateTargetProfit({
+        fixedCosts: fixedVal,
+        targetProfit: targetVal,
+        pricePerUnit: priceVal,
+        variableCostPerUnit: varVal,
+      });
+
+      if (!result.isValid) {
+        errorBox?.classList.remove('hidden');
+        if (errorMsg) errorMsg.textContent = result.errorMessage || 'Invalid inputs.';
+        return;
+      }
+
+      errorBox?.classList.add('hidden');
+
+      const totalBurden = result.fixedCosts + result.targetProfit;
+
+      if (primaryEl) primaryEl.textContent = formatNumber(result.requiredUnits, result.requiredUnits % 1 === 0 ? 0 : 2);
+      if (revenueEl) revenueEl.textContent = formatCurrency(result.requiredRevenue);
+      if (cmEl) cmEl.textContent = formatCurrency(result.contributionMargin);
+      if (burdenEl) burdenEl.textContent = formatCurrency(totalBurden);
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `Selling <strong class="text-[var(--text-primary)] font-semibold">${formatNumber(result.requiredUnits, result.requiredUnits % 1 === 0 ? 0 : 2)} units</strong> generates <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.requiredRevenue)}</strong> revenue to deliver ${formatCurrency(result.targetProfit)} profit.`;
+      }
+    }
+
+    fixedInput.addEventListener('input', recalculate);
+    targetInput.addEventListener('input', recalculate);
+    priceInput.addEventListener('input', recalculate);
+    varInput.addEventListener('input', recalculate);
+
+    document.querySelectorAll<HTMLButtonElement>('.tp-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (fixedInput) fixedInput.value = btn.dataset.fixed || '10000';
+        if (targetInput) targetInput.value = btn.dataset.target || '5000';
+        if (priceInput) priceInput.value = btn.dataset.price || '50';
+        if (varInput) varInput.value = btn.dataset.var || '30';
+        recalculate();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (fixedInput) fixedInput.value = '10000';
+      if (targetInput) targetInput.value = '5000';
+      if (priceInput) priceInput.value = '50';
+      if (varInput) varInput.value = '30';
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupTargetProfitCalculator);
+  } else {
+    setupTargetProfitCalculator();
+  }
+  document.addEventListener('astro:page-load', setupTargetProfitCalculator);
+</script>

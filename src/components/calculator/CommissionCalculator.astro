@@ -1,0 +1,265 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="commission-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <!-- Presets & Reset Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+      Sales Commission
+    </div>
+
+    <!-- Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="comm-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-sale="20000"
+          data-rate="7.5"
+          data-base="0"
+        >
+          $20k @ 7.5%
+        </button>
+        <button
+          type="button"
+          class="comm-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-sale="50000"
+          data-rate="10"
+          data-base="2500"
+        >
+          $50k @ 10% + $2.5k
+        </button>
+        <button
+          type="button"
+          class="comm-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-sale="100000"
+          data-rate="5"
+          data-base="0"
+        >
+          $100k @ 5%
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="comm-btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Sales & Compensation
+        </span>
+
+        <div
+          id="comm-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="comm-error-msg">Please enter valid non-negative numbers.</span>
+        </div>
+
+        <form id="comm-form" class="space-y-4 sm:space-y-5" onsubmit="return false;">
+          <CalculatorInput
+            id="comm-input-sale"
+            name="saleAmount"
+            label="Total Sales Volume"
+            value="20000"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Gross value of closed contracts or sales orders."
+            required
+          />
+
+          <CalculatorInput
+            id="comm-input-rate"
+            name="commissionRate"
+            label="Commission Rate"
+            value="7.5"
+            suffix="%"
+            placeholder="0.00"
+            helperText="Agreed percentage payout rate."
+            required
+          />
+
+          <CalculatorInput
+            id="comm-input-base"
+            name="baseSalary"
+            label="Base Salary (Optional)"
+            value="0"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Guaranteed monthly or per-period salary baseline."
+          />
+        </form>
+      </div>
+
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Instant calculation</span>
+        <span>Gross incentive</span>
+      </div>
+    </div>
+
+    <!-- Right: Dominant Result -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <div id="comm-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter sales volume and commission rate.</p>
+        <p class="text-xs text-[var(--text-muted)]">Calculate earned incentive payouts instantly.</p>
+      </div>
+
+      <div id="comm-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Incentive Payout
+          </span>
+
+          <div class="py-1">
+            <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              Commission Amount
+            </span>
+            <div
+              id="comm-result-primary"
+              class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--positive-text)] tabular-nums leading-none"
+            >
+              $1,500.00
+            </div>
+            <p id="comm-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              A 7.50% commission on $20,000.00 sales yields an earned payout of <strong class="text-[var(--text-primary)] font-semibold">$1,500.00</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Total with commission (sale + payout)</span>
+            <span id="comm-res-total" class="font-semibold text-[var(--text-primary)] tabular-nums">
+              $21,500.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Total rep earnings (base + commission)</span>
+            <span id="comm-res-earnings" class="font-medium text-[var(--text-primary)] tabular-nums">
+              $1,500.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Effective commission rate</span>
+            <span id="comm-res-rate" class="font-medium text-[var(--text-primary)] tabular-nums">
+              7.50%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateCommission } from '../../lib/calculators/commission/formulas';
+  import { formatCurrency, formatPercent } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function setupCommissionCalculator() {
+    const saleInput = document.getElementById('comm-input-sale') as HTMLInputElement | null;
+    const rateInput = document.getElementById('comm-input-rate') as HTMLInputElement | null;
+    const baseInput = document.getElementById('comm-input-base') as HTMLInputElement | null;
+
+    const primaryEl = document.getElementById('comm-result-primary');
+    const totalEl = document.getElementById('comm-res-total');
+    const earningsEl = document.getElementById('comm-res-earnings');
+    const rateEl = document.getElementById('comm-res-rate');
+    const summaryEl = document.getElementById('comm-result-summary');
+
+    const errorBox = document.getElementById('comm-error-box');
+    const errorMsg = document.getElementById('comm-error-msg');
+    const emptyState = document.getElementById('comm-empty-state');
+    const activeContainer = document.getElementById('comm-active-container');
+    const resetBtn = document.getElementById('comm-btn-reset');
+
+    if (!saleInput || !rateInput) return;
+
+    function recalculate() {
+      const saleVal = parseCleanNumber(saleInput?.value);
+      const rateVal = parseCleanNumber(rateInput?.value);
+      const baseVal = baseInput?.value.trim() ? parseCleanNumber(baseInput.value) : 0;
+
+      if (saleVal === null || rateVal === null || baseVal === null) {
+        activeContainer?.classList.add('hidden');
+        emptyState?.classList.remove('hidden');
+        errorBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+
+      const result = calculateCommission({
+        saleAmount: saleVal,
+        commissionRate: rateVal,
+        baseSalary: baseVal,
+      });
+
+      if (!result.isValid) {
+        errorBox?.classList.remove('hidden');
+        if (errorMsg) errorMsg.textContent = result.errorMessage || 'Invalid inputs.';
+        return;
+      }
+
+      errorBox?.classList.add('hidden');
+
+      if (primaryEl) primaryEl.textContent = formatCurrency(result.commissionAmount);
+      if (totalEl) totalEl.textContent = formatCurrency(result.totalWithCommission);
+      if (earningsEl) earningsEl.textContent = formatCurrency(result.totalEarnings);
+      if (rateEl) rateEl.textContent = formatPercent(result.commissionRate);
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `A ${formatPercent(result.commissionRate)} commission on ${formatCurrency(result.saleAmount)} sales yields an earned payout of <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.commissionAmount)}</strong>.`;
+      }
+    }
+
+    saleInput.addEventListener('input', recalculate);
+    rateInput.addEventListener('input', recalculate);
+    baseInput?.addEventListener('input', recalculate);
+
+    document.querySelectorAll<HTMLButtonElement>('.comm-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (saleInput) saleInput.value = btn.dataset.sale || '20000';
+        if (rateInput) rateInput.value = btn.dataset.rate || '7.5';
+        if (baseInput) baseInput.value = btn.dataset.base || '0';
+        recalculate();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (saleInput) saleInput.value = '20000';
+      if (rateInput) rateInput.value = '7.5';
+      if (baseInput) baseInput.value = '0';
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupCommissionCalculator);
+  } else {
+    setupCommissionCalculator();
+  }
+  document.addEventListener('astro:page-load', setupCommissionCalculator);
+</script>

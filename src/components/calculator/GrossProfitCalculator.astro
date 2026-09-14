@@ -1,0 +1,253 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="gross-profit-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <!-- Presets & Reset Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+      Gross Profit & Margin
+    </div>
+
+    <!-- Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="gp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-rev="100000"
+          data-cogs="40000"
+        >
+          $100k / $40k
+        </button>
+        <button
+          type="button"
+          class="gp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-rev="50000"
+          data-cogs="15000"
+        >
+          $50k / $15k
+        </button>
+        <button
+          type="button"
+          class="gp-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-rev="250000"
+          data-cogs="175000"
+        >
+          $250k / $175k
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="gp-btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Financial Inputs
+        </span>
+
+        <div
+          id="gp-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="gp-error-msg">Please enter valid non-negative numbers.</span>
+        </div>
+
+        <form id="gp-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
+          <CalculatorInput
+            id="gp-input-revenue"
+            name="revenue"
+            label="Total Revenue"
+            value="100000"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Total sales revenue during the measurement period."
+            required
+          />
+
+          <CalculatorInput
+            id="gp-input-cogs"
+            name="cogs"
+            label="Cost of Goods Sold (COGS)"
+            value="40000"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Direct production, manufacturing, or wholesale costs."
+            required
+          />
+        </form>
+      </div>
+
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Instant calculation</span>
+        <span>Before OPEX & taxes</span>
+      </div>
+    </div>
+
+    <!-- Right: Dominant Result -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <div id="gp-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter revenue and COGS to calculate gross profit.</p>
+        <p class="text-xs text-[var(--text-muted)]">Clear visibility into direct production margins.</p>
+      </div>
+
+      <div id="gp-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Primary Metric
+          </span>
+
+          <div class="py-1">
+            <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              Gross Profit
+            </span>
+            <div
+              id="gp-result-primary"
+              class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--positive-text)] tabular-nums leading-none"
+            >
+              $60,000.00
+            </div>
+            <p id="gp-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              Your business retains <strong class="text-[var(--text-primary)] font-semibold">$60,000.00</strong> on $100,000.00 of total revenue.
+            </p>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Gross profit margin</span>
+            <span id="gp-res-margin" class="font-semibold text-[var(--text-primary)] tabular-nums">
+              60.00%
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Cost of goods sold (COGS)</span>
+            <span id="gp-res-cogs" class="font-medium text-[var(--text-primary)] tabular-nums">
+              $40,000.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Effective markup on cost</span>
+            <span id="gp-res-markup" class="font-medium text-[var(--text-primary)] tabular-nums">
+              150.00%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateGrossProfit } from '../../lib/calculators/gross-profit/formulas';
+  import { formatCurrency, formatPercent } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function setupGrossProfitCalculator() {
+    const revenueInput = document.getElementById('gp-input-revenue') as HTMLInputElement | null;
+    const cogsInput = document.getElementById('gp-input-cogs') as HTMLInputElement | null;
+
+    const primaryEl = document.getElementById('gp-result-primary');
+    const marginEl = document.getElementById('gp-res-margin');
+    const cogsEl = document.getElementById('gp-res-cogs');
+    const markupEl = document.getElementById('gp-res-markup');
+    const summaryEl = document.getElementById('gp-result-summary');
+
+    const errorBox = document.getElementById('gp-error-box');
+    const errorMsg = document.getElementById('gp-error-msg');
+    const emptyState = document.getElementById('gp-empty-state');
+    const activeContainer = document.getElementById('gp-active-container');
+    const resetBtn = document.getElementById('gp-btn-reset');
+
+    if (!revenueInput || !cogsInput) return;
+
+    function recalculate() {
+      const revenueVal = parseCleanNumber(revenueInput?.value);
+      const cogsVal = parseCleanNumber(cogsInput?.value);
+
+      if (revenueVal === null || cogsVal === null) {
+        activeContainer?.classList.add('hidden');
+        emptyState?.classList.remove('hidden');
+        errorBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+
+      const result = calculateGrossProfit({ revenue: revenueVal, cogs: cogsVal });
+
+      if (!result.isValid) {
+        errorBox?.classList.remove('hidden');
+        if (errorMsg) errorMsg.textContent = result.errorMessage || 'Invalid inputs.';
+        return;
+      }
+
+      errorBox?.classList.add('hidden');
+
+      if (primaryEl) {
+        primaryEl.textContent = formatCurrency(result.grossProfit);
+        if (result.grossProfit < 0) {
+          primaryEl.classList.remove('text-[var(--positive-text)]');
+          primaryEl.classList.add('text-[var(--negative-text)]');
+        } else {
+          primaryEl.classList.remove('text-[var(--negative-text)]');
+          primaryEl.classList.add('text-[var(--positive-text)]');
+        }
+      }
+
+      if (marginEl) marginEl.textContent = formatPercent(result.grossMargin);
+      if (cogsEl) cogsEl.textContent = formatCurrency(result.cogs);
+      if (markupEl) markupEl.textContent = formatPercent(result.markup);
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `Your business retains <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.grossProfit)}</strong> on ${formatCurrency(result.revenue)} of total revenue.`;
+      }
+    }
+
+    revenueInput.addEventListener('input', recalculate);
+    cogsInput.addEventListener('input', recalculate);
+
+    document.querySelectorAll<HTMLButtonElement>('.gp-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (revenueInput) revenueInput.value = btn.dataset.rev || '100000';
+        if (cogsInput) cogsInput.value = btn.dataset.cogs || '40000';
+        recalculate();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (revenueInput) revenueInput.value = '100000';
+      if (cogsInput) cogsInput.value = '40000';
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupGrossProfitCalculator);
+  } else {
+    setupGrossProfitCalculator();
+  }
+  document.addEventListener('astro:page-load', setupGrossProfitCalculator);
+</script>

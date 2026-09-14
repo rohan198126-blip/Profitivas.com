@@ -1,0 +1,233 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="revenue-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <!-- Presets & Reset Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+      Top-Line Revenue
+    </div>
+
+    <!-- Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="rev-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-units="1200"
+          data-price="45"
+        >
+          1,200 @ $45
+        </button>
+        <button
+          type="button"
+          class="rev-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-units="500"
+          data-price="120"
+        >
+          500 @ $120
+        </button>
+        <button
+          type="button"
+          class="rev-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-units="3000"
+          data-price="29"
+        >
+          3,000 @ $29
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="rev-btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Sales & Pricing
+        </span>
+
+        <div
+          id="rev-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="rev-error-msg">Please enter valid non-negative numbers.</span>
+        </div>
+
+        <form id="rev-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
+          <CalculatorInput
+            id="rev-input-units"
+            name="unitsSold"
+            label="Units Sold"
+            value="1200"
+            placeholder="0"
+            helperText="Total units, subscriptions, or orders delivered."
+            required
+          />
+
+          <CalculatorInput
+            id="rev-input-price"
+            name="pricePerUnit"
+            label="Average Price per Unit"
+            value="45"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Realized average selling price per unit."
+            required
+          />
+        </form>
+      </div>
+
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Instant calculation</span>
+        <span>Top-line gross</span>
+      </div>
+    </div>
+
+    <!-- Right: Dominant Result -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <div id="rev-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter unit sales volume and average price.</p>
+        <p class="text-xs text-[var(--text-muted)]">Calculate top-line turnover instantly.</p>
+      </div>
+
+      <div id="rev-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Top-Line Output
+          </span>
+
+          <div class="py-1">
+            <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              Total Revenue
+            </span>
+            <div
+              id="rev-result-primary"
+              class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
+            >
+              $54,000.00
+            </div>
+            <p id="rev-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              Delivering <strong class="text-[var(--text-primary)] font-semibold">1,200 units</strong> at $45.00 produces <strong class="text-[var(--text-primary)] font-semibold">$54,000.00</strong> in sales turnover.
+            </p>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Average price per unit</span>
+            <span id="rev-res-price" class="font-medium text-[var(--text-primary)] tabular-nums">
+              $45.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Volume quantity</span>
+            <span id="rev-res-units" class="font-medium text-[var(--text-primary)] tabular-nums">
+              1,200
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateRevenue } from '../../lib/calculators/revenue/formulas';
+  import { formatCurrency, formatNumber } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function setupRevenueCalculator() {
+    const unitsInput = document.getElementById('rev-input-units') as HTMLInputElement | null;
+    const priceInput = document.getElementById('rev-input-price') as HTMLInputElement | null;
+
+    const primaryEl = document.getElementById('rev-result-primary');
+    const priceEl = document.getElementById('rev-res-price');
+    const unitsEl = document.getElementById('rev-res-units');
+    const summaryEl = document.getElementById('rev-result-summary');
+
+    const errorBox = document.getElementById('rev-error-box');
+    const errorMsg = document.getElementById('rev-error-msg');
+    const emptyState = document.getElementById('rev-empty-state');
+    const activeContainer = document.getElementById('rev-active-container');
+    const resetBtn = document.getElementById('rev-btn-reset');
+
+    if (!unitsInput || !priceInput) return;
+
+    function recalculate() {
+      const unitsVal = parseCleanNumber(unitsInput?.value);
+      const priceVal = parseCleanNumber(priceInput?.value);
+
+      if (unitsVal === null || priceVal === null) {
+        activeContainer?.classList.add('hidden');
+        emptyState?.classList.remove('hidden');
+        errorBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+
+      const result = calculateRevenue({ unitsSold: unitsVal, pricePerUnit: priceVal });
+
+      if (!result.isValid) {
+        errorBox?.classList.remove('hidden');
+        if (errorMsg) errorMsg.textContent = result.errorMessage || 'Invalid inputs.';
+        return;
+      }
+
+      errorBox?.classList.add('hidden');
+
+      if (primaryEl) primaryEl.textContent = formatCurrency(result.totalRevenue);
+      if (priceEl) priceEl.textContent = formatCurrency(result.pricePerUnit);
+      if (unitsEl) unitsEl.textContent = formatNumber(result.unitsSold, result.unitsSold % 1 === 0 ? 0 : 2);
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `Delivering <strong class="text-[var(--text-primary)] font-semibold">${formatNumber(result.unitsSold, result.unitsSold % 1 === 0 ? 0 : 2)} units</strong> at ${formatCurrency(result.pricePerUnit)} produces <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.totalRevenue)}</strong> in sales turnover.`;
+      }
+    }
+
+    unitsInput.addEventListener('input', recalculate);
+    priceInput.addEventListener('input', recalculate);
+
+    document.querySelectorAll<HTMLButtonElement>('.rev-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (unitsInput) unitsInput.value = btn.dataset.units || '1200';
+        if (priceInput) priceInput.value = btn.dataset.price || '45';
+        recalculate();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (unitsInput) unitsInput.value = '1200';
+      if (priceInput) priceInput.value = '45';
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupRevenueCalculator);
+  } else {
+    setupRevenueCalculator();
+  }
+  document.addEventListener('astro:page-load', setupRevenueCalculator);
+</script>

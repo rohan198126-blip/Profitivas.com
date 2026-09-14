@@ -6,6 +6,7 @@ import WorkedExampleSection from '../components/calculator/WorkedExample.astro';
 import FaqSection from '../components/calculator/FaqSection.astro';
 import RelatedCalculators from '../components/calculator/RelatedCalculators.astro';
 import JsonLd from '../components/seo/JsonLd.astro';
+import AdSlot from '../components/ads/AdSlot.astro';
 import { getSoftwareApplicationSchema } from '../lib/seo/schema';
 import type { CalculatorContent } from '../lib/calculators/types';
 
@@ -53,6 +54,9 @@ const categoryLabels = {
       <slot />
     </section>
 
+    <!-- Safe In-Content Ad Placement (Zero render when inactive) -->
+    <AdSlot position="in-content" />
+
     <!-- Supporting Documentation & Context -->
     <div class="pt-12 sm:pt-16 border-t border-[var(--border)] space-y-14 sm:space-y-16">
       <!-- Formulas & Logic -->
@@ -92,6 +96,9 @@ const categoryLabels = {
 
       <!-- Related Calculators -->
       <RelatedCalculators relatedSlugs={relatedSlugs} />
+
+      <!-- Safe Bottom Ad Placement (Zero render when inactive) -->
+      <AdSlot position="bottom" />
     </div>
   </div>
 

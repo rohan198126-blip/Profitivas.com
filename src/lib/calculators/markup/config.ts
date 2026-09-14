@@ -121,7 +121,7 @@ export const markupContent: CalculatorContent = {
   relatedSlugs: [
     'profit-margin-calculator',
     'selling-price-calculator',
+    'discount-calculator',
     'gross-profit-calculator',
-    'break-even-calculator',
   ],
 };

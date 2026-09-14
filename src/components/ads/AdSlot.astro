@@ -1,0 +1,37 @@
+---
+import { ADS_CONFIG } from '../../lib/ads/config';
+
+export interface Props {
+  position: 'top' | 'in-content' | 'bottom';
+  className?: string;
+}
+
+const { position, className = '' } = Astro.props;
+
+// STRICT SAFETY GUARD:
+// When advertising is disabled or no valid publisher ID is present,
+// render completely empty output (0 bytes, 0 blank space, 0 layout shifts).
+const isEnabled = ADS_CONFIG.enabled && ADS_CONFIG.publisherId !== null;
+const slotKey = position === 'in-content' ? 'inContent' : position;
+const slotConfig = ADS_CONFIG.slots[slotKey];
+---
+
+{isEnabled && (
+  <aside
+    class={`profitivas-ad-wrapper my-8 mx-auto w-full max-w-4xl px-4 ${className}`}
+    aria-label="Advertisement"
+  >
+    <div class="flex flex-col items-center">
+      <span class="text-[10px] tracking-wider uppercase text-neutral-400 dark:text-neutral-500 mb-1 select-none">
+        Advertisement
+      </span>
+      <div
+        class="w-full min-h-[90px] flex items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/40 overflow-hidden"
+        id={slotConfig?.id}
+        data-ad-slot={slotConfig?.slotId || ''}
+      >
+        <!-- Google AdSense tag rendered only when active with verified publisher credentials -->
+      </div>
+    </div>
+  </aside>
+)}

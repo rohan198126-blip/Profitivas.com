@@ -1,0 +1,52 @@
+import type { UiTranslations } from '../types';
+
+export const enTranslations: UiTranslations = {
+  nav: {
+    calculators: 'Calculators',
+    categories: 'Categories',
+    resources: 'Resources',
+    about: 'About',
+    privacy: 'Privacy',
+    terms: 'Terms',
+    contact: 'Contact',
+    home: 'Home',
+  },
+  actions: {
+    chooseCalculator: 'Choose a calculator',
+    browseAllCalculators: 'Browse all calculators',
+    searchCalculators: 'Search calculators...',
+    calculate: 'Calculate',
+    reset: 'Reset',
+    switchTheme: 'Switch theme',
+    close: 'Close',
+    backToAll: 'Back to all calculators',
+  },
+  common: {
+    tagline: 'Business numbers. Better decisions.',
+    heroHeadlinePart1: 'Business numbers.',
+    heroHeadlinePart2: 'Better decisions.',
+    heroDescription: 'Fast, precise calculators for pricing, profit, finance, and growth.',
+    trustLine: 'No sign-up · Client-side calculations · Verified formulas',
+    launcherTrust: 'Free · No sign-up · Instant results',
+    disclaimerLabel: 'Disclaimer:',
+    disclaimerText: 'Profitivas calculators and educational guides are provided for informational and planning purposes only. Calculations should be verified before making major financial commitments.',
+    allRightsReserved: 'All rights reserved.',
+    noCalculatorsFound: 'No calculators found',
+    trySearchingSuggestions: 'Try: profit, pricing, finance, marketing',
+    inDevelopment: 'In development',
+    activeStatus: 'Active',
+  },
+  categories: {
+    pricingProfit: 'Pricing & Profit',
+    businessFinance: 'Business Finance',
+    marketingGrowth: 'Marketing & Growth',
+  },
+  calculatorSections: {
+    methodologyAndAssumptions: 'Methodology & Assumptions',
+    methodologyDescription: 'Underlying definitions and operational accounting principles.',
+    frequentlyAskedQuestions: 'Frequently Asked Questions',
+    relatedCalculators: 'Related Calculators',
+    workedExample: 'Worked Business Example',
+    formulaExplanation: 'Formulas & Logic',
+  },
+};

@@ -1,0 +1,334 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="discount-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <div
+      class="inline-flex p-0.5 bg-[var(--surface-subtle)] border border-[var(--border)] rounded-lg w-full sm:w-auto"
+      role="tablist"
+      aria-label="Discount Mode"
+    >
+      <button
+        type="button"
+        id="dc-tab-std"
+        role="tab"
+        aria-selected="true"
+        class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)] shadow-2xs"
+        data-mode="standard"
+      >
+        Percentage Off
+      </button>
+      <button
+        type="button"
+        id="dc-tab-rev"
+        role="tab"
+        aria-selected="false"
+        class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+        data-mode="reverse"
+      >
+        Calculate % from Price
+      </button>
+    </div>
+
+    <!-- Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="dc-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-orig="100"
+          data-val="20"
+        >
+          20% off $100
+        </button>
+        <button
+          type="button"
+          class="dc-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-orig="50"
+          data-val="15"
+        >
+          15% off $50
+        </button>
+        <button
+          type="button"
+          class="dc-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-orig="250"
+          data-val="30"
+        >
+          30% off $250
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="dc-btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Your Numbers
+        </span>
+
+        <div
+          id="dc-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="dc-error-msg">Please enter valid positive numbers.</span>
+        </div>
+
+        <form id="dc-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
+          <CalculatorInput
+            id="dc-input-orig"
+            name="originalPrice"
+            label="Original Price"
+            value="100"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Regular retail or catalog price before discounts."
+            required
+          />
+
+          <div id="dc-std-wrap">
+            <CalculatorInput
+              id="dc-input-pct"
+              name="discountPercent"
+              label="Discount"
+              value="20"
+              suffix="%"
+              placeholder="0.00"
+              helperText="Percentage reduction (0% to 100%)."
+              min="0"
+              max="100"
+            />
+          </div>
+
+          <div id="dc-rev-wrap" class="hidden">
+            <CalculatorInput
+              id="dc-input-final"
+              name="finalPrice"
+              label="Final Sale Price"
+              value="80"
+              prefix="$"
+              placeholder="0.00"
+              helperText="Actual promotional price paid at checkout."
+              min="0"
+            />
+          </div>
+        </form>
+      </div>
+
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Instant calculation</span>
+        <span>Pre-tax</span>
+      </div>
+    </div>
+
+    <!-- Right: Result -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <div id="dc-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter prices to calculate your discount.</p>
+        <p class="text-xs text-[var(--text-muted)]">View final sale price and total customer savings.</p>
+      </div>
+
+      <div id="dc-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Your Result
+          </span>
+
+          <div class="py-1">
+            <span id="dc-result-label" class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              Final Sale Price
+            </span>
+            <div
+              id="dc-result-primary"
+              class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
+            >
+              $80.00
+            </div>
+            <p id="dc-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              Save <strong class="text-[var(--positive-text)] font-semibold">$20.00 (20.00%)</strong> off the $100.00 list price.
+            </p>
+          </div>
+        </div>
+
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Discount savings</span>
+            <span id="dc-res-savings" class="font-semibold text-[var(--positive-text)] tabular-nums">
+              $20.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Discount percentage</span>
+            <span id="dc-res-pct" class="font-medium text-[var(--text-primary)] tabular-nums">
+              20.00%
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Original price</span>
+            <span id="dc-res-orig" class="font-medium text-[var(--text-primary)] tabular-nums">
+              $100.00
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateStandardDiscount, calculateReverseDiscount } from '../../lib/calculators/discount/formulas';
+  import { formatCurrency, formatPercent } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function setupDiscountCalculator() {
+    const origInput = document.getElementById('dc-input-orig') as HTMLInputElement | null;
+    const pctInput = document.getElementById('dc-input-pct') as HTMLInputElement | null;
+    const finalInput = document.getElementById('dc-input-final') as HTMLInputElement | null;
+
+    const tabStd = document.getElementById('dc-tab-std');
+    const tabRev = document.getElementById('dc-tab-rev');
+    const stdWrap = document.getElementById('dc-std-wrap');
+    const revWrap = document.getElementById('dc-rev-wrap');
+
+    const primaryEl = document.getElementById('dc-result-primary');
+    const labelEl = document.getElementById('dc-result-label');
+    const savingsEl = document.getElementById('dc-res-savings');
+    const pctEl = document.getElementById('dc-res-pct');
+    const origEl = document.getElementById('dc-res-orig');
+    const summaryEl = document.getElementById('dc-result-summary');
+
+    const errorBox = document.getElementById('dc-error-box');
+    const errorMsg = document.getElementById('dc-error-msg');
+    const emptyState = document.getElementById('dc-empty-state');
+    const activeContainer = document.getElementById('dc-active-container');
+    const resetBtn = document.getElementById('dc-btn-reset');
+
+    if (!origInput) return;
+
+    let currentMode: 'standard' | 'reverse' = 'standard';
+
+    function setMode(mode: 'standard' | 'reverse') {
+      currentMode = mode;
+      if (mode === 'standard') {
+        tabStd?.setAttribute('aria-selected', 'true');
+        tabRev?.setAttribute('aria-selected', 'false');
+        tabStd?.classList.add('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border-[var(--border)]');
+        tabStd?.classList.remove('text-[var(--text-muted)]');
+        tabRev?.classList.remove('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border-[var(--border)]');
+        tabRev?.classList.add('text-[var(--text-muted)]');
+
+        stdWrap?.classList.remove('hidden');
+        revWrap?.classList.add('hidden');
+        if (labelEl) labelEl.textContent = 'Final Sale Price';
+      } else {
+        tabRev?.setAttribute('aria-selected', 'true');
+        tabStd?.setAttribute('aria-selected', 'false');
+        tabRev?.classList.add('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border-[var(--border)]');
+        tabRev?.classList.remove('text-[var(--text-muted)]');
+        tabStd?.classList.remove('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border-[var(--border)]');
+        tabStd?.classList.add('text-[var(--text-muted)]');
+
+        revWrap?.classList.remove('hidden');
+        stdWrap?.classList.add('hidden');
+        if (labelEl) labelEl.textContent = 'Effective Discount';
+      }
+      recalculate();
+    }
+
+    tabStd?.addEventListener('click', () => setMode('standard'));
+    tabRev?.addEventListener('click', () => setMode('reverse'));
+
+    function recalculate() {
+      const origVal = parseCleanNumber(origInput?.value);
+      const pctVal = parseCleanNumber(pctInput?.value);
+      const finalVal = parseCleanNumber(finalInput?.value);
+
+      if (origVal === null || (currentMode === 'standard' ? pctVal === null : finalVal === null)) {
+        activeContainer?.classList.add('hidden');
+        emptyState?.classList.remove('hidden');
+        errorBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+
+      const result = currentMode === 'standard'
+        ? calculateStandardDiscount({ originalPrice: origVal, discountPercent: pctVal! })
+        : calculateReverseDiscount({ originalPrice: origVal, finalPrice: finalVal! });
+
+      if (!result.isValid) {
+        errorBox?.classList.remove('hidden');
+        if (errorMsg) errorMsg.textContent = result.errorMessage || 'Invalid inputs.';
+        return;
+      }
+
+      errorBox?.classList.add('hidden');
+
+      if (currentMode === 'standard') {
+        if (primaryEl) primaryEl.textContent = formatCurrency(result.finalPrice);
+      } else {
+        if (primaryEl) primaryEl.textContent = formatPercent(result.discountPercent);
+      }
+
+      if (savingsEl) savingsEl.textContent = formatCurrency(result.discountAmount);
+      if (pctEl) pctEl.textContent = formatPercent(result.discountPercent);
+      if (origEl) origEl.textContent = formatCurrency(result.originalPrice);
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `Save <strong class="text-[var(--positive-text)] font-semibold">${formatCurrency(result.discountAmount)} (${formatPercent(result.discountPercent)})</strong> off the ${formatCurrency(result.originalPrice)} list price.`;
+      }
+    }
+
+    origInput.addEventListener('input', recalculate);
+    pctInput?.addEventListener('input', recalculate);
+    finalInput?.addEventListener('input', recalculate);
+
+    document.querySelectorAll<HTMLButtonElement>('.dc-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (origInput) origInput.value = btn.dataset.orig || '100';
+        if (currentMode === 'standard' && pctInput) {
+          pctInput.value = btn.dataset.val || '20';
+        } else if (currentMode === 'reverse' && finalInput) {
+          finalInput.value = '80';
+        }
+        recalculate();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (origInput) origInput.value = '100';
+      if (pctInput) pctInput.value = '20';
+      if (finalInput) finalInput.value = '80';
+      setMode('standard');
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupDiscountCalculator);
+  } else {
+    setupDiscountCalculator();
+  }
+  document.addEventListener('astro:page-load', setupDiscountCalculator);
+</script>

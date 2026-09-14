@@ -1,0 +1,254 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="roas-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <!-- Presets & Reset Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <div class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+      Return on Ad Spend
+    </div>
+
+    <!-- Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="roas-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-rev="12000"
+          data-spend="3000"
+        >
+          $12k / $3k (4x)
+        </button>
+        <button
+          type="button"
+          class="roas-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-rev="25000"
+          data-spend="5000"
+        >
+          $25k / $5k (5x)
+        </button>
+        <button
+          type="button"
+          class="roas-preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-rev="5000"
+          data-spend="2500"
+        >
+          $5k / $2.5k (2x)
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="roas-btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Campaign Metrics
+        </span>
+
+        <div
+          id="roas-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="roas-error-msg">Ad spend must be greater than 0.</span>
+        </div>
+
+        <form id="roas-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
+          <CalculatorInput
+            id="roas-input-rev"
+            name="revenue"
+            label="Attributed Ad Revenue"
+            value="12000"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Total customer sales tracked directly to ad campaigns."
+            required
+          />
+
+          <CalculatorInput
+            id="roas-input-spend"
+            name="adSpend"
+            label="Total Ad Spend"
+            value="3000"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Media cost paid across advertising platforms."
+            required
+          />
+        </form>
+      </div>
+
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Instant calculation</span>
+        <span>Top-line ad yield</span>
+      </div>
+    </div>
+
+    <!-- Right: Dominant Result -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <div id="roas-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter revenue and ad spend to calculate ROAS.</p>
+        <p class="text-xs text-[var(--text-muted)]">Measure campaign efficiency and revenue yield per dollar spent.</p>
+      </div>
+
+      <div id="roas-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Ad Efficiency
+          </span>
+
+          <div class="py-1">
+            <span class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              Return on Ad Spend
+            </span>
+            <div
+              id="roas-result-primary"
+              class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
+            >
+              4.00x
+            </div>
+            <p id="roas-result-summary" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              Every $1.00 of advertising generates <strong class="text-[var(--text-primary)] font-semibold">$4.00</strong> in attributed sales revenue.
+            </p>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">ROAS percentage</span>
+            <span id="roas-res-pct" class="font-semibold text-[var(--text-primary)] tabular-nums">
+              400.00%
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Gross revenue after ad spend</span>
+            <span id="roas-res-net" class="font-medium text-[var(--positive-text)] tabular-nums">
+              $9,000.00
+            </span>
+          </div>
+
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Advertising cost of sales (ACoS)</span>
+            <span id="roas-res-acos" class="font-medium text-[var(--text-primary)] tabular-nums">
+              25.00%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateRoas } from '../../lib/calculators/roas/formulas';
+  import { formatCurrency, formatPercent, formatNumber } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function setupRoasCalculator() {
+    const revInput = document.getElementById('roas-input-rev') as HTMLInputElement | null;
+    const spendInput = document.getElementById('roas-input-spend') as HTMLInputElement | null;
+
+    const primaryEl = document.getElementById('roas-result-primary');
+    const pctEl = document.getElementById('roas-res-pct');
+    const netEl = document.getElementById('roas-res-net');
+    const acosEl = document.getElementById('roas-res-acos');
+    const summaryEl = document.getElementById('roas-result-summary');
+
+    const errorBox = document.getElementById('roas-error-box');
+    const errorMsg = document.getElementById('roas-error-msg');
+    const emptyState = document.getElementById('roas-empty-state');
+    const activeContainer = document.getElementById('roas-active-container');
+    const resetBtn = document.getElementById('roas-btn-reset');
+
+    if (!revInput || !spendInput) return;
+
+    function recalculate() {
+      const revVal = parseCleanNumber(revInput?.value);
+      const spendVal = parseCleanNumber(spendInput?.value);
+
+      if (revVal === null || spendVal === null) {
+        activeContainer?.classList.add('hidden');
+        emptyState?.classList.remove('hidden');
+        errorBox?.classList.add('hidden');
+        return;
+      }
+
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+
+      const result = calculateRoas({ revenue: revVal, adSpend: spendVal });
+
+      if (!result.isValid) {
+        errorBox?.classList.remove('hidden');
+        if (errorMsg) errorMsg.textContent = result.errorMessage || 'Invalid inputs.';
+        return;
+      }
+
+      errorBox?.classList.add('hidden');
+
+      const acos = result.revenue > 0 ? (result.adSpend / result.revenue) * 100 : 0;
+
+      if (primaryEl) primaryEl.textContent = `${formatNumber(result.roasMultiple, 2)}x`;
+      if (pctEl) pctEl.textContent = formatPercent(result.roasPercentage);
+      if (netEl) {
+        netEl.textContent = formatCurrency(result.netReturn);
+        if (result.netReturn < 0) {
+          netEl.classList.remove('text-[var(--positive-text)]');
+          netEl.classList.add('text-[var(--negative-text)]');
+        } else {
+          netEl.classList.remove('text-[var(--negative-text)]');
+          netEl.classList.add('text-[var(--positive-text)]');
+        }
+      }
+      if (acosEl) acosEl.textContent = formatPercent(acos);
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `Every $1.00 of advertising generates <strong class="text-[var(--text-primary)] font-semibold">${formatCurrency(result.roasMultiple)}</strong> in attributed sales revenue.`;
+      }
+    }
+
+    revInput.addEventListener('input', recalculate);
+    spendInput.addEventListener('input', recalculate);
+
+    document.querySelectorAll<HTMLButtonElement>('.roas-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (revInput) revInput.value = btn.dataset.rev || '12000';
+        if (spendInput) spendInput.value = btn.dataset.spend || '3000';
+        recalculate();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (revInput) revInput.value = '12000';
+      if (spendInput) spendInput.value = '3000';
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupRoasCalculator);
+  } else {
+    setupRoasCalculator();
+  }
+  document.addEventListener('astro:page-load', setupRoasCalculator);
+</script>
