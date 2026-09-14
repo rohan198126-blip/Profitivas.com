@@ -1,0 +1,119 @@
+---
+import { LOCALES, getActiveLocales, getEquivalentPath, type SupportedLocale } from '../../lib/i18n';
+import { ChevronDown, Check } from 'lucide-astro';
+
+export interface Props {
+  currentLocale: SupportedLocale;
+  isMobile?: boolean;
+}
+
+const { currentLocale = 'en', isMobile = false } = Astro.props;
+const currentConfig = LOCALES[currentLocale] || LOCALES.en;
+const activeLocales = getActiveLocales();
+const currentPath = Astro.url.pathname;
+---
+
+<div class={`relative inline-block text-left ${isMobile ? 'w-full' : ''}`} id={isMobile ? 'mobile-lang-picker' : 'desktop-lang-picker'}>
+  <button
+    type="button"
+    class={`lang-trigger-btn inline-flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer border border-[var(--border)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)] ${isMobile ? 'w-full' : ''}`}
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-label={`Language: ${currentConfig.nativeName}. Choose language.`}
+  >
+    <span class="font-mono uppercase tracking-wider">{currentLocale}</span>
+    <span class="text-[11px] opacity-75 hidden sm:inline">{currentConfig.nativeName}</span>
+    <ChevronDown class="w-3.5 h-3.5 text-[var(--text-muted)] transition-transform duration-150 chevron-icon" />
+  </button>
+
+  <!-- Dropdown Popover Menu -->
+  <div
+    class="lang-menu-dropdown hidden absolute right-0 mt-2 w-44 rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] shadow-xl py-1 z-50 focus:outline-none backdrop-blur-md"
+    role="menu"
+    aria-orientation="vertical"
+    tabindex="-1"
+  >
+    {activeLocales.map((loc) => {
+      const isCurrent = loc.code === currentLocale;
+      const targetHref = getEquivalentPath(currentPath, loc.code);
+      return (
+        <a
+          href={targetHref}
+          role="menuitem"
+          class={`flex items-center justify-between px-3 py-2 text-xs transition-colors hover:bg-[var(--surface-subtle)] ${
+            isCurrent
+              ? 'text-[var(--text-primary)] font-semibold bg-[var(--surface-subtle)]/50'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+          }`}
+          aria-current={isCurrent ? 'true' : undefined}
+          lang={loc.code}
+        >
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-[10px] uppercase text-[var(--text-muted)] w-4 text-left">
+              {loc.code}
+            </span>
+            <span class="tracking-normal">{loc.nativeName}</span>
+          </div>
+          {isCurrent && <Check class="w-3.5 h-3.5 text-[var(--text-primary)] shrink-0" />}
+        </a>
+      );
+    })}
+  </div>
+</div>
+
+<script>
+  function setupLanguageSelectors() {
+    const containers = document.querySelectorAll('#desktop-lang-picker, #mobile-lang-picker');
+
+    containers.forEach((container) => {
+      const trigger = container.querySelector<HTMLButtonElement>('.lang-trigger-btn');
+      const menu = container.querySelector<HTMLDivElement>('.lang-menu-dropdown');
+      const chevron = container.querySelector<SVGElement>('.chevron-icon');
+
+      if (!trigger || !menu) return;
+
+      function closeMenu() {
+        trigger?.setAttribute('aria-expanded', 'false');
+        menu?.classList.add('hidden');
+        chevron?.classList.remove('rotate-180');
+      }
+
+      function openMenu() {
+        trigger?.setAttribute('aria-expanded', 'true');
+        menu?.classList.remove('hidden');
+        chevron?.classList.add('rotate-180');
+      }
+
+      function toggleMenu(e: MouseEvent) {
+        e.stopPropagation();
+        const isOpen = trigger?.getAttribute('aria-expanded') === 'true';
+        if (isOpen) {
+          closeMenu();
+        } else {
+          // Close others
+          document.querySelectorAll('.lang-menu-dropdown').forEach((m) => m.classList.add('hidden'));
+          document.querySelectorAll('.chevron-icon').forEach((c) => c.classList.remove('rotate-180'));
+          document.querySelectorAll('.lang-trigger-btn').forEach((b) => b.setAttribute('aria-expanded', 'false'));
+          openMenu();
+        }
+      }
+
+      trigger.addEventListener('click', toggleMenu);
+
+      // Close on escape
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeMenu();
+      });
+
+      // Close on click outside
+      document.addEventListener('click', (e) => {
+        if (!container.contains(e.target as Node)) {
+          closeMenu();
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupLanguageSelectors);
+  document.addEventListener('astro:page-load', setupLanguageSelectors);
+</script>

@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import { getNonDefaultLocales, useTranslations, getLocalizedPath } from '../../lib/i18n';
+import type { SupportedLocale } from '../../lib/i18n/types';
+
+export function getStaticPaths() {
+  return getNonDefaultLocales().map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params as { lang: SupportedLocale };
+const t = useTranslations(lang);
+const canonicalUrl = `https://profitivas.com${getLocalizedPath('/privacy', lang)}`;
+---
+
+<BaseLayout
+  title={`${t.privacy.title} — Profitivas`}
+  description={t.privacy.subtitle}
+  canonicalUrl={canonicalUrl}
+  locale={lang}
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <!-- Breadcrumbs -->
+    <Breadcrumbs items={[{ label: t.privacy.title }]} locale={lang} />
+
+    <header class="mt-6 mb-10 sm:mb-12">
+      <p class="text-xs font-medium text-[var(--text-muted)] tracking-[0.2em] uppercase mb-2.5">
+        {t.privacy.title}
+      </p>
+      <h1 class="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
+        {t.privacy.title}
+      </h1>
+      <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-3 leading-relaxed font-normal">
+        {t.privacy.subtitle}
+      </p>
+    </header>
+
+    <article class="space-y-10 sm:space-y-12 text-sm text-[var(--text-secondary)] leading-relaxed">
+      <!-- Section 1 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.privacy.s1Title}
+        </h2>
+        <p>{t.privacy.s1P1}</p>
+        <p>{t.privacy.s1P2}</p>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.privacy.s2Title}
+        </h2>
+        <p>{t.privacy.s2P1}</p>
+        <p>{t.privacy.s2P2}</p>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.privacy.s3Title}
+        </h2>
+        <p>{t.privacy.s3P1}</p>
+      </section>
+
+      <!-- Section 4 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.privacy.s4Title}
+        </h2>
+        <p>{t.privacy.s4P1}</p>
+        <p>{t.privacy.s4P2}</p>
+        <ul class="list-disc list-inside space-y-1.5 pl-2 text-xs sm:text-sm">
+          <li>{t.privacy.s4Li1}</li>
+          <li>{t.privacy.s4Li2}</li>
+          <li>{t.privacy.s4Li3}</li>
+          <li>{t.privacy.s4Li4}</li>
+        </ul>
+      </section>
+
+      <!-- Section 5 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.privacy.s5Title}
+        </h2>
+        <p>{t.privacy.s5P1}</p>
+        <ul class="list-disc list-inside space-y-1.5 pl-2 text-xs sm:text-sm">
+          <li>{t.privacy.s5Li1}</li>
+          <li>{t.privacy.s5Li2}</li>
+          <li>{t.privacy.s5Li3}</li>
+        </ul>
+      </section>
+
+      <!-- Section 6 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.privacy.s6Title}
+        </h2>
+        <p>{t.privacy.s6P1}</p>
+        <p>
+          {t.privacy.s6P2}
+          <a href={getLocalizedPath('/about', lang)} class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80 ml-1">
+            {t.nav.about}
+          </a>.
+        </p>
+      </section>
+    </article>
+  </div>
+</BaseLayout>

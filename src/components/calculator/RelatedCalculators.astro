@@ -1,12 +1,19 @@
 ---
 import { getRelatedCalculators } from '../../lib/calculators/registry';
+import { getLocaleFromUrl, getLocalizedPath, useTranslations, type SupportedLocale } from '../../lib/i18n';
+import { getLocalizedCalculatorContent } from '../../lib/i18n/calculators';
+import { getInvoiceTranslations } from '../../lib/i18n/invoice';
 
 export interface Props {
   relatedSlugs: string[];
+  locale?: SupportedLocale;
 }
 
-const { relatedSlugs } = Astro.props;
+const { relatedSlugs, locale: propLocale } = Astro.props;
+const currentLocale = propLocale || getLocaleFromUrl(Astro.url);
 const relatedTools = getRelatedCalculators(relatedSlugs);
+const t = useTranslations(currentLocale);
+const invoiceT = getInvoiceTranslations(currentLocale);
 ---
 
 {
@@ -14,56 +21,68 @@ const relatedTools = getRelatedCalculators(relatedSlugs);
     <section aria-labelledby="related-heading" class="space-y-4">
       <div>
         <h2 id="related-heading" class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
-          Related Calculators
+          {t.calculatorSections.relatedCalculators}
         </h2>
         <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
-          Complementary tools for pricing and profitability analysis.
+          {t.common.brandDescription}
         </p>
       </div>
 
       <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
         {relatedTools.map((tool) => {
-          const isActive = tool.status === 'active';
+          const localized = getLocalizedCalculatorContent(tool.slug, currentLocale);
+          const toolName = localized?.meta.name || tool.name;
+          const toolTagline = localized?.meta.tagline || tool.tagline;
+
           return (
             <div class="py-3.5 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 group -mx-2 px-2 rounded-lg hover:bg-[var(--surface-subtle)] transition-colors">
               <div class="space-y-0.5 max-w-lg">
                 <div class="flex items-baseline gap-2">
-                  {isActive ? (
-                    <a
-                      href={`/${tool.slug}`}
-                      class="font-medium text-[var(--text-primary)] text-sm group-hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)] rounded-sm"
-                    >
-                      {tool.name}
-                    </a>
-                  ) : (
-                    <span class="font-medium text-[var(--text-secondary)] text-sm">{tool.name}</span>
-                  )}
-                  {isActive && (
-                    <span class="text-[10px] font-medium uppercase tracking-wider text-[var(--positive-text)]">
-                      Active
-                    </span>
-                  )}
+                  <a
+                    href={getLocalizedPath(tool.slug, currentLocale)}
+                    class="font-medium text-[var(--text-primary)] text-sm group-hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)] rounded-sm"
+                  >
+                    {toolName}
+                  </a>
+                  <span class="text-[10px] font-medium uppercase tracking-wider text-[var(--positive-text)]">
+                    {t.common.activeStatus}
+                  </span>
                 </div>
-                <p class="text-xs text-[var(--text-secondary)] font-normal leading-relaxed">
-                  {tool.tagline}
+                <p class="text-xs text-[var(--text-secondary)] leading-relaxed font-normal">
+                  {toolTagline}
                 </p>
               </div>
-              <div class="shrink-0 text-xs sm:self-center">
-                {isActive ? (
-                  <a
-                    href={`/${tool.slug}`}
-                    class="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] font-medium inline-flex items-center gap-1 transition-colors"
-                  >
-                    <span>Open calculator</span>
-                    <span aria-hidden="true">&rarr;</span>
-                  </a>
-                ) : (
-                  <span class="text-[var(--text-muted)]">In development</span>
-                )}
+
+              <div class="shrink-0 flex items-center">
+                <a
+                  href={getLocalizedPath(tool.slug, currentLocale)}
+                  class="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-1"
+                  aria-label={`${toolName}`}
+                >
+                  <span class="hidden sm:inline">{t.actions.calculate}</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
               </div>
             </div>
           );
         })}
+      </div>
+
+      <!-- Business Tool Cross-Link: Invoice Generator -->
+      <div class="mt-4 p-3 sm:p-3.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="space-y-0.5">
+          <span class="font-medium text-[var(--text-primary)]">{invoiceT.header.h1}</span>
+          <p class="text-[var(--text-secondary)] font-normal text-[11px] sm:text-xs">
+            {invoiceT.header.subtitle}
+          </p>
+        </div>
+        <a
+          href={getLocalizedPath('/invoice-generator', currentLocale)}
+          class="shrink-0 font-medium text-[var(--text-primary)] hover:underline inline-flex items-center gap-1 self-start sm:self-auto cursor-pointer"
+        >
+          <span>{invoiceT.actions.editMode}</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
       </div>
     </section>
   )

@@ -35,7 +35,7 @@ const locale = props.locale || getLocaleFromUrl(Astro.url);
       Skip to main content
     </a>
 
-    <Header />
+    <Header locale={locale} />
 
     <!-- Subtle Ambient Background Light (Dark Theme Only) -->
     <div class="ambient-glow-wrapper pointer-events-none absolute inset-0 select-none" aria-hidden="true">
@@ -47,7 +47,7 @@ const locale = props.locale || getLocaleFromUrl(Astro.url);
       <slot />
     </main>
 
-    <Footer />
+    <Footer locale={locale} />
     <ConsentBoundary />
   </body>
 </html>

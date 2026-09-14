@@ -1,0 +1,1290 @@
+---
+import { Printer, Download, RotateCcw, Plus, Upload, CheckCircle2 } from 'lucide-astro';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { getInvoiceTranslations, SUPPORTED_CURRENCIES } from '../../lib/i18n/invoice';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = getInvoiceTranslations(locale);
+
+const todayStr = new Date().toISOString().split('T')[0];
+const defaultDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+---
+
+<div id="invoice-generator-root" class="w-full" data-locale={locale} data-confirm-clear={t.actions.confirmClear}>
+  <!-- Mobile Mode Switch Tabs (Editor / Live Preview) -->
+  <div class="lg:hidden flex items-center justify-center p-1 bg-[var(--surface-subtle)] border border-[var(--border)] rounded-lg mb-6 no-print">
+    <button
+      type="button"
+      id="tab-btn-editor"
+      class="flex-1 py-2 px-4 text-xs font-medium rounded-md bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)] shadow-xs transition-colors cursor-pointer"
+    >
+      {t.actions.editMode}
+    </button>
+    <button
+      type="button"
+      id="tab-btn-preview"
+      class="flex-1 py-2 px-4 text-xs font-medium rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+    >
+      {t.actions.previewMode}
+    </button>
+  </div>
+
+  <!-- Primary Workspace Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+    <!-- LEFT COLUMN: Editor Controls -->
+    <div id="invoice-editor-col" class="lg:col-span-6 space-y-6 no-print">
+      <!-- Action Toolbar (Top Quick Actions) -->
+      <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            id="btn-print-invoice"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg bg-[var(--text-primary)] text-[var(--background)] hover:opacity-90 transition-opacity cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+          >
+            <Printer class="w-3.5 h-3.5" />
+            <span>{t.actions.printInvoice}</span>
+          </button>
+          <button
+            type="button"
+            id="btn-save-pdf"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+            title="Save invoice using your browser's PDF print option"
+          >
+            <Download class="w-3.5 h-3.5" />
+            <span>{t.actions.savePdf}</span>
+          </button>
+        </div>
+
+        <button
+          type="button"
+          id="btn-clear-draft"
+          class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--negative-text)] hover:bg-[var(--surface-elevated)] rounded-md transition-colors cursor-pointer"
+          title={t.actions.clearDraft}
+        >
+          <RotateCcw class="w-3 h-3" />
+          <span>{t.actions.clearDraft}</span>
+        </button>
+      </div>
+
+      <!-- Progressive Form Sections Accordion / Cards -->
+      <div class="space-y-5">
+        <!-- 1. Seller Information -->
+        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+              {t.sections.seller}
+            </h2>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 1</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2 space-y-1.5">
+              <label for="seller-name" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.businessName} *
+              </label>
+              <input
+                type="text"
+                id="seller-name"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="Acme Studio Inc."
+                value="Acme Studio Inc."
+              />
+            </div>
+
+            <!-- Logo Upload -->
+            <div class="sm:col-span-2 space-y-2">
+              <label class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.businessLogo}
+              </label>
+              <div class="flex items-center gap-3">
+                <label
+                  for="logo-file-input"
+                  class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+                >
+                  <Upload class="w-3.5 h-3.5" />
+                  <span>{t.fields.uploadLogo}</span>
+                  <input
+                    type="file"
+                    id="logo-file-input"
+                    accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                    class="sr-only"
+                  />
+                </label>
+                <div id="logo-preview-thumb-wrap" class="hidden flex items-center gap-2">
+                  <img id="logo-preview-thumb" src="" alt="Logo thumbnail" class="h-7 w-auto max-w-[80px] object-contain rounded border border-[var(--border)] p-0.5 bg-white" />
+                  <button type="button" id="btn-remove-logo" class="text-xs text-[var(--text-muted)] hover:text-[var(--negative-text)] transition-colors cursor-pointer">
+                    {t.fields.removeLogo}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="sm:col-span-2 space-y-1.5">
+              <label for="seller-address" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.address}
+              </label>
+              <textarea
+                id="seller-address"
+                rows="2"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="100 Market St, Suite 400&#10;San Francisco, CA 94105"
+              >100 Market St, Suite 400
+San Francisco, CA 94105</textarea>
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="seller-email" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.email}
+              </label>
+              <input
+                type="email"
+                id="seller-email"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="billing@acmestudio.com"
+                value="billing@acmestudio.com"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="seller-phone" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.phone}
+              </label>
+              <input
+                type="text"
+                id="seller-phone"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="+1 (555) 019-2834"
+                value="+1 (555) 019-2834"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="seller-tax-id" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.taxId}
+              </label>
+              <input
+                type="text"
+                id="seller-tax-id"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="US-EIN 12-3456789"
+                value="US-EIN 12-3456789"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="seller-website" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.website}
+              </label>
+              <input
+                type="text"
+                id="seller-website"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="https://acmestudio.com"
+                value="https://acmestudio.com"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Customer Information -->
+        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+              {t.sections.customer}
+            </h2>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 2</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label for="customer-company" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.companyName}
+              </label>
+              <input
+                type="text"
+                id="customer-company"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="Venture Brands LLC"
+                value="Venture Brands LLC"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="customer-name" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.clientName}
+              </label>
+              <input
+                type="text"
+                id="customer-name"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="Sarah Jenkins"
+                value="Sarah Jenkins"
+              />
+            </div>
+
+            <div class="sm:col-span-2 space-y-1.5">
+              <label for="customer-address" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.address}
+              </label>
+              <textarea
+                id="customer-address"
+                rows="2"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="450 Broadway Ave, Floor 8&#10;New York, NY 10013"
+              >450 Broadway Ave, Floor 8
+New York, NY 10013</textarea>
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="customer-email" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.email}
+              </label>
+              <input
+                type="email"
+                id="customer-email"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="accounting@venturebrands.com"
+                value="accounting@venturebrands.com"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="customer-tax-id" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.taxId}
+              </label>
+              <input
+                type="text"
+                id="customer-tax-id"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="Tax ID (optional)"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Invoice Meta & Currency -->
+        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+              {t.sections.invoiceDetails}
+            </h2>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 3</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="space-y-1.5">
+              <label for="invoice-number" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.invoiceNumber} *
+              </label>
+              <input
+                type="text"
+                id="invoice-number"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="INV-2026-001"
+                value="INV-2026-001"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="invoice-date" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.invoiceDate} *
+              </label>
+              <input
+                type="date"
+                id="invoice-date"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+                value={todayStr}
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="invoice-due-date" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.dueDate}
+              </label>
+              <input
+                type="date"
+                id="invoice-due-date"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+                value={defaultDueDate}
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="invoice-currency" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.currency}
+              </label>
+              <select
+                id="invoice-currency"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] cursor-pointer"
+              >
+                {SUPPORTED_CURRENCIES.map((curr) => (
+                  <option value={curr.code} selected={curr.code === 'USD'}>
+                    {curr.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div class="sm:col-span-2 space-y-1.5">
+              <label for="invoice-payment-terms" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.paymentTerms}
+              </label>
+              <input
+                type="text"
+                id="invoice-payment-terms"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="Net 30 / Due on Receipt"
+                value="Net 30"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Line Items -->
+        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+              {t.sections.items}
+            </h2>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 4</span>
+          </div>
+
+          <!-- Dynamic Line Items Container -->
+          <div id="line-items-container" class="space-y-3.5">
+            <!-- Rendered via JS -->
+          </div>
+
+          <!-- Add Line Item Button -->
+          <div class="pt-2">
+            <button
+              type="button"
+              id="btn-add-line-item"
+              class="w-full py-2.5 px-4 text-xs font-medium rounded-lg border border-dashed border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <Plus class="w-3.5 h-3.5" />
+              <span>{t.fields.addItem}</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 5. Notes & Terms -->
+        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-3">
+          <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] pb-2 border-b border-[var(--border)]">
+            {t.sections.notes}
+          </h2>
+          <textarea
+            id="invoice-notes"
+            rows="3"
+            class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+            placeholder={t.fields.notesPlaceholder}
+          >Payment is due within 30 days of invoice date. Please transfer to Wire/ACH: Bank of America, Routing #123456789, Account #987654321. Thank you for your business!</textarea>
+        </section>
+
+        <!-- Privacy & Local Security Notice -->
+        <div class="p-4 rounded-lg bg-[var(--surface-subtle)] border border-[var(--border)] text-xs text-[var(--text-muted)] leading-relaxed flex items-start gap-2.5">
+          <CheckCircle2 class="w-4 h-4 text-[var(--positive-text)] shrink-0 mt-0.5" />
+          <span>{t.privacyNotice}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Professional Paper Live Preview -->
+    <div id="invoice-preview-col" class="lg:col-span-6 lg:sticky lg:top-24">
+      <!-- Printable Sheet Container (Styled like standard document paper) -->
+      <div
+        id="invoice-paper-sheet"
+        class="bg-white text-neutral-900 rounded-lg shadow-xl border border-neutral-300 p-8 sm:p-10 font-sans text-xs sm:text-sm leading-normal max-w-full overflow-hidden"
+      >
+        <!-- Document Header: Seller Info + Invoice Title/Meta -->
+        <div class="flex flex-col sm:flex-row justify-between gap-6 pb-8 border-b border-neutral-200">
+          <!-- Left: Brand / Seller -->
+          <div class="space-y-2 max-w-[280px]">
+            <div id="doc-logo-wrap" class="hidden pb-1">
+              <img id="doc-logo-img" src="" alt="Business Logo" class="max-h-12 max-w-[160px] object-contain" />
+            </div>
+            <h3 id="doc-seller-name" class="text-lg sm:text-xl font-bold tracking-tight text-neutral-900 leading-tight">
+              Acme Studio Inc.
+            </h3>
+            <p id="doc-seller-address" class="text-xs text-neutral-600 whitespace-pre-line leading-relaxed">
+              100 Market St, Suite 400
+              San Francisco, CA 94105
+            </p>
+            <div id="doc-seller-contact" class="text-xs text-neutral-600 space-y-0.5 pt-0.5">
+              <div id="doc-seller-email">billing@acmestudio.com</div>
+              <div id="doc-seller-phone">+1 (555) 019-2834</div>
+              <div id="doc-seller-tax-id" class="font-mono text-[11px] pt-1">Tax ID: US-EIN 12-3456789</div>
+            </div>
+          </div>
+
+          <!-- Right: Document Name & Meta Box -->
+          <div class="sm:text-right space-y-2 min-w-[180px]">
+            <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-neutral-900 uppercase">
+              {t.document.invoiceTitle}
+            </h2>
+            <div class="space-y-1 text-xs pt-1">
+              <div class="flex sm:justify-end gap-2">
+                <span class="text-neutral-500">{t.document.invoiceNumberLabel}:</span>
+                <span id="doc-invoice-number" class="font-mono font-bold text-neutral-900">INV-2026-001</span>
+              </div>
+              <div class="flex sm:justify-end gap-2">
+                <span class="text-neutral-500">{t.document.dateLabel}:</span>
+                <span id="doc-invoice-date" class="font-medium text-neutral-900">{todayStr}</span>
+              </div>
+              <div class="flex sm:justify-end gap-2">
+                <span class="text-neutral-500">{t.document.dueDateLabel}:</span>
+                <span id="doc-invoice-due-date" class="font-medium text-neutral-900">{defaultDueDate}</span>
+              </div>
+              <div id="doc-payment-terms-wrap" class="flex sm:justify-end gap-2">
+                <span class="text-neutral-500">{t.document.paymentTermsLabel}:</span>
+                <span id="doc-payment-terms" class="font-medium text-neutral-900">Net 30</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bill To Section -->
+        <div class="py-6 border-b border-neutral-200">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-1.5">
+            {t.document.billToLabel}
+          </span>
+          <div id="doc-customer-company" class="text-base font-bold text-neutral-900">
+            Venture Brands LLC
+          </div>
+          <div id="doc-customer-name" class="text-xs text-neutral-700 font-medium mt-0.5">
+            Attn: Sarah Jenkins
+          </div>
+          <div id="doc-customer-address" class="text-xs text-neutral-600 whitespace-pre-line mt-1 leading-relaxed">
+            450 Broadway Ave, Floor 8
+            New York, NY 10013
+          </div>
+          <div id="doc-customer-contact" class="text-xs text-neutral-600 mt-1 space-y-0.5">
+            <div id="doc-customer-email">accounting@venturebrands.com</div>
+            <div id="doc-customer-tax-id" class="font-mono text-[11px]"></div>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="py-6 overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b-2 border-neutral-300 text-[11px] uppercase font-bold text-neutral-600 tracking-wider">
+                <th class="py-2 pr-4">{t.document.descHeader}</th>
+                <th class="py-2 px-2 text-right w-16">{t.document.qtyHeader}</th>
+                <th class="py-2 px-2 text-right w-24">{t.document.priceHeader}</th>
+                <th class="py-2 px-2 text-right w-20">{t.document.discountHeader}</th>
+                <th class="py-2 px-2 text-right w-16">{t.document.taxHeader}</th>
+                <th class="py-2 pl-4 text-right w-24">{t.document.amountHeader}</th>
+              </tr>
+            </thead>
+            <tbody id="doc-items-tbody" class="divide-y divide-neutral-200 text-xs sm:text-sm">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals & Calculations Block -->
+        <div class="pt-4 border-t-2 border-neutral-200 flex flex-col sm:flex-row justify-between items-start gap-6">
+          <!-- Notes & Terms on Paper -->
+          <div class="flex-1 space-y-2 text-xs text-neutral-600 max-w-sm">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
+              {t.document.notesLabel}
+            </span>
+            <p id="doc-notes-text" class="whitespace-pre-line leading-relaxed">
+              Payment is due within 30 days of invoice date. Please transfer to Wire/ACH: Bank of America, Routing #123456789, Account #987654321. Thank you for your business!
+            </p>
+          </div>
+
+          <!-- Numerical Breakdown -->
+          <div class="w-full sm:w-64 space-y-2 text-xs">
+            <div class="flex justify-between py-1 text-neutral-600">
+              <span>{t.document.subtotalLabel}</span>
+              <span id="doc-subtotal-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+            </div>
+            <div id="doc-discount-row" class="hidden flex justify-between py-1 text-neutral-600">
+              <span>{t.document.discountTotalLabel}</span>
+              <span id="doc-discount-val" class="font-mono font-medium text-neutral-900">-$0.00</span>
+            </div>
+            <div id="doc-tax-row" class="hidden flex justify-between py-1 text-neutral-600">
+              <span>{t.document.taxTotalLabel}</span>
+              <span id="doc-tax-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+            </div>
+            <div class="flex justify-between py-2 border-t-2 border-neutral-900 text-sm sm:text-base font-bold text-neutral-900">
+              <span>{t.document.totalLabel}</span>
+              <span id="doc-total-val" class="font-mono">$0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Print Stylesheet -->
+<style is:global>
+  @media print {
+    @page {
+      size: auto;
+      margin: 10mm 12mm;
+    }
+
+    /* Hide website UI chrome when printing */
+    header,
+    footer,
+    nav,
+    .no-print,
+    .ambient-glow-wrapper,
+    #mobile-nav-menu,
+    #invoice-editor-col,
+    section[aria-labelledby="faqs-heading"],
+    section[aria-labelledby="related-heading"],
+    section[aria-labelledby="tools-heading"],
+    .breadcrumb-nav {
+      display: none !important;
+    }
+
+    body {
+      background: #ffffff !important;
+      color: #000000 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    main {
+      padding: 0 !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+    }
+
+    #invoice-generator-root {
+      display: block !important;
+      width: 100% !important;
+    }
+
+    #invoice-preview-col {
+      position: static !important;
+      width: 100% !important;
+      display: block !important;
+    }
+
+    #invoice-paper-sheet {
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      background: #ffffff !important;
+      color: #111111 !important;
+    }
+  }
+</style>
+
+<!-- Client-Side Reactive Invoice Engine -->
+<script>
+  import { SUPPORTED_CURRENCIES } from '../../lib/i18n/invoice';
+  import type { InvoiceLineItem } from '../../lib/i18n/invoice/types';
+
+  interface InvoiceState {
+    sellerName: string;
+    sellerLogo: string;
+    sellerAddress: string;
+    sellerEmail: string;
+    sellerPhone: string;
+    sellerTaxId: string;
+    sellerWebsite: string;
+    customerName: string;
+    customerCompany: string;
+    customerAddress: string;
+    customerEmail: string;
+    customerTaxId: string;
+    invoiceNumber: string;
+    invoiceDate: string;
+    dueDate: string;
+    currency: string;
+    paymentTerms: string;
+    items: InvoiceLineItem[];
+    notes: string;
+  }
+
+  const STORAGE_KEY = 'profitivas_invoice_draft_v1';
+
+  function initInvoiceGenerator() {
+    const root = document.getElementById('invoice-generator-root');
+    if (!root) return;
+
+    const currentLocale = root.getAttribute('data-locale') || 'en';
+
+    // Default Initial State
+    const defaultState: InvoiceState = {
+      sellerName: 'Acme Studio Inc.',
+      sellerLogo: '',
+      sellerAddress: '100 Market St, Suite 400\nSan Francisco, CA 94105',
+      sellerEmail: 'billing@acmestudio.com',
+      sellerPhone: '+1 (555) 019-2834',
+      sellerTaxId: 'US-EIN 12-3456789',
+      sellerWebsite: 'https://acmestudio.com',
+      customerName: 'Sarah Jenkins',
+      customerCompany: 'Venture Brands LLC',
+      customerAddress: '450 Broadway Ave, Floor 8\nNew York, NY 10013',
+      customerEmail: 'accounting@venturebrands.com',
+      customerTaxId: '',
+      invoiceNumber: 'INV-2026-001',
+      invoiceDate: new Date().toISOString().split('T')[0],
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      currency: 'USD',
+      paymentTerms: 'Net 30',
+      items: [
+        {
+          id: 'item-1',
+          description: 'Web Design & Brand Identity Consultation',
+          quantity: 1,
+          unitPrice: 1500,
+          discountPercent: 0,
+          taxPercent: 0,
+        },
+        {
+          id: 'item-2',
+          description: 'Frontend Development & Performance Optimization',
+          quantity: 20,
+          unitPrice: 95,
+          discountPercent: 5,
+          taxPercent: 0,
+        },
+      ],
+      notes: 'Payment is due within 30 days of invoice date. Please transfer to Wire/ACH: Bank of America, Routing #123456789, Account #987654321. Thank you for your business!',
+    };
+
+    let state: InvoiceState = { ...defaultState };
+
+    // Restore from localStorage if present
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+          state = { ...defaultState, ...parsed };
+        }
+      }
+    } catch {
+      // Ignore storage errors safely
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        // Safe catch if quota exceeded
+      }
+    }
+
+    function getCurrencyConfig(code: string) {
+      return SUPPORTED_CURRENCIES.find((c) => c.code === code) || SUPPORTED_CURRENCIES[0];
+    }
+
+    function formatMoney(amount: number, currencyCode: string): string {
+      if (!Number.isFinite(amount)) return '$0.00';
+      const cfg = getCurrencyConfig(currencyCode);
+      const decimals = cfg.decimals;
+
+      const localeMap: Record<string, string> = {
+        en: 'en-US',
+        es: 'es-ES',
+        fr: 'fr-FR',
+        de: 'de-DE',
+        pt: 'pt-BR',
+        it: 'it-IT',
+        ja: 'ja-JP',
+        ko: 'ko-KR',
+      };
+      const activeIntlLocale = localeMap[currentLocale] || 'en-US';
+
+      try {
+        return new Intl.NumberFormat(activeIntlLocale, {
+          style: 'currency',
+          currency: currencyCode,
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+        }).format(amount);
+      } catch {
+        return `${cfg.symbol}${amount.toFixed(decimals)}`;
+      }
+    }
+
+    // DOM Elements
+    const sellerNameInput = document.getElementById('seller-name') as HTMLInputElement | null;
+    const sellerAddressInput = document.getElementById('seller-address') as HTMLTextAreaElement | null;
+    const sellerEmailInput = document.getElementById('seller-email') as HTMLInputElement | null;
+    const sellerPhoneInput = document.getElementById('seller-phone') as HTMLInputElement | null;
+    const sellerTaxIdInput = document.getElementById('seller-tax-id') as HTMLInputElement | null;
+    const sellerWebsiteInput = document.getElementById('seller-website') as HTMLInputElement | null;
+    const logoFileInput = document.getElementById('logo-file-input') as HTMLInputElement | null;
+    const logoPreviewThumbWrap = document.getElementById('logo-preview-thumb-wrap');
+    const logoPreviewThumb = document.getElementById('logo-preview-thumb') as HTMLImageElement | null;
+    const btnRemoveLogo = document.getElementById('btn-remove-logo');
+
+    const customerCompanyInput = document.getElementById('customer-company') as HTMLInputElement | null;
+    const customerNameInput = document.getElementById('customer-name') as HTMLInputElement | null;
+    const customerAddressInput = document.getElementById('customer-address') as HTMLTextAreaElement | null;
+    const customerEmailInput = document.getElementById('customer-email') as HTMLInputElement | null;
+    const customerTaxIdInput = document.getElementById('customer-tax-id') as HTMLInputElement | null;
+
+    const invoiceNumberInput = document.getElementById('invoice-number') as HTMLInputElement | null;
+    const invoiceDateInput = document.getElementById('invoice-date') as HTMLInputElement | null;
+    const invoiceDueDateInput = document.getElementById('invoice-due-date') as HTMLInputElement | null;
+    const invoiceCurrencySelect = document.getElementById('invoice-currency') as HTMLSelectElement | null;
+    const invoicePaymentTermsInput = document.getElementById('invoice-payment-terms') as HTMLInputElement | null;
+    const invoiceNotesInput = document.getElementById('invoice-notes') as HTMLTextAreaElement | null;
+
+    const lineItemsContainer = document.getElementById('line-items-container');
+    const btnAddLineItem = document.getElementById('btn-add-line-item');
+
+    // Document Preview DOM Elements
+    const docSellerName = document.getElementById('doc-seller-name');
+    const docSellerAddress = document.getElementById('doc-seller-address');
+    const docSellerEmail = document.getElementById('doc-seller-email');
+    const docSellerPhone = document.getElementById('doc-seller-phone');
+    const docSellerTaxId = document.getElementById('doc-seller-tax-id');
+    const docLogoWrap = document.getElementById('doc-logo-wrap');
+    const docLogoImg = document.getElementById('doc-logo-img') as HTMLImageElement | null;
+
+    const docCustomerCompany = document.getElementById('doc-customer-company');
+    const docCustomerName = document.getElementById('doc-customer-name');
+    const docCustomerAddress = document.getElementById('doc-customer-address');
+    const docCustomerEmail = document.getElementById('doc-customer-email');
+    const docCustomerTaxId = document.getElementById('doc-customer-tax-id');
+
+    const docInvoiceNumber = document.getElementById('doc-invoice-number');
+    const docInvoiceDate = document.getElementById('doc-invoice-date');
+    const docInvoiceDueDate = document.getElementById('doc-invoice-due-date');
+    const docPaymentTerms = document.getElementById('doc-payment-terms');
+    const docPaymentTermsWrap = document.getElementById('doc-payment-terms-wrap');
+    const docNotesText = document.getElementById('doc-notes-text');
+
+    const docItemsTbody = document.getElementById('doc-items-tbody');
+    const docSubtotalVal = document.getElementById('doc-subtotal-val');
+    const docDiscountRow = document.getElementById('doc-discount-row');
+    const docDiscountVal = document.getElementById('doc-discount-val');
+    const docTaxRow = document.getElementById('doc-tax-row');
+    const docTaxVal = document.getElementById('doc-tax-val');
+    const docTotalVal = document.getElementById('doc-total-val');
+
+    // Sync input values to form fields from restored state
+    function populateFormFields() {
+      if (sellerNameInput) sellerNameInput.value = state.sellerName;
+      if (sellerAddressInput) sellerAddressInput.value = state.sellerAddress;
+      if (sellerEmailInput) sellerEmailInput.value = state.sellerEmail;
+      if (sellerPhoneInput) sellerPhoneInput.value = state.sellerPhone;
+      if (sellerTaxIdInput) sellerTaxIdInput.value = state.sellerTaxId;
+      if (sellerWebsiteInput) sellerWebsiteInput.value = state.sellerWebsite;
+
+      if (customerCompanyInput) customerCompanyInput.value = state.customerCompany;
+      if (customerNameInput) customerNameInput.value = state.customerName;
+      if (customerAddressInput) customerAddressInput.value = state.customerAddress;
+      if (customerEmailInput) customerEmailInput.value = state.customerEmail;
+      if (customerTaxIdInput) customerTaxIdInput.value = state.customerTaxId;
+
+      if (invoiceNumberInput) invoiceNumberInput.value = state.invoiceNumber;
+      if (invoiceDateInput) invoiceDateInput.value = state.invoiceDate;
+      if (invoiceDueDateInput) invoiceDueDateInput.value = state.dueDate;
+      if (invoiceCurrencySelect) invoiceCurrencySelect.value = state.currency;
+      if (invoicePaymentTermsInput) invoicePaymentTermsInput.value = state.paymentTerms;
+      if (invoiceNotesInput) invoiceNotesInput.value = state.notes;
+
+      updateLogoDisplay();
+    }
+
+    function updateLogoDisplay() {
+      if (state.sellerLogo) {
+        if (logoPreviewThumbWrap) logoPreviewThumbWrap.classList.remove('hidden');
+        if (logoPreviewThumb) logoPreviewThumb.src = state.sellerLogo;
+        if (docLogoWrap) docLogoWrap.classList.remove('hidden');
+        if (docLogoImg) docLogoImg.src = state.sellerLogo;
+      } else {
+        if (logoPreviewThumbWrap) logoPreviewThumbWrap.classList.add('hidden');
+        if (logoPreviewThumb) logoPreviewThumb.src = '';
+        if (docLogoWrap) docLogoWrap.classList.add('hidden');
+        if (docLogoImg) docLogoImg.src = '';
+      }
+    }
+
+    // Render Line Items in Form Editor
+    function renderEditorLineItems() {
+      if (!lineItemsContainer) return;
+      lineItemsContainer.innerHTML = '';
+
+      state.items.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'p-3.5 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] space-y-3';
+        row.setAttribute('data-id', item.id);
+
+        row.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] font-mono text-[var(--text-muted)]">#${index + 1}</span>
+            ${
+              state.items.length > 1
+                ? `<button type="button" class="btn-remove-item p-1 text-[var(--text-muted)] hover:text-[var(--negative-text)] transition-colors cursor-pointer" data-id="${item.id}" title="Remove item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                  </button>`
+                : ''
+            }
+          </div>
+          <div class="space-y-1">
+            <input
+              type="text"
+              class="item-desc-input w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+              placeholder="Item description"
+              value="${item.description.replace(/"/g, '&quot;')}"
+              data-id="${item.id}"
+            />
+          </div>
+          <div class="grid grid-cols-4 gap-2 text-xs">
+            <div>
+              <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Qty</label>
+              <input
+                type="number"
+                min="0"
+                step="any"
+                class="item-qty-input w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2 py-1 text-xs text-[var(--text-primary)] font-mono tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+                value="${item.quantity}"
+                data-id="${item.id}"
+              />
+            </div>
+            <div>
+              <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Price</label>
+              <input
+                type="number"
+                min="0"
+                step="any"
+                class="item-price-input w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2 py-1 text-xs text-[var(--text-primary)] font-mono tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+                value="${item.unitPrice}"
+                data-id="${item.id}"
+              />
+            </div>
+            <div>
+              <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Disc %</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="any"
+                class="item-disc-input w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2 py-1 text-xs text-[var(--text-primary)] font-mono tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+                value="${item.discountPercent}"
+                data-id="${item.id}"
+              />
+            </div>
+            <div>
+              <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Tax %</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="any"
+                class="item-tax-input w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2 py-1 text-xs text-[var(--text-primary)] font-mono tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+                value="${item.taxPercent}"
+                data-id="${item.id}"
+              />
+            </div>
+          </div>
+        `;
+
+        lineItemsContainer.appendChild(row);
+      });
+
+      // Bind row listeners
+      lineItemsContainer.querySelectorAll('.item-desc-input').forEach((el) => {
+        el.addEventListener('input', (e) => {
+          const target = e.target as HTMLInputElement;
+          const id = target.getAttribute('data-id');
+          const it = state.items.find((x) => x.id === id);
+          if (it) {
+            it.description = target.value;
+            updatePreview();
+            saveToStorage();
+          }
+        });
+      });
+
+      lineItemsContainer.querySelectorAll('.item-qty-input').forEach((el) => {
+        el.addEventListener('input', (e) => {
+          const target = e.target as HTMLInputElement;
+          const id = target.getAttribute('data-id');
+          const it = state.items.find((x) => x.id === id);
+          if (it) {
+            const parsed = parseFloat(target.value);
+            it.quantity = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+            updatePreview();
+            saveToStorage();
+          }
+        });
+      });
+
+      lineItemsContainer.querySelectorAll('.item-price-input').forEach((el) => {
+        el.addEventListener('input', (e) => {
+          const target = e.target as HTMLInputElement;
+          const id = target.getAttribute('data-id');
+          const it = state.items.find((x) => x.id === id);
+          if (it) {
+            const parsed = parseFloat(target.value);
+            it.unitPrice = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+            updatePreview();
+            saveToStorage();
+          }
+        });
+      });
+
+      lineItemsContainer.querySelectorAll('.item-disc-input').forEach((el) => {
+        el.addEventListener('input', (e) => {
+          const target = e.target as HTMLInputElement;
+          const id = target.getAttribute('data-id');
+          const it = state.items.find((x) => x.id === id);
+          if (it) {
+            const parsed = parseFloat(target.value);
+            it.discountPercent = isNaN(parsed) || parsed < 0 ? 0 : Math.min(100, parsed);
+            updatePreview();
+            saveToStorage();
+          }
+        });
+      });
+
+      lineItemsContainer.querySelectorAll('.item-tax-input').forEach((el) => {
+        el.addEventListener('input', (e) => {
+          const target = e.target as HTMLInputElement;
+          const id = target.getAttribute('data-id');
+          const it = state.items.find((x) => x.id === id);
+          if (it) {
+            const parsed = parseFloat(target.value);
+            it.taxPercent = isNaN(parsed) || parsed < 0 ? 0 : Math.min(100, parsed);
+            updatePreview();
+            saveToStorage();
+          }
+        });
+      });
+
+      lineItemsContainer.querySelectorAll('.btn-remove-item').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const target = (e.currentTarget as HTMLElement).getAttribute('data-id');
+          if (state.items.length > 1) {
+            state.items = state.items.filter((x) => x.id !== target);
+            renderEditorLineItems();
+            updatePreview();
+            saveToStorage();
+          }
+        });
+      });
+    }
+
+    // Update Live Document Preview & Mathematical Totals
+    function updatePreview() {
+      // 1. Text Fields Sync
+      if (docSellerName) docSellerName.textContent = state.sellerName || 'Your Business Name';
+      if (docSellerAddress) docSellerAddress.textContent = state.sellerAddress || '';
+      if (docSellerEmail) docSellerEmail.textContent = state.sellerEmail || '';
+      if (docSellerPhone) docSellerPhone.textContent = state.sellerPhone || '';
+      if (docSellerTaxId) {
+        docSellerTaxId.textContent = state.sellerTaxId ? `Tax ID: ${state.sellerTaxId}` : '';
+        docSellerTaxId.style.display = state.sellerTaxId ? 'block' : 'none';
+      }
+
+      if (docCustomerCompany) docCustomerCompany.textContent = state.customerCompany || 'Customer Name / Company';
+      if (docCustomerName) {
+        docCustomerName.textContent = state.customerName ? `Attn: ${state.customerName}` : '';
+        docCustomerName.style.display = state.customerName ? 'block' : 'none';
+      }
+      if (docCustomerAddress) docCustomerAddress.textContent = state.customerAddress || '';
+      if (docCustomerEmail) docCustomerEmail.textContent = state.customerEmail || '';
+      if (docCustomerTaxId) {
+        docCustomerTaxId.textContent = state.customerTaxId ? `Tax ID: ${state.customerTaxId}` : '';
+        docCustomerTaxId.style.display = state.customerTaxId ? 'block' : 'none';
+      }
+
+      if (docInvoiceNumber) docInvoiceNumber.textContent = state.invoiceNumber || 'INV-001';
+      if (docInvoiceDate) docInvoiceDate.textContent = state.invoiceDate || '';
+      if (docInvoiceDueDate) docInvoiceDueDate.textContent = state.dueDate || '';
+      if (docPaymentTerms) docPaymentTerms.textContent = state.paymentTerms || '';
+      if (docPaymentTermsWrap) {
+        docPaymentTermsWrap.style.display = state.paymentTerms ? 'flex' : 'none';
+      }
+
+      if (docNotesText) docNotesText.textContent = state.notes || '';
+
+      // 2. Line Items Calculation and Table Render
+      if (!docItemsTbody) return;
+      docItemsTbody.innerHTML = '';
+
+      let subtotalSum = 0;
+      let discountSum = 0;
+      let taxSum = 0;
+
+      state.items.forEach((item) => {
+        const qty = Number.isFinite(item.quantity) && item.quantity >= 0 ? item.quantity : 0;
+        const price = Number.isFinite(item.unitPrice) && item.unitPrice >= 0 ? item.unitPrice : 0;
+        const discPct = Number.isFinite(item.discountPercent) && item.discountPercent >= 0 ? item.discountPercent : 0;
+        const taxPct = Number.isFinite(item.taxPercent) && item.taxPercent >= 0 ? item.taxPercent : 0;
+
+        const rawLineSubtotal = qty * price;
+        const lineDiscount = rawLineSubtotal * (discPct / 100);
+        const lineNet = rawLineSubtotal - lineDiscount;
+        const lineTax = lineNet * (taxPct / 100);
+        const lineAmount = lineNet + lineTax;
+
+        subtotalSum += rawLineSubtotal;
+        discountSum += lineDiscount;
+        taxSum += lineTax;
+
+        const tr = document.createElement('tr');
+        tr.className = 'text-neutral-800';
+        tr.innerHTML = `
+          <td class="py-3 pr-4 font-normal">${item.description || '—'}</td>
+          <td class="py-3 px-2 text-right font-mono tabular-nums">${qty}</td>
+          <td class="py-3 px-2 text-right font-mono tabular-nums">${formatMoney(price, state.currency)}</td>
+          <td class="py-3 px-2 text-right font-mono tabular-nums text-neutral-500">${discPct > 0 ? `${discPct}%` : '—'}</td>
+          <td class="py-3 px-2 text-right font-mono tabular-nums text-neutral-500">${taxPct > 0 ? `${taxPct}%` : '—'}</td>
+          <td class="py-3 pl-4 text-right font-mono font-medium text-neutral-900 tabular-nums">${formatMoney(lineAmount, state.currency)}</td>
+        `;
+        docItemsTbody.appendChild(tr);
+      });
+
+      const finalTotal = Math.max(0, subtotalSum - discountSum + taxSum);
+
+      if (docSubtotalVal) docSubtotalVal.textContent = formatMoney(subtotalSum, state.currency);
+
+      if (docDiscountRow && docDiscountVal) {
+        if (discountSum > 0) {
+          docDiscountRow.classList.remove('hidden');
+          docDiscountVal.textContent = `-${formatMoney(discountSum, state.currency)}`;
+        } else {
+          docDiscountRow.classList.add('hidden');
+        }
+      }
+
+      if (docTaxRow && docTaxVal) {
+        if (taxSum > 0) {
+          docTaxRow.classList.remove('hidden');
+          docTaxVal.textContent = formatMoney(taxSum, state.currency);
+        } else {
+          docTaxRow.classList.add('hidden');
+        }
+      }
+
+      if (docTotalVal) docTotalVal.textContent = formatMoney(finalTotal, state.currency);
+    }
+
+    // Bind Top-Level Field Listeners
+    sellerNameInput?.addEventListener('input', (e) => {
+      state.sellerName = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    sellerAddressInput?.addEventListener('input', (e) => {
+      state.sellerAddress = (e.target as HTMLTextAreaElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    sellerEmailInput?.addEventListener('input', (e) => {
+      state.sellerEmail = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    sellerPhoneInput?.addEventListener('input', (e) => {
+      state.sellerPhone = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    sellerTaxIdInput?.addEventListener('input', (e) => {
+      state.sellerTaxId = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    sellerWebsiteInput?.addEventListener('input', (e) => {
+      state.sellerWebsite = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+
+    customerCompanyInput?.addEventListener('input', (e) => {
+      state.customerCompany = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    customerNameInput?.addEventListener('input', (e) => {
+      state.customerName = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    customerAddressInput?.addEventListener('input', (e) => {
+      state.customerAddress = (e.target as HTMLTextAreaElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    customerEmailInput?.addEventListener('input', (e) => {
+      state.customerEmail = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    customerTaxIdInput?.addEventListener('input', (e) => {
+      state.customerTaxId = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+
+    invoiceNumberInput?.addEventListener('input', (e) => {
+      state.invoiceNumber = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    invoiceDateInput?.addEventListener('input', (e) => {
+      state.invoiceDate = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    invoiceDueDateInput?.addEventListener('input', (e) => {
+      state.dueDate = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    invoiceCurrencySelect?.addEventListener('change', (e) => {
+      state.currency = (e.target as HTMLSelectElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    invoicePaymentTermsInput?.addEventListener('input', (e) => {
+      state.paymentTerms = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    invoiceNotesInput?.addEventListener('input', (e) => {
+      state.notes = (e.target as HTMLTextAreaElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+
+    // Logo Upload Reader (Local DataURL)
+    logoFileInput?.addEventListener('change', (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      // Validate size (< 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Please choose an image under 2MB.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (loadEvt) => {
+        const result = loadEvt.target?.result as string;
+        if (result) {
+          state.sellerLogo = result;
+          updateLogoDisplay();
+          saveToStorage();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    btnRemoveLogo?.addEventListener('click', () => {
+      state.sellerLogo = '';
+      if (logoFileInput) logoFileInput.value = '';
+      updateLogoDisplay();
+      saveToStorage();
+    });
+
+    // Add Item Handler
+    btnAddLineItem?.addEventListener('click', () => {
+      state.items.push({
+        id: `item-${Date.now()}`,
+        description: 'New Project Deliverable / Service',
+        quantity: 1,
+        unitPrice: 100,
+        discountPercent: 0,
+        taxPercent: 0,
+      });
+      renderEditorLineItems();
+      updatePreview();
+      saveToStorage();
+    });
+
+    // Clear / Reset Handler
+    const btnClearDraft = document.getElementById('btn-clear-draft');
+    btnClearDraft?.addEventListener('click', () => {
+      const confirmPrompt = root.getAttribute('data-confirm-clear') || 'Are you sure you want to clear this draft? All entered invoice data will be reset.';
+      if (confirm(confirmPrompt)) {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch {}
+        state = {
+          ...defaultState,
+          items: [
+            {
+              id: 'item-1',
+              description: 'Professional Services',
+              quantity: 1,
+              unitPrice: 500,
+              discountPercent: 0,
+              taxPercent: 0,
+            },
+          ],
+        };
+        populateFormFields();
+        renderEditorLineItems();
+        updatePreview();
+      }
+    });
+
+    // Print & Save Actions
+    const btnPrint = document.getElementById('btn-print-invoice');
+    const btnSavePdf = document.getElementById('btn-save-pdf');
+
+    btnPrint?.addEventListener('click', () => {
+      window.print();
+    });
+
+    btnSavePdf?.addEventListener('click', () => {
+      window.print();
+    });
+
+    // Mobile View Toggle Tabs
+    const tabBtnEditor = document.getElementById('tab-btn-editor');
+    const tabBtnPreview = document.getElementById('tab-btn-preview');
+    const editorCol = document.getElementById('invoice-editor-col');
+    const previewCol = document.getElementById('invoice-preview-col');
+
+    function setMobileView(view: 'editor' | 'preview') {
+      if (view === 'editor') {
+        tabBtnEditor?.classList.add('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border');
+        tabBtnEditor?.classList.remove('text-[var(--text-secondary)]');
+        tabBtnPreview?.classList.remove('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border');
+        tabBtnPreview?.classList.add('text-[var(--text-secondary)]');
+
+        editorCol?.classList.remove('hidden');
+        previewCol?.classList.add('hidden', 'lg:block');
+      } else {
+        tabBtnPreview?.classList.add('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border');
+        tabBtnPreview?.classList.remove('text-[var(--text-secondary)]');
+        tabBtnEditor?.classList.remove('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border');
+        tabBtnEditor?.classList.add('text-[var(--text-secondary)]');
+
+        editorCol?.classList.add('hidden');
+        previewCol?.classList.remove('hidden');
+      }
+    }
+
+    tabBtnEditor?.addEventListener('click', () => setMobileView('editor'));
+    tabBtnPreview?.addEventListener('click', () => setMobileView('preview'));
+
+    // Initialize display
+    populateFormFields();
+    renderEditorLineItems();
+    updatePreview();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initInvoiceGenerator);
+  } else {
+    initInvoiceGenerator();
+  }
+  document.addEventListener('astro:page-load', initInvoiceGenerator);
+</script>

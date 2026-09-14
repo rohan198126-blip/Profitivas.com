@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import { getNonDefaultLocales, useTranslations, getLocalizedPath } from '../../lib/i18n';
+import type { SupportedLocale } from '../../lib/i18n/types';
+
+export function getStaticPaths() {
+  return getNonDefaultLocales().map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params as { lang: SupportedLocale };
+const t = useTranslations(lang);
+const canonicalUrl = `https://profitivas.com${getLocalizedPath('/terms', lang)}`;
+---
+
+<BaseLayout
+  title={`${t.terms.title} — Profitivas`}
+  description={t.terms.subtitle}
+  canonicalUrl={canonicalUrl}
+  locale={lang}
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <!-- Breadcrumbs -->
+    <Breadcrumbs items={[{ label: t.terms.title }]} locale={lang} />
+
+    <header class="mt-6 mb-10 sm:mb-12">
+      <p class="text-xs font-medium text-[var(--text-muted)] tracking-[0.2em] uppercase mb-2.5">
+        {t.terms.title}
+      </p>
+      <h1 class="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
+        {t.terms.title}
+      </h1>
+      <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-3 leading-relaxed font-normal">
+        {t.terms.subtitle}
+      </p>
+    </header>
+
+    <article class="space-y-10 sm:space-y-12 text-sm text-[var(--text-secondary)] leading-relaxed">
+      <!-- Section 1 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.terms.s1Title}
+        </h2>
+        <p>{t.terms.s1P1}</p>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.terms.s2Title}
+        </h2>
+        <p>{t.terms.s2P1}</p>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.terms.s3Title}
+        </h2>
+        <p>{t.terms.s3P1}</p>
+      </section>
+
+      <!-- Section 4 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.terms.s4Title}
+        </h2>
+        <p>{t.terms.s4P1}</p>
+      </section>
+
+      <!-- Section 5 -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.terms.s5Title}
+        </h2>
+        <p>{t.terms.s5P1}</p>
+      </section>
+
+      <!-- Section 6: Updates & Contact -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          6. Updates & Contact
+        </h2>
+        <p>
+          We may update these terms periodically to reflect new features or regulatory requirements. For questions regarding these terms, please visit our 
+          <a href={getLocalizedPath('/about', lang)} class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80 ml-1">
+            {t.nav.about}
+          </a>.
+        </p>
+      </section>
+    </article>
+  </div>
+</BaseLayout>

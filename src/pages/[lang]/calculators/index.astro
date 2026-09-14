@@ -1,28 +1,41 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/common/Breadcrumbs.astro';
 import { Search } from 'lucide-astro';
-import { CATEGORIES, getAllCalculators } from '../../lib/calculators/registry';
+import { CATEGORIES, getAllCalculators } from '../../../lib/calculators/registry';
+import { getNonDefaultLocales, useTranslations, getLocalizedPath } from '../../../lib/i18n';
+import { getLocalizedCalculatorContent } from '../../../lib/i18n/calculators';
+import { getInvoiceTranslations } from '../../../lib/i18n/invoice';
+import type { SupportedLocale } from '../../../lib/i18n/types';
 
+export function getStaticPaths() {
+  return getNonDefaultLocales().map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params as { lang: SupportedLocale };
+const t = useTranslations(lang);
+const invoiceT = getInvoiceTranslations(lang);
+const canonicalUrl = `https://profitivas.com${getLocalizedPath('/calculators', lang)}`;
 const allCalculators = getAllCalculators();
 
-// Keywords mapping for accurate business search matching
 const KEYWORDS: Record<string, string> = {
-  'profit-margin': 'margin markup profit gross revenue cost cogs pricing price return economics',
-  markup: 'markup margin profit cost price revenue return pricing cost-plus',
-  'selling-price': 'selling price cost target margin pricing quote retail cogs wholesale',
-  discount: 'discount sale savings percentage reduction pricing markdown clearance promotional',
-  'gross-profit': 'gross profit revenue cogs margin cost sales earnings income',
-  'break-even': 'break even breakeven fixed variable costs units volume revenue finance threshold',
-  'target-profit': 'target profit sales volume goal income revenue required units finance planning',
-  revenue: 'revenue sales volume price units projections earnings finance top-line',
-  commission: 'commission sales bonus tiered payout rate earnings compensation finance incentive',
-  roi: 'roi return on investment capital gain project yield profitability finance hurdle',
-  roas: 'roas return on ad spend advertising marketing paid ads campaign efficiency media',
-  cac: 'cac customer acquisition cost marketing paid organic acquisition blend spend',
-  ltv: 'ltv customer lifetime value retention churn revenue marketing growth value',
-  'ltv-cac': 'ltv cac ratio unit economics sustainability efficiency benchmark marketing growth payback',
-  'conversion-rate': 'conversion rate visitors leads checkouts funnel landing page marketing growth optimize',
+  'profit-margin': 'margin markup profit gross revenue cost cogs pricing price return margen marge marge gewinn margem margine マージン 마진',
+  markup: 'markup margin profit cost price revenue return pricing margen marge gewinn ricarico マークアップ 마크업',
+  'selling-price': 'selling price cost target margin pricing quote retail cogs precio vente verkaufspreis preço prezzo 価格 판매가격',
+  discount: 'discount sale savings percentage reduction pricing markdown clearance descuento rabais rabatt desconto sconto 割引 할인',
+  'gross-profit': 'gross profit revenue cogs margin cost sales earnings beneficio brut gewinn lucro bruto utile lordo 粗利益 매출총이익',
+  'break-even': 'break even breakeven fixed variable costs units volume revenue finance umbral seuil schwelle ponto pareggio 損益分岐 손익분기',
+  'target-profit': 'target profit sales volume goal income revenue required units finance objetivo ziel meta obiettivo 目標利益 목표이익',
+  revenue: 'revenue sales volume price units projections earnings finance ingresos revenu umsatz receita ricavi 売上 매출',
+  commission: 'commission sales bonus tiered payout rate earnings compensation finance comision provisie provision provvigione 手数料 수수료',
+  roi: 'roi return on investment capital gain project yield profitability finance retorno investissement rendite retorno investimento 投資収益 投資利益',
+  roas: 'roas return on ad spend advertising marketing paid ads campaign efficiency publicidad pub werbewerbung annonces 광고수익',
+  cac: 'cac customer acquisition cost marketing paid organic acquisition blend adquisicion acquisition kundenakquisition aquisição acquisizione 顧客獲得 顧客獲得費用',
+  ltv: 'ltv customer lifetime value retention churn revenue marketing growth valor vie kundenwert valor vita 顧客生涯価値 고객생애가치',
+  'ltv-cac': 'ltv cac ratio unit economics sustainability efficiency benchmark marketing growth relacion ratio proportion rapport 比率 비율',
+  'conversion-rate': 'conversion rate visitors leads checkouts funnel landing page marketing growth conversion konversion conversione 転換率 전환율',
 };
 
 let globalCounter = 0;
@@ -30,41 +43,46 @@ const categorizedCalculators = CATEGORIES.map((cat) => {
   const calcs = allCalculators.filter((c) => c.category === cat.id);
   const itemsWithIndex = calcs.map((c) => {
     globalCounter += 1;
+    const localized = getLocalizedCalculatorContent(c.slug, lang);
+    const meta = localized?.meta || c;
     return {
       ...c,
+      name: meta.name,
+      description: meta.description,
+      tagline: meta.tagline,
+      localizedHref: getLocalizedPath(`/${c.slug}`, lang),
       displayNum: String(globalCounter).padStart(2, '0'),
       keywords: KEYWORDS[c.id] || '',
     };
   });
   return {
     ...cat,
+    name: (t.categories as Record<string, string>)[cat.id] || cat.name,
     calculators: itemsWithIndex,
   };
 });
-
-const pageTitle = 'Business Calculators — Profitivas';
-const pageDescription = 'Explore the complete directory of Profitivas business calculators for pricing, profit, finance, marketing, and unit economics.';
 ---
 
 <BaseLayout
-  title={pageTitle}
-  description={pageDescription}
-  canonicalUrl="https://profitivas.com/calculators"
+  title={`${t.common.directoryTitle} — Profitivas`}
+  description={t.common.directoryDescription}
+  canonicalUrl={canonicalUrl}
+  locale={lang}
 >
   <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
     <!-- Breadcrumbs -->
-    <Breadcrumbs items={[{ label: 'Calculators' }]} />
+    <Breadcrumbs items={[{ label: t.nav.calculators }]} locale={lang} />
 
     <!-- Compact Centered Introduction -->
     <header class="text-center max-w-xl mx-auto mt-6 mb-10 sm:mb-12">
       <p class="text-xs font-medium text-[var(--text-muted)] tracking-[0.2em] uppercase mb-2.5">
-        Calculators
+        {t.nav.calculators}
       </p>
       <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
-        Business calculations, all in one place.
+        {t.common.directoryTitle}
       </h1>
       <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-2.5 font-normal leading-relaxed">
-        Simple tools for pricing, profit, finance, marketing, and growth.
+        {t.common.directoryDescription}
       </p>
     </header>
 
@@ -76,10 +94,10 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
         <input
           type="search"
           id="directory-search-input"
-          placeholder="Search calculators..."
+          placeholder={t.actions.searchCalculators}
           autocomplete="off"
           class="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
-          aria-label="Search calculators"
+          aria-label={t.actions.searchCalculators}
         />
         <kbd class="hidden sm:inline-flex px-1.5 py-0.5 text-[10px] font-mono text-[var(--text-muted)] bg-[var(--surface-elevated)] border border-[var(--border)] rounded shrink-0 select-none">
           ESC
@@ -92,7 +110,7 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
         id="category-tabs"
         class="flex items-center justify-center flex-wrap gap-1 sm:gap-2 pt-1"
         role="tablist"
-        aria-label="Calculator Categories"
+        aria-label={t.nav.categories}
       >
         <button
           type="button"
@@ -101,9 +119,9 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
           data-category="all"
           aria-selected="true"
         >
-          All
+          {t.common.allCalculators}
         </button>
-        {CATEGORIES.map((cat) => (
+        {categorizedCalculators.map((cat) => (
           <button
             type="button"
             role="tab"
@@ -119,9 +137,9 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
 
     <!-- Empty Search State -->
     <div id="directory-empty-state" class="hidden py-16 text-center space-y-2">
-      <p class="text-sm font-medium text-[var(--text-primary)]">No calculators found</p>
+      <p class="text-sm font-medium text-[var(--text-primary)]">{t.common.noCalculatorsFound}</p>
       <p class="text-xs text-[var(--text-muted)]">
-        Try: profit, pricing, finance, marketing
+        {t.common.trySearchingSuggestions}
       </p>
     </div>
 
@@ -130,20 +148,20 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div class="space-y-1.5 max-w-xl">
           <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[var(--surface-elevated)] border border-[var(--border)] text-[var(--positive-text)]">
-            <span>Business Tool</span>
+            <span>{invoiceT.header.eyebrow}</span>
           </div>
           <h2 class="text-base sm:text-lg font-bold text-[var(--text-primary)]">
-            Free Invoice Generator
+            {invoiceT.header.h1}
           </h2>
           <p class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-            Create professional, client-side business invoices with custom logos, line items, taxes, discounts, and instant PDF printing. 100% private with no account required.
+            {invoiceT.header.subtitle}
           </p>
         </div>
         <a
-          href="/invoice-generator"
+          href={getLocalizedPath('/invoice-generator', lang)}
           class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--text-primary)] text-[var(--background)] hover:opacity-90 transition-opacity cursor-pointer"
         >
-          <span>Create Invoice</span>
+          <span>{invoiceT.actions.editMode}</span>
           <span aria-hidden="true">&rarr;</span>
         </a>
       </div>
@@ -191,7 +209,7 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
                   >
                     {isActive ? (
                       <a
-                        href={`/${calc.slug}`}
+                        href={calc.localizedHref}
                         class="group flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 sm:gap-6 py-4 sm:py-5 px-3 -mx-3 rounded-lg hover:bg-[var(--surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)]"
                       >
                         <div class="flex items-baseline gap-4 sm:gap-6 min-w-0 max-w-2xl">
@@ -204,7 +222,7 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
                                 {calc.name}
                               </h3>
                               <span class="text-[10px] font-medium uppercase tracking-wider text-[var(--positive-text)]">
-                                Active
+                                {t.common.activeStatus}
                               </span>
                             </div>
                             <p class="text-xs sm:text-sm text-[var(--text-secondary)] font-normal mt-0.5 leading-relaxed">
@@ -214,7 +232,7 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
                         </div>
 
                         <div class="shrink-0 flex items-center gap-1 text-xs text-[var(--text-muted)] group-hover:text-[var(--text-primary)] self-start sm:self-center">
-                          <span class="hidden sm:inline font-medium">Open calculator</span>
+                          <span class="hidden sm:inline font-medium">{t.actions.chooseCalculator}</span>
                           <span class="group-hover:translate-x-1 transition-transform" aria-hidden="true">
                             &rarr;
                           </span>
@@ -237,7 +255,7 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
                         </div>
 
                         <div class="shrink-0 text-xs text-[var(--text-muted)] self-start sm:self-center">
-                          <span>In development</span>
+                          <span>{t.common.inDevelopment}</span>
                         </div>
                       </div>
                     )}
@@ -307,7 +325,6 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
           }
         });
 
-        // Hide category header if 0 visible calculators in that category
         if (sectionVisibleCount === 0 || !categoryMatchesFilter) {
           section.classList.add('hidden');
         } else {
@@ -315,7 +332,6 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
         }
       });
 
-      // Show empty state if no calculators match query
       if (totalVisible === 0) {
         emptyState?.classList.remove('hidden');
       } else {
@@ -323,7 +339,6 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
       }
     }
 
-    // Category tab click handler
     tabButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         activeCategory = btn.getAttribute('data-category') || 'all';
@@ -344,10 +359,8 @@ const pageDescription = 'Explore the complete directory of Profitivas business c
       });
     });
 
-    // Real-time instant search input listener
     searchInput?.addEventListener('input', filterDirectory);
 
-    // Escape key to clear search
     searchInput?.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (searchInput.value) {

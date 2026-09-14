@@ -2,6 +2,8 @@
 import { ChevronRight, Home } from 'lucide-astro';
 import JsonLd from '../seo/JsonLd.astro';
 import { getBreadcrumbSchema } from '../../lib/seo/schema';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations, getLocalizedPath } from '../../lib/i18n';
 
 export interface BreadcrumbItem {
   label: string;
@@ -10,15 +12,17 @@ export interface BreadcrumbItem {
 
 export interface Props {
   items: BreadcrumbItem[];
+  locale?: SupportedLocale;
 }
 
-const { items } = Astro.props;
+const { items, locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
 
-const allItems = [{ label: 'Home', href: '/' }, ...items];
+const allItems = [{ label: t.nav.home, href: getLocalizedPath('/', locale) }, ...items];
 
 const schemaItems = allItems.map((item) => ({
   name: item.label,
-  url: item.href || '',
+  url: item.href ? `https://profitivas.com${item.href}` : '',
 }));
 ---
 

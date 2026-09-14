@@ -17,7 +17,7 @@ export const LOCALES: Record<SupportedLocale, LocaleConfig> = {
     nativeName: 'Español',
     direction: 'ltr',
     isDefault: false,
-    isActive: false, // Planned for future expansion
+    isActive: true,
   },
   fr: {
     code: 'fr',
@@ -25,7 +25,7 @@ export const LOCALES: Record<SupportedLocale, LocaleConfig> = {
     nativeName: 'Français',
     direction: 'ltr',
     isDefault: false,
-    isActive: false, // Planned for future expansion
+    isActive: true,
   },
   de: {
     code: 'de',
@@ -33,7 +33,7 @@ export const LOCALES: Record<SupportedLocale, LocaleConfig> = {
     nativeName: 'Deutsch',
     direction: 'ltr',
     isDefault: false,
-    isActive: false, // Planned for future expansion
+    isActive: true,
   },
   pt: {
     code: 'pt',
@@ -41,7 +41,7 @@ export const LOCALES: Record<SupportedLocale, LocaleConfig> = {
     nativeName: 'Português',
     direction: 'ltr',
     isDefault: false,
-    isActive: false, // Planned for future expansion
+    isActive: true,
   },
   it: {
     code: 'it',
@@ -49,13 +49,36 @@ export const LOCALES: Record<SupportedLocale, LocaleConfig> = {
     nativeName: 'Italiano',
     direction: 'ltr',
     isDefault: false,
-    isActive: false, // Planned for future expansion
+    isActive: true,
+  },
+  ja: {
+    code: 'ja',
+    name: 'Japanese',
+    nativeName: '日本語',
+    direction: 'ltr',
+    isDefault: false,
+    isActive: true,
+  },
+  ko: {
+    code: 'ko',
+    name: 'Korean',
+    nativeName: '한국어',
+    direction: 'ltr',
+    isDefault: false,
+    isActive: true,
   },
 };
 
 /**
+ * Returns list of non-default active language codes for route generation.
+ * (e.g. ['es', 'fr', 'de', 'pt', 'it', 'ja', 'ko'])
+ */
+export function getNonDefaultLocales(): SupportedLocale[] {
+  return (Object.keys(LOCALES) as SupportedLocale[]).filter((code) => code !== DEFAULT_LOCALE);
+}
+
+/**
  * Returns currently active languages in production.
- * Currently returns ['en'] strictly to prevent generating nonexistent localized pages or hreflang links.
  */
 export function getActiveLocales(): LocaleConfig[] {
   return Object.values(LOCALES).filter((loc) => loc.isActive);
@@ -66,4 +89,8 @@ export function getLocaleConfig(locale: string): LocaleConfig {
     return LOCALES[locale as SupportedLocale];
   }
   return LOCALES[DEFAULT_LOCALE];
+}
+
+export function isSupportedLocale(locale: string): locale is SupportedLocale {
+  return locale in LOCALES;
 }

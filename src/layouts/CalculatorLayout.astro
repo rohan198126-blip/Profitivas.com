@@ -9,34 +9,43 @@ import JsonLd from '../components/seo/JsonLd.astro';
 import AdSlot from '../components/ads/AdSlot.astro';
 import { getSoftwareApplicationSchema } from '../lib/seo/schema';
 import type { CalculatorContent } from '../lib/calculators/types';
+import type { SupportedLocale } from '../lib/i18n/types';
+import { useTranslations, getLocalizedPath } from '../lib/i18n';
 
 export interface Props {
   content: CalculatorContent;
+  locale?: SupportedLocale;
 }
 
-const { content } = Astro.props;
+const { content, locale = 'en' } = Astro.props;
 const { meta, formulas, workedExample, assumptions, faqs, relatedSlugs } = content;
+const t = useTranslations(locale);
 
-const categoryLabels = {
-  'pricing-profit': 'Pricing & Profit',
-  business: 'Business Finance',
-  marketing: 'Marketing & Growth',
+const localizedCalculatorsPath = getLocalizedPath('/calculators', locale);
+const localizedCanonical = `https://profitivas.com${getLocalizedPath(`/${meta.slug}`, locale)}`;
+
+const categoryMap: Record<string, string> = {
+  'pricing-profit': t.categories.pricingProfit,
+  business: t.categories.businessFinance,
+  marketing: t.categories.marketingGrowth,
 };
 ---
 
 <BaseLayout
   title={meta.seoTitle}
   description={meta.seoDescription}
-  canonicalUrl={`https://profitivas.com/${meta.slug}`}
+  canonicalUrl={localizedCanonical}
+  locale={locale}
 >
   <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
     <!-- Breadcrumbs: Subtle, muted text -->
     <Breadcrumbs
       items={[
-        { label: 'Calculators', href: '/calculators' },
-        { label: categoryLabels[meta.category], href: `/calculators#${meta.category}` },
+        { label: t.nav.calculators, href: localizedCalculatorsPath },
+        { label: categoryMap[meta.category] || meta.category, href: `${localizedCalculatorsPath}#${meta.category}` },
         { label: meta.name },
       ]}
+      locale={locale}
     />
 
     <!-- Header Section: Clean editorial intro -->
@@ -60,20 +69,20 @@ const categoryLabels = {
     <!-- Supporting Documentation & Context -->
     <div class="pt-12 sm:pt-16 border-t border-[var(--border)] space-y-14 sm:space-y-16">
       <!-- Formulas & Logic -->
-      <FormulaExplanation formulas={formulas} />
+      <FormulaExplanation formulas={formulas} locale={locale} />
 
       <!-- Worked Business Example -->
-      <WorkedExampleSection example={workedExample} />
+      <WorkedExampleSection example={workedExample} locale={locale} />
 
       <!-- Methodology & Assumptions -->
       {assumptions && assumptions.length > 0 && (
         <section aria-labelledby="assumptions-heading" class="space-y-4">
           <div>
             <h2 id="assumptions-heading" class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
-              Methodology & Assumptions
+              {t.calculatorSections.methodologyAndAssumptions}
             </h2>
             <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
-              Underlying definitions and operational accounting principles.
+              {t.calculatorSections.methodologyDescription}
             </p>
           </div>
           <dl class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 pt-1">
@@ -92,10 +101,10 @@ const categoryLabels = {
       )}
 
       <!-- Frequently Asked Questions -->
-      <FaqSection faqs={faqs} />
+      <FaqSection faqs={faqs} locale={locale} />
 
       <!-- Related Calculators -->
-      <RelatedCalculators relatedSlugs={relatedSlugs} />
+      <RelatedCalculators relatedSlugs={relatedSlugs} locale={locale} />
 
       <!-- Safe Bottom Ad Placement (Zero render when inactive) -->
       <AdSlot position="bottom" />

@@ -1,5 +1,14 @@
 ---
-// Compact Central Product Interaction Box
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations, getLocalizedPath } from '../../lib/i18n';
+
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
+const calculatorsPath = getLocalizedPath('/calculators', locale);
 ---
 
 <div class="w-full max-w-[620px] mx-auto">
@@ -7,12 +16,12 @@
   <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-8 sm:p-10 text-center">
     <!-- Focused Title -->
     <h2 class="text-lg sm:text-xl font-semibold tracking-tight text-[var(--text-primary)]">
-      Find a calculator
+      {t.common.findCalculator}
     </h2>
 
     <!-- Short Muted Description -->
     <p class="text-xs sm:text-sm text-[var(--text-secondary)] font-normal mt-1.5 mb-7">
-      Choose the calculation you need.
+      {t.common.chooseCalculationYouNeed}
     </p>
 
     <!-- Two Clear Actions Only -->
@@ -22,20 +31,20 @@
         id="btn-open-picker"
         class="w-full sm:w-auto inline-flex items-center justify-center bg-[var(--text-primary)] text-[var(--background)] hover:opacity-90 font-medium px-5 py-2.5 rounded-lg text-sm transition-opacity cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
       >
-        Choose a calculator
+        {t.actions.chooseCalculator}
       </button>
 
       <a
-        href="/calculators"
+        href={calculatorsPath}
         class="w-full sm:w-auto inline-flex items-center justify-center border border-[var(--border)] bg-transparent hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium px-5 py-2.5 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)]"
       >
-        Browse all calculators
+        {t.actions.browseAllCalculators}
       </a>
     </div>
 
     <!-- Small Muted Trust Line -->
     <p class="text-xs text-[var(--text-muted)] mt-7">
-      Free · No sign-up · Instant results
+      {t.common.launcherTrust}
     </p>
   </div>
 </div>

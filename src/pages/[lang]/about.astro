@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import { getNonDefaultLocales, useTranslations, getLocalizedPath } from '../../lib/i18n';
+import type { SupportedLocale } from '../../lib/i18n/types';
+
+export function getStaticPaths() {
+  return getNonDefaultLocales().map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params as { lang: SupportedLocale };
+const t = useTranslations(lang);
+const canonicalUrl = `https://profitivas.com${getLocalizedPath('/about', lang)}`;
+---
+
+<BaseLayout
+  title={`${t.about.title} — Profitivas`}
+  description={t.about.subtitle}
+  canonicalUrl={canonicalUrl}
+  locale={lang}
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <!-- Breadcrumbs -->
+    <Breadcrumbs items={[{ label: t.nav.about }]} locale={lang} />
+
+    <header class="mt-6 mb-10 sm:mb-12">
+      <p class="text-xs font-medium text-[var(--text-muted)] tracking-[0.2em] uppercase mb-2.5">
+        {t.nav.about}
+      </p>
+      <h1 class="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
+        {t.about.title}
+      </h1>
+      <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-3 leading-relaxed font-normal">
+        {t.about.subtitle}
+      </p>
+    </header>
+
+    <article class="space-y-10 sm:space-y-12 text-sm text-[var(--text-secondary)] leading-relaxed">
+      <!-- Mission Section -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.about.missionHeading}
+        </h2>
+        <p>{t.about.missionP1}</p>
+        <p>{t.about.missionP2}</p>
+      </section>
+
+      <!-- Principles Section -->
+      <section class="space-y-4 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.about.principlesHeading}
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-1">
+          <div class="space-y-1.5">
+            <h3 class="font-medium text-sm text-[var(--text-primary)]">
+              {t.about.p1Title}
+            </h3>
+            <p class="text-xs text-[var(--text-secondary)] leading-normal">
+              {t.about.p1Desc}
+            </p>
+          </div>
+          <div class="space-y-1.5">
+            <h3 class="font-medium text-sm text-[var(--text-primary)]">
+              {t.about.p2Title}
+            </h3>
+            <p class="text-xs text-[var(--text-secondary)] leading-normal">
+              {t.about.p2Desc}
+            </p>
+          </div>
+          <div class="space-y-1.5 sm:col-span-2">
+            <h3 class="font-medium text-sm text-[var(--text-primary)]">
+              {t.about.p3Title}
+            </h3>
+            <p class="text-xs text-[var(--text-secondary)] leading-normal">
+              {t.about.p3Desc}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact Section -->
+      <section id="contact" class="space-y-3 pt-6 border-t border-[var(--border)] scroll-mt-16">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          {t.about.contactHeading}
+        </h2>
+        <p>{t.about.contactText}</p>
+        <p>
+          <a href={getLocalizedPath('/calculators', lang)} class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80">
+            {t.actions.browseAllCalculators}
+          </a> · 
+          <a href={getLocalizedPath('/privacy', lang)} class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80">
+            {t.nav.privacy}
+          </a> · 
+          <a href={getLocalizedPath('/terms', lang)} class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80">
+            {t.nav.terms}
+          </a>
+        </p>
+      </section>
+    </article>
+  </div>
+</BaseLayout>

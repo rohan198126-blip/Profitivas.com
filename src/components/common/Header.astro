@@ -1,31 +1,41 @@
 ---
 import { Search, Menu, X } from 'lucide-astro';
 import ThemeToggle from './ThemeToggle.astro';
+import Logo from './Logo.astro';
+import LanguageSelector from './LanguageSelector.astro';
+import { getLocaleFromUrl, getLocalizedPath, useTranslations, type SupportedLocale } from '../../lib/i18n';
 
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const currentLocale = Astro.props.locale || getLocaleFromUrl(Astro.url);
 const currentPath = Astro.url.pathname;
+const t = useTranslations(currentLocale);
 
 const navItems = [
-  { label: 'Calculators', href: '/calculators' },
-  { label: 'Categories', href: '/calculators#categories' },
-  { label: 'Resources', href: '/calculators' },
-  { label: 'About', href: '/about' },
+  { label: t.nav.calculators, href: getLocalizedPath('/calculators', currentLocale) },
+  { label: t.nav.categories, href: `${getLocalizedPath('/calculators', currentLocale)}#categories` },
+  { label: t.nav.resources, href: getLocalizedPath('/calculators', currentLocale) },
+  { label: t.nav.about, href: getLocalizedPath('/about', currentLocale) },
 ];
 ---
 
 <header class="border-b border-[var(--border)] bg-[var(--background)]/85 backdrop-blur-md sticky top-0 z-40 transition-colors">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 sm:h-18 flex items-center justify-between">
     <!-- Brand & Desktop Navigation -->
-    <div class="flex items-center gap-8 sm:gap-10">
+    <div class="flex items-center gap-6 sm:gap-8">
       <a
-        href="/"
-        class="text-[var(--text-primary)] font-bold text-base tracking-tight hover:opacity-90 transition-opacity"
+        href={getLocalizedPath('/', currentLocale)}
+        class="group flex items-center gap-2 text-[var(--text-primary)] font-bold text-base tracking-tight hover:opacity-90 transition-opacity"
         aria-label="Profitivas Home"
       >
-        Profitivas
+        <Logo size={22} />
+        <span>Profitivas</span>
       </a>
 
       <!-- Primary Navigation Links (Desktop) -->
-      <nav class="hidden md:flex items-center gap-6" aria-label="Main Navigation">
+      <nav class="hidden md:flex items-center gap-5 lg:gap-6" aria-label="Main Navigation">
         {navItems.map((item) => {
           const isActive = currentPath === item.href;
           return (
@@ -45,21 +55,26 @@ const navItems = [
       </nav>
     </div>
 
-    <!-- Right Controls: Search, Theme Toggle, and Mobile Menu Button -->
-    <div class="flex items-center gap-2 sm:gap-3">
+    <!-- Right Controls: Search, Language Picker, Theme Toggle, and Mobile Menu Button -->
+    <div class="flex items-center gap-2 sm:gap-2.5">
       <!-- Quiet Desktop Search Trigger -->
       <button
         type="button"
         id="header-search-btn"
         class="hidden sm:inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer"
-        aria-label="Search calculators"
+        aria-label={t.actions.searchCalculators}
       >
         <Search class="w-3.5 h-3.5 text-[var(--text-muted)]" />
-        <span>Search</span>
+        <span>{t.actions.searchCalculators.replace('...', '')}</span>
         <kbd class="hidden lg:inline-flex items-center px-1 text-[10px] font-mono text-[var(--text-muted)]">
           ⌘K
         </kbd>
       </button>
+
+      <!-- Language Selector (Desktop) -->
+      <div class="hidden sm:inline-flex">
+        <LanguageSelector currentLocale={currentLocale} />
+      </div>
 
       <!-- Theme Toggle (Utility Control) -->
       <ThemeToggle />
@@ -73,8 +88,8 @@ const navItems = [
         aria-expanded="false"
         aria-controls="mobile-nav-menu"
       >
-        <Menu class="w-4 h-4 block" id="mobile-menu-open-icon" />
-        <X class="w-4 h-4 hidden" id="mobile-menu-close-icon" />
+        <Menu id="mobile-menu-open-icon" class="w-4 h-4 block" />
+        <X id="mobile-menu-close-icon" class="w-4 h-4 hidden" />
       </button>
     </div>
   </div>
@@ -100,21 +115,30 @@ const navItems = [
         class="inline-flex items-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1.5 transition-colors text-left cursor-pointer"
       >
         <Search class="w-3.5 h-3.5 text-[var(--text-muted)]" />
-        <span>Search calculators</span>
+        <span>{t.actions.searchCalculators}</span>
       </button>
+
+      <!-- Mobile Language Selector in Drawer -->
+      <div class="pt-2 border-t border-[var(--border)]">
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-1.5">
+          {t.actions.selectLanguage}
+        </span>
+        <LanguageSelector currentLocale={currentLocale} isMobile={true} />
+      </div>
     </nav>
   </div>
 </header>
 
 <script>
   function setupHeaderInteractions() {
-    // 1. Unified Search Action: Open calculator picker if present, otherwise navigate to /calculators
     function triggerCalculatorSearch() {
       const pickerDialog = document.getElementById('calc-picker-dialog');
       if (pickerDialog) {
         window.dispatchEvent(new CustomEvent('profitivas:open-picker'));
       } else {
-        window.location.href = '/calculators';
+        const localeMatch = window.location.pathname.match(/^\/(es|fr|de|pt|it|ja|ko)/);
+        const prefix = localeMatch ? localeMatch[0] : '';
+        window.location.href = `${prefix}/calculators`;
       }
     }
 
@@ -123,7 +147,7 @@ const navItems = [
 
     headerSearchBtn?.addEventListener('click', triggerCalculatorSearch);
 
-    // 2. Mobile Menu Controller
+    // Mobile Menu Controller
     const menuBtn = document.getElementById('mobile-menu-btn');
     const navMenu = document.getElementById('mobile-nav-menu');
     const openIcon = document.getElementById('mobile-menu-open-icon');
@@ -139,15 +163,14 @@ const navItems = [
     function toggleMobileMenu() {
       const isExpanded = menuBtn?.getAttribute('aria-expanded') === 'true';
       const nextState = !isExpanded;
+
       menuBtn?.setAttribute('aria-expanded', String(nextState));
       if (nextState) {
         navMenu?.classList.remove('hidden');
         openIcon?.classList.add('hidden');
         closeIcon?.classList.remove('hidden');
       } else {
-        navMenu?.classList.add('hidden');
-        openIcon?.classList.remove('hidden');
-        closeIcon?.classList.add('hidden');
+        closeMobileMenu();
       }
     }
 
@@ -158,19 +181,15 @@ const navItems = [
       triggerCalculatorSearch();
     });
 
-    // Close mobile menu when clicking any link
-    navMenu?.querySelectorAll('.mobile-nav-link').forEach((link) => {
+    const mobileLinks = navMenu?.querySelectorAll('.mobile-nav-link');
+    mobileLinks?.forEach((link) => {
       link.addEventListener('click', closeMobileMenu);
     });
 
-    // Close on Escape key
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (menuBtn?.getAttribute('aria-expanded') === 'true') {
-          closeMobileMenu();
-        }
+      if (e.key === 'Escape' && menuBtn?.getAttribute('aria-expanded') === 'true') {
+        closeMobileMenu();
       }
-      // Global ⌘K / Ctrl+K keyboard shortcut
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         triggerCalculatorSearch();
@@ -178,7 +197,6 @@ const navItems = [
     });
   }
 
-  // Initialize on load and on Astro page transitions
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupHeaderInteractions);
   } else {

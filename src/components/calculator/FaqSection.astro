@@ -1,22 +1,26 @@
 ---
 import type { FAQItem } from '../../lib/calculators/types';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations } from '../../lib/i18n';
 import JsonLd from '../seo/JsonLd.astro';
 import { getFaqSchema } from '../../lib/seo/schema';
 
 export interface Props {
   faqs: FAQItem[];
+  locale?: SupportedLocale;
 }
 
-const { faqs } = Astro.props;
+const { faqs, locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
 ---
 
 <section aria-labelledby="faqs-heading" class="space-y-4">
   <div>
     <h2 id="faqs-heading" class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
-      Frequently Asked Questions
+      {t.calculatorSections.frequentlyAskedQuestions}
     </h2>
     <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
-      Practical answers regarding margins, markups, and pricing strategy.
+      {t.calculatorSections.methodologyDescription}
     </p>
   </div>
 

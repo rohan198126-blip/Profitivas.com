@@ -1,26 +1,35 @@
 ---
 import { Search, X } from 'lucide-astro';
 import { CATEGORIES, getAllCalculators } from '../../lib/calculators/registry';
+import type { SupportedLocale } from '../../lib/i18n/types';
+import { useTranslations, getLocalizedPath } from '../../lib/i18n';
+import { getLocalizedCalculatorContent } from '../../lib/i18n/calculators';
 
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const { locale = 'en' } = Astro.props;
+const t = useTranslations(locale);
 const allCalculators = getAllCalculators();
 
 // Keywords mapping for accurate business search matching
 const KEYWORDS: Record<string, string> = {
-  'profit-margin': 'margin markup profit gross revenue cost cogs pricing price return',
-  markup: 'markup margin profit cost price revenue return pricing',
-  'selling-price': 'selling price cost target margin pricing quote retail cogs',
-  discount: 'discount sale savings percentage reduction pricing markdown clearance',
-  'gross-profit': 'gross profit revenue cogs margin cost sales earnings',
-  'break-even': 'break even breakeven fixed variable costs units volume revenue finance',
-  'target-profit': 'target profit sales volume goal income revenue required units finance',
-  revenue: 'revenue sales volume price units projections earnings finance',
-  commission: 'commission sales bonus tiered payout rate earnings compensation finance',
-  roi: 'roi return on investment capital gain project yield profitability finance',
-  roas: 'roas return on ad spend advertising marketing paid ads campaign efficiency',
-  cac: 'cac customer acquisition cost marketing paid organic acquisition blend',
-  ltv: 'ltv customer lifetime value retention churn revenue marketing growth',
-  'ltv-cac': 'ltv cac ratio unit economics sustainability efficiency benchmark marketing growth',
-  'conversion-rate': 'conversion rate visitors leads checkouts funnel landing page marketing growth',
+  'profit-margin': 'margin markup profit gross revenue cost cogs pricing price return margen marge marge gewinn margem margine マージン 마진',
+  markup: 'markup margin profit cost price revenue return pricing margen marge gewinn ricarico マークアップ 마크업',
+  'selling-price': 'selling price cost target margin pricing quote retail cogs precio vente verkaufspreis preço prezzo 価格 판매가격',
+  discount: 'discount sale savings percentage reduction pricing markdown clearance descuento rabais rabatt desconto sconto 割引 할인',
+  'gross-profit': 'gross profit revenue cogs margin cost sales earnings beneficio brut gewinn lucro bruto utile lordo 粗利益 매출총이익',
+  'break-even': 'break even breakeven fixed variable costs units volume revenue finance umbral seuil schwelle ponto pareggio 損益分岐 손익분기',
+  'target-profit': 'target profit sales volume goal income revenue required units finance objetivo ziel meta obiettivo 目標利益 목표이익',
+  revenue: 'revenue sales volume price units projections earnings finance ingresos revenu umsatz receita ricavi 売上 매출',
+  commission: 'commission sales bonus tiered payout rate earnings compensation finance comision provisie provision provvigione 手数料 수수료',
+  roi: 'roi return on investment capital gain project yield profitability finance retorno investissement rendite retorno investimento 投資収益 投資利益',
+  roas: 'roas return on ad spend advertising marketing paid ads campaign efficiency publicidad pub werbewerbung annonces 광고수익',
+  cac: 'cac customer acquisition cost marketing paid organic acquisition blend adquisicion acquisition kundenakquisition aquisição acquisizione 顧客獲得 顧客獲得費用',
+  ltv: 'ltv customer lifetime value retention churn revenue marketing growth valor vie kundenwert valor vita 顧客生涯価値 고객생애가치',
+  'ltv-cac': 'ltv cac ratio unit economics sustainability efficiency benchmark marketing growth relacion ratio proportion rapport 比率 비율',
+  'conversion-rate': 'conversion rate visitors leads checkouts funnel landing page marketing growth conversion konversion conversione 転換率 전환율',
 };
 
 let globalCounter = 0;
@@ -28,14 +37,21 @@ const categorizedCalculators = CATEGORIES.map((cat) => {
   const calcs = allCalculators.filter((c) => c.category === cat.id);
   const itemsWithIndex = calcs.map((c) => {
     globalCounter += 1;
+    const localized = getLocalizedCalculatorContent(c.slug, locale);
+    const meta = localized?.meta || c;
     return {
       ...c,
+      name: meta.name,
+      tagline: meta.tagline,
+      slug: c.slug,
+      localizedHref: getLocalizedPath(`/${c.slug}`, locale),
       displayNum: String(globalCounter).padStart(2, '0'),
       keywords: KEYWORDS[c.id] || '',
     };
   });
   return {
     ...cat,
+    name: (t.categories as Record<string, string>)[cat.id] || cat.name,
     calculators: itemsWithIndex,
   };
 });
@@ -59,17 +75,17 @@ const categorizedCalculators = CATEGORIES.map((cat) => {
       <div class="flex items-start justify-between gap-4">
         <div>
           <h2 id="picker-title" class="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)]">
-            Choose a calculator
+            {t.actions.chooseCalculator}
           </h2>
           <p class="text-xs text-[var(--text-secondary)] mt-0.5">
-            Search by name, category, or what you need to calculate.
+            {t.common.searchByNameOrCategory}
           </p>
         </div>
         <button
           type="button"
           id="picker-close-btn"
           class="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)] transition-colors rounded-md shrink-0 cursor-pointer"
-          aria-label="Close picker"
+          aria-label={t.actions.close}
         >
           <X class="w-4 h-4" />
         </button>
@@ -81,7 +97,7 @@ const categorizedCalculators = CATEGORIES.map((cat) => {
         <input
           type="search"
           id="picker-search-input"
-          placeholder="Search calculators..."
+          placeholder={t.actions.searchCalculators}
           autocomplete="off"
           class="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
         />
@@ -95,9 +111,9 @@ const categorizedCalculators = CATEGORIES.map((cat) => {
     <div id="picker-scroll-area" class="overflow-y-auto p-3 sm:p-4 space-y-5 flex-1">
       <!-- Empty Search State -->
       <div id="picker-empty-state" class="hidden py-8 text-center space-y-1">
-        <p class="text-sm font-medium text-[var(--text-primary)]">No calculators found</p>
+        <p class="text-sm font-medium text-[var(--text-primary)]">{t.common.noCalculatorsFound}</p>
         <p class="text-xs text-[var(--text-muted)]">
-          Try searching for profit, pricing, finance, or marketing.
+          {t.common.trySearchingSuggestions}
         </p>
       </div>
 
@@ -124,7 +140,7 @@ const categorizedCalculators = CATEGORIES.map((cat) => {
                   >
                     {isActive ? (
                       <a
-                        href={`/${calc.slug}`}
+                        href={calc.localizedHref}
                         class="picker-row flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-[var(--surface-subtle)] transition-colors group focus-visible:outline-none focus:bg-[var(--surface-subtle)] focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)]"
                       >
                         <div class="flex items-center gap-3 min-w-0">
@@ -142,7 +158,7 @@ const categorizedCalculators = CATEGORIES.map((cat) => {
                         </div>
                         <div class="flex items-center gap-2 shrink-0 ml-3">
                           <span class="text-[10px] font-medium uppercase tracking-wider text-[var(--positive-text)] hidden sm:inline">
-                            Active
+                            {t.common.activeStatus}
                           </span>
                           <span class="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-0.5 transition-all" aria-hidden="true">
                             &rarr;
@@ -165,7 +181,7 @@ const categorizedCalculators = CATEGORIES.map((cat) => {
                           </div>
                         </div>
                         <span class="text-[10px] text-[var(--text-muted)] shrink-0 ml-3">
-                          In development
+                          {t.common.inDevelopment}
                         </span>
                       </div>
                     )}
@@ -180,9 +196,9 @@ const categorizedCalculators = CATEGORIES.map((cat) => {
 
     <!-- Modal Footer -->
     <div class="px-4 py-2.5 bg-[var(--surface-subtle)] border-t border-[var(--border)] flex items-center justify-between text-[11px] text-[var(--text-muted)]">
-      <span>15 calculators in catalog</span>
-      <a href="/calculators" class="hover:text-[var(--text-primary)] transition-colors font-medium">
-        Browse all calculators &rarr;
+      <span>{t.common.availableTools}</span>
+      <a href={getLocalizedPath('/calculators', locale)} class="hover:text-[var(--text-primary)] transition-colors font-medium">
+        {t.actions.browseAllCalculators} &rarr;
       </a>
     </div>
   </div>

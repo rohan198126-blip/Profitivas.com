@@ -1,20 +1,24 @@
 ---
 import type { FormulaStep } from '../../lib/calculators/types';
+import { getLocaleFromUrl, useTranslations, type SupportedLocale } from '../../lib/i18n';
 
 export interface Props {
   formulas: FormulaStep[];
+  locale?: SupportedLocale;
 }
 
-const { formulas } = Astro.props;
+const { formulas, locale: propLocale } = Astro.props;
+const currentLocale = propLocale || getLocaleFromUrl(Astro.url);
+const t = useTranslations(currentLocale);
 ---
 
 <section aria-labelledby="formulas-heading" class="space-y-4">
   <div>
     <h2 id="formulas-heading" class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
-      Formulas & Logic
+      {t.calculatorSections.formulaExplanation}
     </h2>
     <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
-      Transparent mathematical formulas behind this calculation engine.
+      {t.calculatorSections.methodologyDescription}
     </p>
   </div>
 

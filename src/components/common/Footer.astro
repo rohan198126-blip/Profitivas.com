@@ -1,8 +1,22 @@
 ---
 import { CATEGORIES, getActiveCalculatorsMeta } from '../../lib/calculators/registry';
+import { getLocaleFromUrl, getLocalizedPath, useTranslations, type SupportedLocale } from '../../lib/i18n';
+import { getLocalizedCalculatorContent } from '../../lib/i18n/calculators';
 
+export interface Props {
+  locale?: SupportedLocale;
+}
+
+const currentLocale = Astro.props.locale || getLocaleFromUrl(Astro.url);
 const currentYear = new Date().getFullYear();
 const activeCalculators = getActiveCalculatorsMeta();
+const t = useTranslations(currentLocale);
+
+const categoryTranslations: Record<string, string> = {
+  'pricing-profit': t.categories.pricingProfit,
+  business: t.categories.businessFinance,
+  marketing: t.categories.marketingGrowth,
+};
 ---
 
 <footer class="border-t border-[var(--footer-border)] bg-[var(--footer-bg)] mt-16 sm:mt-24 no-print transition-colors">
@@ -10,30 +24,39 @@ const activeCalculators = getActiveCalculatorsMeta();
     <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
       <!-- Brand column -->
       <div class="md:col-span-2 space-y-2">
-        <a href="/" class="text-[var(--text-primary)] font-bold text-sm tracking-tight hover:opacity-85 transition-opacity">
+        <a href={getLocalizedPath('/', currentLocale)} class="text-[var(--text-primary)] font-bold text-sm tracking-tight hover:opacity-85 transition-opacity">
           Profitivas
         </a>
         <p class="text-xs text-[var(--text-secondary)] max-w-sm leading-relaxed">
-          Business numbers. Better decisions. Fast, modern, mathematically verified calculation tools for operators and founders.
+          {t.common.brandDescription}
         </p>
       </div>
 
       <!-- Active Tools -->
       <div>
         <h3 class="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2.5">
-          Available Tools
+          {t.common.availableTools}
         </h3>
         <ul class="space-y-1.5 text-xs text-[var(--text-secondary)]">
-          {activeCalculators.map((calc) => (
-            <li>
-              <a href={`/${calc.slug}`} class="hover:text-[var(--text-primary)] transition-colors">
-                {calc.name}
-              </a>
-            </li>
-          ))}
+          {activeCalculators.map((calc) => {
+            const localized = getLocalizedCalculatorContent(calc.slug, currentLocale);
+            const displayName = localized?.meta.name || calc.name;
+            return (
+              <li>
+                <a href={getLocalizedPath(calc.slug, currentLocale)} class="hover:text-[var(--text-primary)] transition-colors">
+                  {displayName}
+                </a>
+              </li>
+            );
+          })}
           <li>
-            <a href="/calculators" class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80 font-medium transition-opacity">
-              Browse all calculators &rarr;
+            <a href={getLocalizedPath('/invoice-generator', currentLocale)} class="hover:text-[var(--text-primary)] transition-colors font-medium">
+              Invoice Generator
+            </a>
+          </li>
+          <li>
+            <a href={getLocalizedPath('/calculators', currentLocale)} class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80 font-medium transition-opacity">
+              {t.actions.browseAllCalculators} &rarr;
             </a>
           </li>
         </ul>
@@ -42,13 +65,13 @@ const activeCalculators = getActiveCalculatorsMeta();
       <!-- Categories -->
       <div>
         <h3 class="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2.5">
-          Categories
+          {t.nav.categories}
         </h3>
         <ul class="space-y-1.5 text-xs text-[var(--text-secondary)]">
           {CATEGORIES.map((category) => (
             <li>
-              <a href={`/calculators#${category.id}`} class="hover:text-[var(--text-primary)] transition-colors">
-                {category.name}
+              <a href={`${getLocalizedPath('/calculators', currentLocale)}#${category.id}`} class="hover:text-[var(--text-primary)] transition-colors">
+                {categoryTranslations[category.id] || category.name}
               </a>
             </li>
           ))}
@@ -59,18 +82,17 @@ const activeCalculators = getActiveCalculatorsMeta();
     <!-- Financial Disclaimer, Legal Links & Copyright -->
     <div class="border-t border-[var(--border-subtle)] pt-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[11px] text-[var(--text-muted)]">
       <p class="max-w-xl leading-relaxed">
-        <strong class="text-[var(--text-secondary)]">Disclaimer:</strong> Profitivas calculators and educational guides are provided for informational and planning purposes only. Calculations should be verified before making major financial commitments.
+        <strong class="text-[var(--text-secondary)]">{t.common.disclaimerLabel}</strong> {t.common.disclaimerText}
       </p>
+
       <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 shrink-0">
         <div class="flex items-center gap-4 text-[var(--text-secondary)]">
-          <a href="/about" class="hover:text-[var(--text-primary)] transition-colors">About</a>
-          <a href="/about#contact" class="hover:text-[var(--text-primary)] transition-colors">Contact</a>
-          <a href="/privacy" class="hover:text-[var(--text-primary)] transition-colors">Privacy</a>
-          <a href="/terms" class="hover:text-[var(--text-primary)] transition-colors">Terms</a>
+          <a href={getLocalizedPath('/about', currentLocale)} class="hover:text-[var(--text-primary)] transition-colors">{t.nav.about}</a>
+          <a href={`${getLocalizedPath('/about', currentLocale)}#contact`} class="hover:text-[var(--text-primary)] transition-colors">{t.nav.contact}</a>
+          <a href={getLocalizedPath('/privacy', currentLocale)} class="hover:text-[var(--text-primary)] transition-colors">{t.nav.privacy}</a>
+          <a href={getLocalizedPath('/terms', currentLocale)} class="hover:text-[var(--text-primary)] transition-colors">{t.nav.terms}</a>
         </div>
-        <p class="whitespace-nowrap">
-          &copy; {currentYear} Profitivas. All rights reserved.
-        </p>
+        <p class="whitespace-nowrap">&copy; {currentYear} Profitivas. {t.common.allRightsReserved}</p>
       </div>
     </div>
   </div>

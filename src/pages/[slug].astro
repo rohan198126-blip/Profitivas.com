@@ -33,7 +33,7 @@ export interface Props {
 const { content } = Astro.props;
 ---
 
-<CalculatorLayout content={content}>
+<CalculatorLayout content={content} locale="en">
   {content.meta.id === 'profit-margin' && <ProfitMarginCalculator />}
   {content.meta.id === 'markup' && <MarkupCalculator />}
   {content.meta.id === 'selling-price' && <SellingPriceCalculator />}

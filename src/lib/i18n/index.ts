@@ -1,5 +1,12 @@
 import { DEFAULT_LOCALE, LOCALES, getActiveLocales } from './config';
 import { enTranslations } from './translations/en';
+import { esTranslations } from './translations/es';
+import { frTranslations } from './translations/fr';
+import { deTranslations } from './translations/de';
+import { ptTranslations } from './translations/pt';
+import { itTranslations } from './translations/it';
+import { jaTranslations } from './translations/ja';
+import { koTranslations } from './translations/ko';
 import type { SupportedLocale, UiTranslations } from './types';
 
 export * from './types';
@@ -7,11 +14,13 @@ export * from './config';
 
 const TRANSLATION_MAP: Record<SupportedLocale, UiTranslations> = {
   en: enTranslations,
-  es: enTranslations, // Fallback to English until fully translated
-  fr: enTranslations,
-  de: enTranslations,
-  pt: enTranslations,
-  it: enTranslations,
+  es: esTranslations,
+  fr: frTranslations,
+  de: deTranslations,
+  pt: ptTranslations,
+  it: itTranslations,
+  ja: jaTranslations,
+  ko: koTranslations,
 };
 
 /**
@@ -28,7 +37,7 @@ export function useTranslations(locale: string = DEFAULT_LOCALE): UiTranslations
 /**
  * Parses locale from URL pathname.
  * English URLs remain unprefixed (e.g. /profit-margin-calculator).
- * Future localized URLs will support prefixes like /es/... or /fr/...
+ * Localized URLs have a prefix like /es/... or /fr/...
  */
 export function getLocaleFromUrl(url: URL | string): SupportedLocale {
   const pathname = typeof url === 'string' ? url : url.pathname;
@@ -42,10 +51,31 @@ export function getLocaleFromUrl(url: URL | string): SupportedLocale {
 }
 
 /**
+ * Extracts the base un-localized route path from any localized or un-localized pathname.
+ * Examples:
+ * getBasePath('/es/profit-margin-calculator') -> '/profit-margin-calculator'
+ * getBasePath('/profit-margin-calculator') -> '/profit-margin-calculator'
+ * getBasePath('/fr/about') -> '/about'
+ * getBasePath('/de') -> '/'
+ * getBasePath('/') -> '/'
+ */
+export function getBasePath(pathname: string): string {
+  const clean = pathname.replace(/\/$/, '') || '/';
+  const segments = clean.split('/').filter(Boolean);
+  const first = segments[0] as SupportedLocale;
+
+  if (first && first in LOCALES) {
+    const remaining = segments.slice(1).join('/');
+    return remaining ? `/${remaining}` : '/';
+  }
+  return clean.startsWith('/') ? clean : `/${clean}`;
+}
+
+/**
  * Generates localized path while keeping English URLs completely unprefixed.
  * Example:
  * getLocalizedPath('/about', 'en') -> '/about'
- * getLocalizedPath('/about', 'es') -> '/es/about' (when Spanish is activated)
+ * getLocalizedPath('/about', 'es') -> '/es/about'
  */
 export function getLocalizedPath(path: string, locale: SupportedLocale = DEFAULT_LOCALE): string {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
@@ -55,14 +85,32 @@ export function getLocalizedPath(path: string, locale: SupportedLocale = DEFAULT
     return cleanPath;
   }
 
-  // Future prefix logic for active international routes
+  // If root path, return /locale (e.g. /es)
+  if (cleanPath === '/') {
+    return `/${locale}`;
+  }
+
   return `/${locale}${cleanPath}`;
 }
 
 /**
+ * Given any current URL pathname and a target locale, returns the equivalent path in that locale.
+ * Perfect for the Header language switcher.
+ * Examples:
+ * getEquivalentPath('/profit-margin-calculator', 'es') -> '/es/profit-margin-calculator'
+ * getEquivalentPath('/es/profit-margin-calculator', 'en') -> '/profit-margin-calculator'
+ * getEquivalentPath('/de/about', 'ja') -> '/ja/about'
+ * getEquivalentPath('/fr', 'en') -> '/'
+ * getEquivalentPath('/', 'es') -> '/es'
+ */
+export function getEquivalentPath(currentPathname: string, targetLocale: SupportedLocale): string {
+  const base = getBasePath(currentPathname);
+  return getLocalizedPath(base, targetLocale);
+}
+
+/**
  * Prepares hreflang alternate link records for international SEO.
- * Strictly checks for active languages only.
- * When English is the sole active language, returns an empty list so no broken or fake hreflang tags are output.
+ * Includes all active locales plus x-default pointing to the default English URL.
  */
 export function getAlternateLanguageLinks(
   canonicalBase: string,
@@ -70,16 +118,24 @@ export function getAlternateLanguageLinks(
 ): Array<{ href: string; hreflang: string }> {
   const activeLocales = getActiveLocales();
 
-  // If only 1 language is active (English), do NOT emit alternate links
   if (activeLocales.length <= 1) {
     return [];
   }
 
   const cleanBase = canonicalBase.replace(/\/$/, '');
-  const cleanPath = path.replace(/\/$/, '') || '/';
+  const basePath = getBasePath(path);
 
-  return activeLocales.map((loc) => ({
+  // Generates alternate links for all 8 active locales
+  const alternates: Array<{ href: string; hreflang: string }> = activeLocales.map((loc) => ({
     hreflang: loc.code,
-    href: `${cleanBase}${getLocalizedPath(cleanPath, loc.code)}`,
+    href: `${cleanBase}${getLocalizedPath(basePath, loc.code)}`,
   }));
+
+  // Append x-default pointing to the canonical English equivalent
+  alternates.push({
+    hreflang: 'x-default',
+    href: `${cleanBase}${getLocalizedPath(basePath, DEFAULT_LOCALE)}`,
+  });
+
+  return alternates;
 }

@@ -1,124 +1,135 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import CalculatorLauncher from '../components/home/CalculatorLauncher.astro';
-import CalculatorPicker from '../components/home/CalculatorPicker.astro';
-import FeaturedBusinessTool from '../components/home/FeaturedBusinessTool.astro';
-import JsonLd from '../components/seo/JsonLd.astro';
-import { getWebSiteSchema, getFaqSchema } from '../lib/seo/schema';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CalculatorLauncher from '../../components/home/CalculatorLauncher.astro';
+import CalculatorPicker from '../../components/home/CalculatorPicker.astro';
+import FeaturedBusinessTool from '../../components/home/FeaturedBusinessTool.astro';
+import JsonLd from '../../components/seo/JsonLd.astro';
+import { getWebSiteSchema, getFaqSchema } from '../../lib/seo/schema';
+import { getNonDefaultLocales, useTranslations, getLocalizedPath } from '../../lib/i18n';
+import type { SupportedLocale } from '../../lib/i18n/types';
+
+export function getStaticPaths() {
+  return getNonDefaultLocales().map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params as { lang: SupportedLocale };
+const t = useTranslations(lang);
+const canonicalUrl = `https://profitivas.com/${lang}/`;
 
 const steps = [
   {
     num: '01',
-    title: 'Choose a calculator',
-    desc: 'Find the calculation you need.',
+    title: t.common.step1Title,
+    desc: t.common.step1Desc,
   },
   {
     num: '02',
-    title: 'Enter your numbers',
-    desc: 'Add your business numbers.',
+    title: t.common.step2Title,
+    desc: t.common.step2Desc,
   },
   {
     num: '03',
-    title: 'Get an instant result',
-    desc: 'See the result immediately.',
+    title: t.common.step3Title,
+    desc: t.common.step3Desc,
   },
 ];
+
+const calculatorsPath = getLocalizedPath('/calculators', lang);
 
 const disciplines = [
   {
     num: '01',
-    title: 'Pricing',
-    desc: 'Know what to charge.',
-    href: '/calculators',
+    title: t.common.catPricingTitle,
+    desc: t.common.catPricingDesc,
+    href: calculatorsPath,
   },
   {
     num: '02',
-    title: 'Profit',
-    desc: 'Understand what you actually earn.',
-    href: '/calculators',
+    title: t.common.catProfitTitle,
+    desc: t.common.catProfitDesc,
+    href: calculatorsPath,
   },
   {
     num: '03',
-    title: 'Finance',
-    desc: 'Plan the numbers behind the business.',
-    href: '/calculators',
+    title: t.common.catFinanceTitle,
+    desc: t.common.catFinanceDesc,
+    href: calculatorsPath,
   },
   {
     num: '04',
-    title: 'Marketing',
-    desc: 'Measure acquisition and performance.',
-    href: '/calculators',
+    title: t.common.catMarketingTitle,
+    desc: t.common.catMarketingDesc,
+    href: calculatorsPath,
   },
   {
     num: '05',
-    title: 'Growth',
-    desc: 'Understand the economics of scaling.',
-    href: '/calculators',
+    title: t.common.catGrowthTitle,
+    desc: t.common.catGrowthDesc,
+    href: calculatorsPath,
   },
 ];
 
 const faqs = [
   {
-    q: 'Are Profitivas calculations completely private?',
-    a: 'Yes. All financial formulas execute entirely in your browser. Your proprietary costs, prices, and numbers are never transmitted to any server.',
+    q: t.common.homeFaq1Q,
+    a: t.common.homeFaq1A,
   },
   {
-    q: 'Are the mathematical formulas verified?',
-    a: 'Every calculator is built upon standard corporate finance, managerial accounting, and unit economics formulas. We publish the exact mathematical formulas and worked examples transparently on each tool page.',
+    q: t.common.homeFaq2Q,
+    a: t.common.homeFaq2A,
   },
   {
-    q: 'Do I need to create an account or sign up?',
-    a: 'No. Profitivas requires no account, no email address, and no subscription. All calculators are free and immediately accessible.',
+    q: t.common.homeFaq3Q,
+    a: t.common.homeFaq3A,
   },
 ];
 ---
 
 <BaseLayout
-  title="Profitivas — Free Business & Profit Calculators"
-  description="A modern, fast calculator platform for businesses, entrepreneurs, freelancers, marketers and online sellers. Fast, client-side tools for pricing, profit, and growth."
-  canonicalUrl="https://profitivas.com/"
+  title={`${t.common.heroHeadlinePart1} ${t.common.heroHeadlinePart2} — Profitivas`}
+  description={t.common.brandDescription}
+  canonicalUrl={canonicalUrl}
+  locale={lang}
 >
   <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
-    <!-- Centered Editorial Hero: One unified composition (max-width 740px) -->
+    <!-- Centered Editorial Hero -->
     <header class="text-center max-w-[740px] mx-auto mb-9 sm:mb-11 pt-4 sm:pt-8">
-      <!-- Eyebrow: Restrained, uppercase, letter-spaced, muted, no pill -->
       <p class="text-xs font-medium text-[var(--text-muted)] tracking-[0.2em] uppercase mb-3.5 sm:mb-4">
-        Business Calculators
+        {t.common.tagline}
       </p>
 
-      <!-- Headline: Confident, off-white, two lines, not oversized -->
       <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-[var(--text-primary)] tracking-tight leading-[1.08] sm:leading-[1.1]">
-        Business numbers.<br />
-        Better decisions.
+        {t.common.heroHeadlinePart1}<br />
+        {t.common.heroHeadlinePart2}
       </h1>
 
-      <!-- Description: Visually quieter than headline, narrower width -->
       <p class="text-base sm:text-lg text-[var(--text-secondary)] mt-4 sm:mt-5 leading-relaxed font-normal max-w-lg mx-auto">
-        Fast, precise calculators for pricing, profit, finance, and growth.
+        {t.common.heroDescription}
       </p>
 
-      <!-- Trust Line: Simple single quiet text line, muted gray, no badges -->
       <p class="text-xs text-[var(--text-muted)] mt-3.5 sm:mt-4 tracking-normal">
-        No sign-up &middot; Client-side calculations &middot; Verified formulas
+        {t.common.trustLine}
       </p>
     </header>
 
-    <!-- Compact Central Product Box (620px Focused Interaction) -->
-    <section aria-label="Calculator Finder" class="mb-24 sm:mb-32">
-      <CalculatorLauncher />
+    <!-- Compact Central Product Box -->
+    <section aria-label={t.common.findCalculator} class="mb-24 sm:mb-32">
+      <CalculatorLauncher locale={lang} />
     </section>
 
     <!-- Featured Business Tool: Free Invoice Generator -->
-    <FeaturedBusinessTool locale="en" />
+    <FeaturedBusinessTool locale={lang} />
 
-    <!-- How Profitivas Works: Editorial 3-Step Horizontal Composition -->
+    <!-- How Profitivas Works -->
     <section aria-labelledby="how-it-works-heading" class="pt-16 sm:pt-20 border-t border-[var(--border)] mb-24 sm:mb-32">
       <div class="max-w-xl mb-12 sm:mb-14">
         <p class="text-xs font-medium uppercase tracking-[0.2em] text-[var(--text-muted)] mb-3">
-          How Profitivas Works
+          {t.common.howItWorksEyebrow}
         </p>
         <h2 id="how-it-works-heading" class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
-          Three steps to clear business numbers.
+          {t.common.howItWorksHeadline}
         </h2>
       </div>
 
@@ -139,21 +150,20 @@ const faqs = [
       </div>
     </section>
 
-    <!-- Built for Business Decisions: Clean Typographic Index -->
+    <!-- Built for Business Decisions -->
     <section aria-labelledby="built-for-heading" class="pt-16 sm:pt-20 border-t border-[var(--border)] mb-24 sm:mb-32">
       <div class="max-w-xl mb-10 sm:mb-12">
         <p class="text-xs font-medium uppercase tracking-[0.2em] text-[var(--text-muted)] mb-3">
-          Built for Business Decisions
+          {t.common.builtForEyebrow}
         </p>
         <h2 id="built-for-heading" class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
-          Numbers are only useful when they help you decide.
+          {t.common.builtForHeadline}
         </h2>
         <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-3 leading-relaxed font-normal">
-          Profitivas brings the calculations behind everyday business decisions into one fast, simple toolkit.
+          {t.common.builtForSubheadline}
         </p>
       </div>
 
-      <!-- Typographic Index List with Subtle Dividers -->
       <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
         {disciplines.map((item) => (
           <a
@@ -182,14 +192,14 @@ const faqs = [
       </div>
     </section>
 
-    <!-- Frequently Asked Questions / Quiet Editorial SEO Content -->
+    <!-- Frequently Asked Questions -->
     <section aria-labelledby="faq-heading" class="pt-16 sm:pt-20 border-t border-[var(--border)] pb-12 sm:pb-16">
       <div class="max-w-xl mb-10">
         <p class="text-xs font-medium uppercase tracking-[0.2em] text-[var(--text-muted)] mb-3">
-          Frequently Asked Questions
+          {t.common.faqEyebrow}
         </p>
         <h2 id="faq-heading" class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
-          Clear answers to common questions.
+          {t.common.faqHeadline}
         </h2>
       </div>
 
@@ -208,9 +218,7 @@ const faqs = [
     </section>
   </div>
 
-  <!-- Command-Style Calculator Picker Modal -->
-  <CalculatorPicker />
-
+  <CalculatorPicker locale={lang} />
   <JsonLd schema={getWebSiteSchema()} />
   <JsonLd schema={getFaqSchema(faqs.map((f) => ({ question: f.q, answer: f.a })))} />
 </BaseLayout>

@@ -1,17 +1,44 @@
 ---
 import type { WorkedExample } from '../../lib/calculators/types';
+import { getLocaleFromUrl, useTranslations, type SupportedLocale } from '../../lib/i18n';
 
 export interface Props {
   example: WorkedExample;
+  locale?: SupportedLocale;
 }
 
-const { example } = Astro.props;
+const { example, locale: propLocale } = Astro.props;
+const currentLocale = propLocale || getLocaleFromUrl(Astro.url);
+const t = useTranslations(currentLocale);
+
+const labels = {
+  given: {
+    en: 'Given',
+    es: 'Datos iniciales',
+    fr: 'Données',
+    de: 'Gegeben',
+    pt: 'Dados iniciais',
+    it: 'Dati iniziali',
+    ja: '入力条件',
+    ko: '입력 조건',
+  }[currentLocale] || 'Given',
+  calculated: {
+    en: 'Calculated',
+    es: 'Resultados',
+    fr: 'Résultats',
+    de: 'Errechnet',
+    pt: 'Resultados',
+    it: 'Risultati',
+    ja: '算出結果',
+    ko: '산출 결과',
+  }[currentLocale] || 'Calculated',
+};
 ---
 
 <section aria-labelledby="worked-example-heading" class="space-y-4">
   <div>
     <h2 id="worked-example-heading" class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
-      Worked Example
+      {t.calculatorSections.workedExample}
     </h2>
     <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
       {example.title}
@@ -27,7 +54,7 @@ const { example } = Astro.props;
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 py-4 border-y border-[var(--border)]">
       <div>
         <span class="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-2">
-          Given
+          {labels.given}
         </span>
         <dl class="space-y-2 text-xs sm:text-sm">
           {Object.entries(example.inputs).map(([key, val]) => (
@@ -41,35 +68,41 @@ const { example } = Astro.props;
 
       <div>
         <span class="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-2">
-          Calculated
+          {labels.calculated}
         </span>
         <dl class="space-y-2 text-xs sm:text-sm">
           {Object.entries(example.results).map(([key, val]) => (
             <div class="flex justify-between items-center">
               <dt class="text-[var(--text-secondary)]">{key}</dt>
-              <dd class="font-medium text-[var(--positive-text)] tabular-nums">{val}</dd>
+              <dd class="font-semibold text-[var(--positive-text)] tabular-nums">{val}</dd>
             </div>
           ))}
         </dl>
       </div>
     </div>
 
-    <!-- Step by Step -->
+    <!-- Step by Step Breakdown -->
     <div class="space-y-2">
       <span class="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-2">
-        Calculation
+        {currentLocale === 'ja' ? '算出ステップ' : currentLocale === 'ko' ? '계산 단계' : currentLocale === 'de' ? 'Rechenschritte' : currentLocale === 'fr' ? 'Étapes de calcul' : currentLocale === 'es' ? 'Pasos del cálculo' : currentLocale === 'it' ? 'Fasi di calcolo' : currentLocale === 'pt' ? 'Passos do cálculo' : 'Calculation Steps'}
       </span>
-      <ol class="space-y-1.5 text-xs sm:text-sm">
+      <ol class="space-y-1.5 list-decimal list-inside text-xs sm:text-sm text-[var(--text-secondary)]">
         {example.steps.map((step) => (
-          <li class="font-mono text-xs sm:text-sm text-[var(--text-primary)] tabular-nums">
-            {step}
+          <li class="leading-relaxed">
+            <span class="font-mono text-xs text-[var(--text-primary)]">{step}</span>
           </li>
         ))}
       </ol>
     </div>
 
-    <p class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed pt-1">
-      <strong class="font-medium text-[var(--text-primary)]">Takeaway:</strong> {example.takeaway}
-    </p>
+    <!-- Takeaway -->
+    <div class="p-3.5 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)]">
+      <p class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-normal">
+        <strong class="font-medium text-[var(--text-primary)]">
+          {currentLocale === 'ja' ? '要点：' : currentLocale === 'ko' ? '핵심 결론: ' : currentLocale === 'de' ? 'Fazit: ' : currentLocale === 'fr' ? 'Enseignement : ' : currentLocale === 'es' ? 'Conclusión: ' : currentLocale === 'it' ? 'Conclusione: ' : currentLocale === 'pt' ? 'Conclusão: ' : 'Key Takeaway: '}
+        </strong>
+        {example.takeaway}
+      </p>
+    </div>
   </div>
 </section>
