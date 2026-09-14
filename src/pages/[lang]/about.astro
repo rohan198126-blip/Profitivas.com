@@ -87,6 +87,14 @@ const canonicalUrl = `https://profitivas.com${getLocalizedPath('/about', lang)}`
         </h2>
         <p>{t.about.contactText}</p>
         <p>
+          <a
+            href="mailto:hello@profitivas.com"
+            class="text-[var(--text-primary)] font-medium underline underline-offset-4 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] rounded-sm"
+          >
+            hello@profitivas.com
+          </a>
+        </p>
+        <p>
           <a href={getLocalizedPath('/calculators', lang)} class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80">
             {t.actions.browseAllCalculators}
           </a> · 
