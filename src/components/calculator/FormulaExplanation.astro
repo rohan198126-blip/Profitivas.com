@@ -1,0 +1,36 @@
+---
+import type { FormulaStep } from '../../lib/calculators/types';
+
+export interface Props {
+  formulas: FormulaStep[];
+}
+
+const { formulas } = Astro.props;
+---
+
+<section aria-labelledby="formulas-heading" class="space-y-4">
+  <div>
+    <h2 id="formulas-heading" class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+      Formulas & Logic
+    </h2>
+    <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
+      Transparent mathematical formulas behind this calculation engine.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
+    {formulas.map((item) => (
+      <div class="space-y-1.5">
+        <h3 class="font-medium text-[var(--text-primary)] text-sm">
+          {item.title}
+        </h3>
+        <div class="font-mono text-xs sm:text-sm text-[var(--text-primary)] font-semibold py-0.5 tabular-nums">
+          <code>{item.formula}</code>
+        </div>
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed font-normal">
+          {item.explanation}
+        </p>
+      </div>
+    ))}
+  </div>
+</section>

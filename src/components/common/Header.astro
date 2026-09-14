@@ -1,0 +1,188 @@
+---
+import { Search, Menu, X } from 'lucide-astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { label: 'Calculators', href: '/calculators' },
+  { label: 'Categories', href: '/calculators#categories' },
+  { label: 'Resources', href: '/calculators' },
+  { label: 'About', href: '/about' },
+];
+---
+
+<header class="border-b border-[var(--border)] bg-[var(--background)]/85 backdrop-blur-md sticky top-0 z-40 transition-colors">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 sm:h-18 flex items-center justify-between">
+    <!-- Brand & Desktop Navigation -->
+    <div class="flex items-center gap-8 sm:gap-10">
+      <a
+        href="/"
+        class="text-[var(--text-primary)] font-bold text-base tracking-tight hover:opacity-90 transition-opacity"
+        aria-label="Profitivas Home"
+      >
+        Profitivas
+      </a>
+
+      <!-- Primary Navigation Links (Desktop) -->
+      <nav class="hidden md:flex items-center gap-6" aria-label="Main Navigation">
+        {navItems.map((item) => {
+          const isActive = currentPath === item.href;
+          return (
+            <a
+              href={item.href}
+              class={`text-xs transition-colors duration-150 ${
+                isActive
+                  ? 'text-[var(--text-primary)] font-medium'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          );
+        })}
+      </nav>
+    </div>
+
+    <!-- Right Controls: Search, Theme Toggle, and Mobile Menu Button -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Quiet Desktop Search Trigger -->
+      <button
+        type="button"
+        id="header-search-btn"
+        class="hidden sm:inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer"
+        aria-label="Search calculators"
+      >
+        <Search class="w-3.5 h-3.5 text-[var(--text-muted)]" />
+        <span>Search</span>
+        <kbd class="hidden lg:inline-flex items-center px-1 text-[10px] font-mono text-[var(--text-muted)]">
+          ⌘K
+        </kbd>
+      </button>
+
+      <!-- Theme Toggle (Utility Control) -->
+      <ThemeToggle />
+
+      <!-- Mobile Menu Toggle Button -->
+      <button
+        type="button"
+        id="mobile-menu-btn"
+        class="inline-flex md:hidden items-center justify-center w-8 h-8 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer focus:outline-none"
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+        aria-controls="mobile-nav-menu"
+      >
+        <Menu class="w-4 h-4 block" id="mobile-menu-open-icon" />
+        <X class="w-4 h-4 hidden" id="mobile-menu-close-icon" />
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Lightweight Overlay Menu -->
+  <div
+    id="mobile-nav-menu"
+    class="hidden md:hidden border-t border-[var(--border)] bg-[var(--background)] px-4 sm:px-6 py-4 transition-all"
+    aria-label="Mobile Navigation Drawer"
+  >
+    <nav class="flex flex-col space-y-3">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class="mobile-nav-link text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1.5 transition-colors"
+        >
+          {item.label}
+        </a>
+      ))}
+      <button
+        type="button"
+        id="mobile-search-btn"
+        class="inline-flex items-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1.5 transition-colors text-left cursor-pointer"
+      >
+        <Search class="w-3.5 h-3.5 text-[var(--text-muted)]" />
+        <span>Search calculators</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<script>
+  function setupHeaderInteractions() {
+    // 1. Unified Search Action: Open calculator picker if present, otherwise navigate to /calculators
+    function triggerCalculatorSearch() {
+      const pickerDialog = document.getElementById('calc-picker-dialog');
+      if (pickerDialog) {
+        window.dispatchEvent(new CustomEvent('profitivas:open-picker'));
+      } else {
+        window.location.href = '/calculators';
+      }
+    }
+
+    const headerSearchBtn = document.getElementById('header-search-btn');
+    const mobileSearchBtn = document.getElementById('mobile-search-btn');
+
+    headerSearchBtn?.addEventListener('click', triggerCalculatorSearch);
+
+    // 2. Mobile Menu Controller
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const navMenu = document.getElementById('mobile-nav-menu');
+    const openIcon = document.getElementById('mobile-menu-open-icon');
+    const closeIcon = document.getElementById('mobile-menu-close-icon');
+
+    function closeMobileMenu() {
+      menuBtn?.setAttribute('aria-expanded', 'false');
+      navMenu?.classList.add('hidden');
+      openIcon?.classList.remove('hidden');
+      closeIcon?.classList.add('hidden');
+    }
+
+    function toggleMobileMenu() {
+      const isExpanded = menuBtn?.getAttribute('aria-expanded') === 'true';
+      const nextState = !isExpanded;
+      menuBtn?.setAttribute('aria-expanded', String(nextState));
+      if (nextState) {
+        navMenu?.classList.remove('hidden');
+        openIcon?.classList.add('hidden');
+        closeIcon?.classList.remove('hidden');
+      } else {
+        navMenu?.classList.add('hidden');
+        openIcon?.classList.remove('hidden');
+        closeIcon?.classList.add('hidden');
+      }
+    }
+
+    menuBtn?.addEventListener('click', toggleMobileMenu);
+
+    mobileSearchBtn?.addEventListener('click', () => {
+      closeMobileMenu();
+      triggerCalculatorSearch();
+    });
+
+    // Close mobile menu when clicking any link
+    navMenu?.querySelectorAll('.mobile-nav-link').forEach((link) => {
+      link.addEventListener('click', closeMobileMenu);
+    });
+
+    // Close on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (menuBtn?.getAttribute('aria-expanded') === 'true') {
+          closeMobileMenu();
+        }
+      }
+      // Global ⌘K / Ctrl+K keyboard shortcut
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        triggerCalculatorSearch();
+      }
+    });
+  }
+
+  // Initialize on load and on Astro page transitions
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupHeaderInteractions);
+  } else {
+    setupHeaderInteractions();
+  }
+  document.addEventListener('astro:page-load', setupHeaderInteractions);
+</script>

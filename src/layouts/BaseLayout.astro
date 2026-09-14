@@ -1,0 +1,46 @@
+---
+import BaseHead from '../components/seo/BaseHead.astro';
+import Header from '../components/common/Header.astro';
+import Footer from '../components/common/Footer.astro';
+import '../styles/global.css';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const props = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <BaseHead {...props} />
+  </head>
+  <body class="min-h-screen flex flex-col bg-[var(--background)] text-[var(--text-primary)] antialiased selection:bg-neutral-700/40 selection:text-[var(--text-primary)] transition-colors relative overflow-x-hidden">
+    <!-- Accessible Skip Link -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--surface-elevated)] focus:text-[var(--text-primary)] focus:border focus:border-[var(--border)] focus:rounded-md focus:shadow-lg focus:outline-none"
+    >
+      Skip to main content
+    </a>
+
+    <Header />
+
+    <!-- Subtle Ambient Background Light (Dark Theme Only) -->
+    <div class="ambient-glow-wrapper pointer-events-none absolute inset-0 select-none" aria-hidden="true">
+      <div class="ambient-glow-primary"></div>
+      <div class="ambient-glow-secondary"></div>
+    </div>
+
+    <main id="main-content" class="flex-1 relative z-10">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

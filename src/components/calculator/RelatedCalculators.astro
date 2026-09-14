@@ -1,0 +1,70 @@
+---
+import { getRelatedCalculators } from '../../lib/calculators/registry';
+
+export interface Props {
+  relatedSlugs: string[];
+}
+
+const { relatedSlugs } = Astro.props;
+const relatedTools = getRelatedCalculators(relatedSlugs);
+---
+
+{
+  relatedTools.length > 0 && (
+    <section aria-labelledby="related-heading" class="space-y-4">
+      <div>
+        <h2 id="related-heading" class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+          Related Calculators
+        </h2>
+        <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
+          Complementary tools for pricing and profitability analysis.
+        </p>
+      </div>
+
+      <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+        {relatedTools.map((tool) => {
+          const isActive = tool.status === 'active';
+          return (
+            <div class="py-3.5 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 group -mx-2 px-2 rounded-lg hover:bg-[var(--surface-subtle)] transition-colors">
+              <div class="space-y-0.5 max-w-lg">
+                <div class="flex items-baseline gap-2">
+                  {isActive ? (
+                    <a
+                      href={`/${tool.slug}`}
+                      class="font-medium text-[var(--text-primary)] text-sm group-hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)] rounded-sm"
+                    >
+                      {tool.name}
+                    </a>
+                  ) : (
+                    <span class="font-medium text-[var(--text-secondary)] text-sm">{tool.name}</span>
+                  )}
+                  {isActive && (
+                    <span class="text-[10px] font-medium uppercase tracking-wider text-[var(--positive-text)]">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <p class="text-xs text-[var(--text-secondary)] font-normal leading-relaxed">
+                  {tool.tagline}
+                </p>
+              </div>
+              <div class="shrink-0 text-xs sm:self-center">
+                {isActive ? (
+                  <a
+                    href={`/${tool.slug}`}
+                    class="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] font-medium inline-flex items-center gap-1 transition-colors"
+                  >
+                    <span>Open calculator</span>
+                    <span aria-hidden="true">&rarr;</span>
+                  </a>
+                ) : (
+                  <span class="text-[var(--text-muted)]">In development</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  )
+}

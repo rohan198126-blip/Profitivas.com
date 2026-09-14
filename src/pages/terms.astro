@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/common/Breadcrumbs.astro';
+
+const pageTitle = 'Terms of Service — Profitivas';
+const pageDescription = 'Terms of Service for Profitivas business and financial calculation instruments. Understand usage guidelines, disclaimers, and terms.';
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonicalUrl="https://profitivas.com/terms"
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <!-- Breadcrumbs -->
+    <Breadcrumbs items={[{ label: 'Terms of Service' }]} />
+
+    <header class="mt-6 mb-10 sm:mb-12">
+      <p class="text-xs font-medium text-[var(--text-muted)] tracking-[0.2em] uppercase mb-2.5">
+        Legal & Usage
+      </p>
+      <h1 class="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
+        Terms of Service
+      </h1>
+      <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-3 leading-relaxed font-normal">
+        Last updated: September 2026. Guidelines governing your use of Profitivas calculation tools.
+      </p>
+    </header>
+
+    <article class="space-y-10 sm:space-y-12 text-sm text-[var(--text-secondary)] leading-relaxed">
+      <!-- Purpose & Disclaimer -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          1. Informational & Educational Purposes Only
+        </h2>
+        <p>
+          All calculators, formulas, benchmarks, and educational content published on Profitivas are provided solely for general planning, educational, and estimation purposes.
+        </p>
+        <p>
+          While every mathematical formula has been rigorously verified against standard accounting principles, real-world business decisions involve nuances—such as variable overhead, tax jurisdictions, shipping tariffs, and payment gateway fees—that may require individualized analysis. Profitivas does not provide formal legal, tax, or accounting advice.
+        </p>
+      </section>
+
+      <!-- Permissible Use -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          2. Permissible Use
+        </h2>
+        <p>
+          You are welcome to use Profitivas freely for personal, commercial, educational, or professional purposes. You may input figures, evaluate pricing scenarios, and use the results in your day-to-day business operations.
+        </p>
+        <p>
+          You agree not to attempt to disrupt the website infrastructure, deploy automated scraping systems that degrade site performance for other users, or misrepresent Profitivas calculations as certified audit statements.
+        </p>
+      </section>
+
+      <!-- Intellectual Property -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          3. Intellectual Property
+        </h2>
+        <p>
+          The visual design, brand identity, user interface components, software code, and editorial documentation of Profitivas are protected by copyright and intellectual property laws. Public domain mathematical principles and standard accounting formulas remain free for anyone to use.
+        </p>
+      </section>
+
+      <!-- Disclaimer of Warranties -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          4. Disclaimer of Warranties
+        </h2>
+        <p>
+          Profitivas is provided on an "as is" and "as available" basis without warranties of any kind, whether express or implied. We make no warranty that our services will be uninterrupted, error-free, or meet every unique accounting requirement of your specific enterprise.
+        </p>
+      </section>
+
+      <!-- Limitation of Liability -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          5. Limitation of Liability
+        </h2>
+        <p>
+          In no event shall Profitivas or its operators be liable for any direct, indirect, incidental, special, or consequential damages resulting from the use of, or inability to use, our calculation tools or informational content.
+        </p>
+      </section>
+
+      <!-- Contact -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          6. Updates & Contact
+        </h2>
+        <p>
+          We may update these terms periodically to reflect new features or regulatory requirements. For questions regarding these terms, please visit our <a href="/about" class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80">About page</a>.
+        </p>
+      </section>
+    </article>
+  </div>
+</BaseLayout>

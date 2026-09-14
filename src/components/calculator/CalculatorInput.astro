@@ -1,0 +1,73 @@
+---
+export interface Props {
+  id: string;
+  name: string;
+  label: string;
+  value?: string | number;
+  placeholder?: string;
+  prefix?: string;
+  suffix?: string;
+  helperText?: string;
+  min?: number | string;
+  max?: number | string;
+  step?: number | string;
+  required?: boolean;
+}
+
+const {
+  id,
+  name,
+  label,
+  value = '',
+  placeholder = '0.00',
+  prefix,
+  suffix,
+  helperText,
+  min = '0',
+  max,
+  step = 'any',
+  required = false,
+} = Astro.props;
+---
+
+<div class="space-y-1.5">
+  <label for={id} class="block text-xs font-medium tracking-[0.12em] uppercase text-[var(--text-secondary)]">
+    {label}
+    {required && <span class="text-[var(--text-muted)] ml-0.5 select-none" aria-hidden="true">*</span>}
+  </label>
+
+  <div class="relative flex items-center rounded-lg border border-[var(--border)] bg-[var(--input-background)] transition-all hover:border-[var(--border-focus)] focus-within:border-[var(--text-primary)] focus-within:ring-1 focus-within:ring-[var(--border-focus)]">
+    {prefix && (
+      <div class="pointer-events-none pl-3.5 pr-1 flex items-center select-none shrink-0">
+        <span class="text-[var(--text-muted)] font-normal text-lg sm:text-xl tabular-nums">{prefix}</span>
+      </div>
+    )}
+
+    <input
+      type="number"
+      id={id}
+      name={name}
+      value={value}
+      placeholder={placeholder}
+      min={min}
+      max={max}
+      step={step}
+      required={required}
+      inputmode="decimal"
+      class="block w-full rounded-lg bg-transparent py-3 sm:py-3.5 px-3 text-[var(--text-primary)] font-medium text-lg sm:text-xl tabular-nums tracking-tight placeholder:text-[var(--text-muted)] focus:outline-none transition-colors"
+      aria-describedby={helperText ? `${id}-helper` : undefined}
+    />
+
+    {suffix && (
+      <div class="pointer-events-none pr-3.5 pl-1 flex items-center select-none shrink-0">
+        <span class="text-[var(--text-muted)] font-normal text-base sm:text-lg">{suffix}</span>
+      </div>
+    )}
+  </div>
+
+  {helperText && (
+    <p id={`${id}-helper`} class="text-xs text-[var(--text-muted)] leading-normal font-normal">
+      {helperText}
+    </p>
+  )}
+</div>

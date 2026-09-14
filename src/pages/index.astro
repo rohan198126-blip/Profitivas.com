@@ -1,11 +1,212 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CalculatorLauncher from '../components/home/CalculatorLauncher.astro';
+import CalculatorPicker from '../components/home/CalculatorPicker.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { getWebSiteSchema, getFaqSchema } from '../lib/seo/schema';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const steps = [
+  {
+    num: '01',
+    title: 'Choose a calculator',
+    desc: 'Find the calculation you need.',
+  },
+  {
+    num: '02',
+    title: 'Enter your numbers',
+    desc: 'Add your business numbers.',
+  },
+  {
+    num: '03',
+    title: 'Get an instant result',
+    desc: 'See the result immediately.',
+  },
+];
+
+const disciplines = [
+  {
+    num: '01',
+    title: 'Pricing',
+    desc: 'Know what to charge.',
+    href: '/calculators',
+  },
+  {
+    num: '02',
+    title: 'Profit',
+    desc: 'Understand what you actually earn.',
+    href: '/calculators',
+  },
+  {
+    num: '03',
+    title: 'Finance',
+    desc: 'Plan the numbers behind the business.',
+    href: '/calculators',
+  },
+  {
+    num: '04',
+    title: 'Marketing',
+    desc: 'Measure acquisition and performance.',
+    href: '/calculators',
+  },
+  {
+    num: '05',
+    title: 'Growth',
+    desc: 'Understand the economics of scaling.',
+    href: '/calculators',
+  },
+];
+
+const faqs = [
+  {
+    q: 'Are Profitivas calculations completely private?',
+    a: 'Yes. All financial formulas execute entirely in your browser. Your proprietary costs, prices, and numbers are never transmitted to any server.',
+  },
+  {
+    q: 'Are the mathematical formulas verified?',
+    a: 'Every calculator is built upon standard corporate finance, managerial accounting, and unit economics formulas. We publish the exact mathematical formulas and worked examples transparently on each tool page.',
+  },
+  {
+    q: 'Do I need to create an account or sign up?',
+    a: 'No. Profitivas requires no account, no email address, and no subscription. All calculators are free and immediately accessible.',
+  },
+];
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout
+  title="Profitivas — Business & Profit Calculators"
+  description="Fast, precise business calculators for pricing, profit, finance, and growth. Calculate margins, markups, and unit economics with instant client-side tools."
+  canonicalUrl="https://profitivas.com/"
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
+    <!-- Centered Editorial Hero: One unified composition (max-width 740px) -->
+    <header class="text-center max-w-[740px] mx-auto mb-9 sm:mb-11 pt-4 sm:pt-8">
+      <!-- Eyebrow: Restrained, uppercase, letter-spaced, muted, no pill -->
+      <p class="text-xs font-medium text-[var(--text-muted)] tracking-[0.2em] uppercase mb-3.5 sm:mb-4">
+        Business Calculators
+      </p>
+
+      <!-- Headline: Confident, off-white, two lines, not oversized -->
+      <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-[var(--text-primary)] tracking-tight leading-[1.08] sm:leading-[1.1]">
+        Business numbers.<br />
+        Better decisions.
+      </h1>
+
+      <!-- Description: Visually quieter than headline, narrower width -->
+      <p class="text-base sm:text-lg text-[var(--text-secondary)] mt-4 sm:mt-5 leading-relaxed font-normal max-w-lg mx-auto">
+        Fast, precise calculators for pricing, profit, finance, and growth.
+      </p>
+
+      <!-- Trust Line: Simple single quiet text line, muted gray, no badges -->
+      <p class="text-xs text-[var(--text-muted)] mt-3.5 sm:mt-4 tracking-normal">
+        No sign-up &middot; Client-side calculations &middot; Verified formulas
+      </p>
+    </header>
+
+    <!-- Compact Central Product Box (620px Focused Interaction) -->
+    <section aria-label="Calculator Finder" class="mb-24 sm:mb-32">
+      <CalculatorLauncher />
+    </section>
+
+    <!-- How Profitivas Works: Editorial 3-Step Horizontal Composition -->
+    <section aria-labelledby="how-it-works-heading" class="pt-16 sm:pt-20 border-t border-[var(--border)] mb-24 sm:mb-32">
+      <div class="max-w-xl mb-12 sm:mb-14">
+        <p class="text-xs font-medium uppercase tracking-[0.2em] text-[var(--text-muted)] mb-3">
+          How Profitivas Works
+        </p>
+        <h2 id="how-it-works-heading" class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
+          Three steps to clear business numbers.
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border)]">
+        {steps.map((step) => (
+          <div class="py-6 md:py-0 md:px-8 first:pl-0 last:pr-0">
+            <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums mb-3 block">
+              {step.num}
+            </span>
+            <h3 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight mb-1.5">
+              {step.title}
+            </h3>
+            <p class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-normal">
+              {step.desc}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Built for Business Decisions: Clean Typographic Index -->
+    <section aria-labelledby="built-for-heading" class="pt-16 sm:pt-20 border-t border-[var(--border)] mb-24 sm:mb-32">
+      <div class="max-w-xl mb-10 sm:mb-12">
+        <p class="text-xs font-medium uppercase tracking-[0.2em] text-[var(--text-muted)] mb-3">
+          Built for Business Decisions
+        </p>
+        <h2 id="built-for-heading" class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
+          Numbers are only useful when they help you decide.
+        </h2>
+        <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-3 leading-relaxed font-normal">
+          Profitivas brings the calculations behind everyday business decisions into one fast, simple toolkit.
+        </p>
+      </div>
+
+      <!-- Typographic Index List with Subtle Dividers -->
+      <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+        {disciplines.map((item) => (
+          <a
+            href={item.href}
+            class="group py-4 sm:py-5 flex items-baseline gap-4 sm:gap-8 transition-colors hover:text-[var(--text-primary)] block"
+          >
+            <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums shrink-0 w-6 sm:w-8">
+              {item.num}
+            </span>
+            <div class="flex-1 sm:flex sm:items-baseline sm:justify-between gap-6">
+              <h3 class="text-sm sm:text-base font-medium text-[var(--text-primary)] sm:w-36 shrink-0 group-hover:text-[var(--text-primary)]">
+                {item.title}
+              </h3>
+              <p class="text-xs sm:text-sm text-[var(--text-secondary)] flex-1 mt-0.5 sm:mt-0 font-normal">
+                {item.desc}
+              </p>
+              <span
+                class="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-1 transition-all hidden sm:inline shrink-0"
+                aria-hidden="true"
+              >
+                &rarr;
+              </span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Frequently Asked Questions / Quiet Editorial SEO Content -->
+    <section aria-labelledby="faq-heading" class="pt-16 sm:pt-20 border-t border-[var(--border)] pb-12 sm:pb-16">
+      <div class="max-w-xl mb-10">
+        <p class="text-xs font-medium uppercase tracking-[0.2em] text-[var(--text-muted)] mb-3">
+          Frequently Asked Questions
+        </p>
+        <h2 id="faq-heading" class="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
+          Clear answers to common questions.
+        </h2>
+      </div>
+
+      <div class="divide-y divide-[var(--border)] border-y border-[var(--border)] max-w-3xl">
+        {faqs.map((faq) => (
+          <div class="py-5 sm:py-6 space-y-1.5">
+            <h3 class="font-medium text-sm sm:text-base text-[var(--text-primary)]">
+              {faq.q}
+            </h3>
+            <p class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-normal">
+              {faq.a}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <!-- Command-Style Calculator Picker Modal -->
+  <CalculatorPicker />
+
+  <JsonLd schema={getWebSiteSchema()} />
+  <JsonLd schema={getFaqSchema(faqs.map((f) => ({ question: f.q, answer: f.a })))} />
+</BaseLayout>

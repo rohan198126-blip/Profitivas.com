@@ -1,0 +1,17 @@
+---
+export interface Props {
+  schema: Record<string, unknown> | Array<Record<string, unknown>> | null;
+}
+
+const { schema } = Astro.props;
+---
+
+{
+  schema && (
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify(schema, null, 2)}
+    />
+  )
+}

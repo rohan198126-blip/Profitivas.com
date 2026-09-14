@@ -1,0 +1,515 @@
+---
+import CalculatorInput from './CalculatorInput.astro';
+import { AlertCircle } from 'lucide-astro';
+---
+
+<div id="markup-app" class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:p-10">
+  <!-- Mode Switcher & Secondary Utility Controls -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
+    <!-- Compact Segmented Mode Switcher -->
+    <div
+      class="inline-flex p-0.5 bg-[var(--surface-subtle)] border border-[var(--border)] rounded-lg w-full sm:w-auto"
+      role="tablist"
+      aria-label="Calculation Mode"
+    >
+      <button
+        type="button"
+        id="tab-standard"
+        role="tab"
+        aria-selected="true"
+        aria-controls="panel-standard"
+        class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)] shadow-2xs"
+        data-mode="standard"
+      >
+        Cost &amp; Selling Price
+      </button>
+      <button
+        type="button"
+        id="tab-target"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-target"
+        class="calc-tab-btn flex-1 sm:flex-none py-1.5 px-3.5 text-xs font-medium rounded-md transition-colors cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+        data-mode="target"
+      >
+        Target Markup (Reverse)
+      </button>
+    </div>
+
+    <!-- Secondary Presets & Reset -->
+    <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5">
+        <span class="hidden md:inline text-[11px] text-[var(--text-muted)]">Presets:</span>
+        <button
+          type="button"
+          class="preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-cost="40"
+          data-revenue="100"
+          data-target="150"
+        >
+          $40 &rarr; $100
+        </button>
+        <button
+          type="button"
+          class="preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-cost="50"
+          data-revenue="75"
+          data-target="50"
+        >
+          $50 &rarr; $75
+        </button>
+        <button
+          type="button"
+          class="preset-btn px-2.5 py-1 text-xs font-normal rounded-md hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] tabular-nums cursor-pointer"
+          data-cost="20"
+          data-revenue="60"
+          data-target="200"
+        >
+          $20 &rarr; $60
+        </button>
+      </div>
+
+      <button
+        type="button"
+        id="btn-reset"
+        class="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors py-1 px-2.5 rounded-md hover:bg-[var(--surface-elevated)] cursor-pointer"
+        title="Reset inputs to default"
+      >
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Unified Financial Instrument Panel (Inputs Left, Dominant Result Right) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 items-start">
+    <!-- Left Column: Inputs -->
+    <div class="lg:col-span-5 space-y-6">
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-4">
+          Your Numbers
+        </span>
+
+        <!-- Calm Inline Validation Alert -->
+        <div
+          id="calc-error-box"
+          class="hidden text-xs text-[var(--negative-text)] flex items-center gap-1.5 py-1 mb-3"
+          role="alert"
+        >
+          <AlertCircle class="w-3.5 h-3.5 text-[var(--negative)] shrink-0" />
+          <span id="calc-error-msg">Please enter valid positive numbers.</span>
+        </div>
+
+        <form id="markup-form" class="space-y-5 sm:space-y-6" onsubmit="return false;">
+          <!-- Unit Cost Input -->
+          <CalculatorInput
+            id="input-cost"
+            name="cost"
+            label="Unit Cost"
+            value="40"
+            prefix="$"
+            placeholder="0.00"
+            helperText="Direct acquisition, manufacturing, or wholesale cost."
+            required
+          />
+
+          <!-- Selling Price Input (Standard Mode) -->
+          <div id="field-revenue-wrap">
+            <CalculatorInput
+              id="input-revenue"
+              name="revenue"
+              label="Selling Price"
+              value="100"
+              prefix="$"
+              placeholder="0.00"
+              helperText="Final customer or retail selling price."
+              required
+            />
+          </div>
+
+          <!-- Target Markup Input (Target Mode) -->
+          <div id="field-target-wrap" class="hidden">
+            <CalculatorInput
+              id="input-target-markup"
+              name="targetMarkup"
+              label="Target Markup"
+              value="150"
+              suffix="%"
+              placeholder="0.00"
+              helperText="Percentage markup added on top of cost (e.g. 150% = 2.5x cost)."
+              min="0"
+            />
+          </div>
+        </form>
+      </div>
+
+      <!-- Quiet Metadata Line -->
+      <div class="text-xs text-[var(--text-muted)] pt-3 flex items-center justify-between border-t border-[var(--border)]">
+        <span>Automatic recalculation</span>
+        <span>Pre-tax</span>
+      </div>
+    </div>
+
+    <!-- Right Column: Dominant Result Experience -->
+    <div class="lg:col-span-7 lg:border-l lg:border-[var(--border)] lg:pl-10 space-y-7" aria-live="polite">
+      <!-- Calm Empty State (When inputs are empty) -->
+      <div id="result-empty-state" class="hidden py-12 text-center sm:text-left space-y-2">
+        <p class="text-sm font-medium text-[var(--text-primary)]">Enter your numbers to calculate your markup.</p>
+        <p class="text-xs text-[var(--text-muted)]">Input unit cost and selling price to view instant markup analysis.</p>
+      </div>
+
+      <!-- Active Result Composition Area -->
+      <div id="result-active-container" class="space-y-7">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-3">
+            Your Result
+          </span>
+
+          <!-- Dominant Hero Result Value with generous breathing room -->
+          <div class="py-1">
+            <span id="primary-result-label" class="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-2">
+              Markup
+            </span>
+            <div
+              id="result-primary-value"
+              class="text-6xl sm:text-7xl lg:text-8xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums leading-none"
+            >
+              150.00%
+            </div>
+            <p id="result-summary-detail" class="text-xs sm:text-sm text-[var(--text-secondary)] mt-3 leading-relaxed max-w-md">
+              A <strong class="text-[var(--text-primary)] font-semibold">150.00% markup</strong> adds $60.00 in gross profit per unit, yielding a <strong class="text-[var(--text-primary)] font-semibold">60.00% profit margin</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics: Clean Typographic Rows with subtle dividers -->
+        <div class="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+          <!-- Gross Profit Row -->
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Gross profit</span>
+            <span id="result-profit" class="font-semibold text-[var(--positive-text)] tabular-nums">
+              $60.00
+            </span>
+          </div>
+
+          <!-- Profit Margin Row -->
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Profit margin</span>
+            <span id="result-margin" class="font-medium text-[var(--text-primary)] tabular-nums">
+              60.00%
+            </span>
+          </div>
+
+          <!-- Mode-specific Secondary Row (Selling price in standard mode, Target markup in reverse mode) -->
+          <div id="row-secondary-mode-specific" class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span id="label-secondary-mode-specific" class="text-[var(--text-secondary)] font-normal">Selling price</span>
+            <span id="value-secondary-mode-specific" class="font-medium text-[var(--text-primary)] tabular-nums">
+              $100.00
+            </span>
+          </div>
+
+          <!-- Return on Cost Row -->
+          <div class="py-3 flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-[var(--text-secondary)] font-normal">Return on cost</span>
+            <span id="result-return" class="font-medium text-[var(--text-primary)] tabular-nums">
+              150.00%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secondary Editorial Analysis: Per $100 Sale Breakdown Strip -->
+  <div id="per-100-analysis" class="mt-8 pt-8 border-t border-[var(--border)] text-xs text-[var(--text-secondary)]">
+    <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
+      <div>
+        <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] block mb-1">
+          Per $100 Sale
+        </span>
+        <p class="text-xs text-[var(--text-secondary)]">
+          Every $100 in revenue yields <strong id="per-100-profit-summary" class="text-[var(--text-primary)] font-semibold">$60.00</strong> in gross margin after covering direct costs.
+        </p>
+      </div>
+      <div class="flex items-center gap-6 sm:gap-8 font-mono text-xs sm:text-sm tabular-nums shrink-0">
+        <div>
+          <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">Revenue</span>
+          <span class="font-medium text-[var(--text-primary)]">$100.00</span>
+        </div>
+        <div>
+          <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">Cost</span>
+          <span id="per-100-cost" class="font-medium text-[var(--text-secondary)]">$40.00</span>
+        </div>
+        <div>
+          <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">Profit</span>
+          <span id="per-100-profit" class="font-semibold text-[var(--positive-text)]">$60.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { calculateStandardMarkup, calculateFromTargetMarkup } from '../../lib/calculators/markup/formulas';
+  import { formatCurrency, formatPercent } from '../../lib/utils/formatters';
+  import { parseCleanNumber } from '../../lib/utils/math';
+
+  function initMarkupCalculator() {
+    const root = document.getElementById('markup-app');
+    if (!root) return;
+
+    let currentMode: 'standard' | 'target' = 'standard';
+
+    // Tabs
+    const tabStandard = document.getElementById('tab-standard');
+    const tabTarget = document.getElementById('tab-target');
+
+    // Input fields
+    const costInput = document.getElementById('input-cost') as HTMLInputElement | null;
+    const revenueInput = document.getElementById('input-revenue') as HTMLInputElement | null;
+    const targetMarkupInput = document.getElementById('input-target-markup') as HTMLInputElement | null;
+
+    // Field wraps
+    const revenueWrap = document.getElementById('field-revenue-wrap');
+    const targetWrap = document.getElementById('field-target-wrap');
+
+    // Validation box
+    const errorBox = document.getElementById('calc-error-box');
+    const errorMsg = document.getElementById('calc-error-msg');
+
+    // Empty state & active container
+    const emptyState = document.getElementById('result-empty-state');
+    const activeContainer = document.getElementById('result-active-container');
+
+    // Output elements
+    const primaryLabel = document.getElementById('primary-result-label');
+    const primaryValue = document.getElementById('result-primary-value');
+    const summaryDetail = document.getElementById('result-summary-detail');
+
+    const resultProfit = document.getElementById('result-profit');
+    const resultMargin = document.getElementById('result-margin');
+    const resultReturn = document.getElementById('result-return');
+    const labelSecondaryModeSpecific = document.getElementById('label-secondary-mode-specific');
+    const valueSecondaryModeSpecific = document.getElementById('value-secondary-mode-specific');
+
+    // Per $100 elements
+    const per100Cost = document.getElementById('per-100-cost');
+    const per100Profit = document.getElementById('per-100-profit');
+    const per100ProfitSummary = document.getElementById('per-100-profit-summary');
+
+    // Preset & Reset
+    const resetBtn = document.getElementById('btn-reset');
+    const presetButtons = document.querySelectorAll('.preset-btn');
+
+    function setMode(mode: 'standard' | 'target') {
+      currentMode = mode;
+
+      if (mode === 'standard') {
+        tabStandard?.setAttribute('aria-selected', 'true');
+        tabTarget?.setAttribute('aria-selected', 'false');
+        tabStandard?.classList.add('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border', 'border-[var(--border)]', 'shadow-2xs');
+        tabStandard?.classList.remove('text-[var(--text-muted)]');
+        tabTarget?.classList.remove('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border', 'border-[var(--border)]', 'shadow-2xs');
+        tabTarget?.classList.add('text-[var(--text-muted)]');
+
+        revenueWrap?.classList.remove('hidden');
+        targetWrap?.classList.add('hidden');
+
+        if (primaryLabel) primaryLabel.textContent = 'Markup';
+        if (labelSecondaryModeSpecific) labelSecondaryModeSpecific.textContent = 'Selling price';
+      } else {
+        tabTarget?.setAttribute('aria-selected', 'true');
+        tabStandard?.setAttribute('aria-selected', 'false');
+        tabTarget?.classList.add('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border', 'border-[var(--border)]', 'shadow-2xs');
+        tabTarget?.classList.remove('text-[var(--text-muted)]');
+        tabStandard?.classList.remove('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border', 'border-[var(--border)]', 'shadow-2xs');
+        tabStandard?.classList.add('text-[var(--text-muted)]');
+
+        revenueWrap?.classList.add('hidden');
+        targetWrap?.classList.remove('hidden');
+
+        if (primaryLabel) primaryLabel.textContent = 'Required Selling Price';
+        if (labelSecondaryModeSpecific) labelSecondaryModeSpecific.textContent = 'Target markup';
+      }
+
+      recalculate();
+    }
+
+    function showError(message: string) {
+      if (errorBox && errorMsg) {
+        errorMsg.textContent = message;
+        errorBox.classList.remove('hidden');
+      }
+    }
+
+    function clearError() {
+      if (errorBox) {
+        errorBox.classList.add('hidden');
+      }
+    }
+
+    function showEmptyState() {
+      emptyState?.classList.remove('hidden');
+      activeContainer?.classList.add('hidden');
+    }
+
+    function hideEmptyState() {
+      emptyState?.classList.add('hidden');
+      activeContainer?.classList.remove('hidden');
+    }
+
+    function recalculate() {
+      clearError();
+      const costRaw = costInput?.value ?? '';
+      const costVal = parseCleanNumber(costRaw);
+
+      if (!costRaw.trim()) {
+        showEmptyState();
+        return;
+      }
+
+      if (costVal === null || costVal < 0) {
+        showError('Please enter a valid non-negative cost.');
+        showEmptyState();
+        return;
+      }
+
+      let res;
+      if (currentMode === 'standard') {
+        const revRaw = revenueInput?.value ?? '';
+        if (!revRaw.trim()) {
+          showEmptyState();
+          return;
+        }
+        const revVal = parseCleanNumber(revRaw);
+        if (revVal === null || revVal < 0) {
+          showError('Please enter a valid non-negative selling price.');
+          showEmptyState();
+          return;
+        }
+        res = calculateStandardMarkup({ cost: costVal, revenue: revVal });
+      } else {
+        const targetRaw = targetMarkupInput?.value ?? '';
+        if (!targetRaw.trim()) {
+          showEmptyState();
+          return;
+        }
+        const targetVal = parseCleanNumber(targetRaw);
+        if (targetVal === null || targetVal < 0) {
+          showError('Please enter a valid non-negative target markup percentage.');
+          showEmptyState();
+          return;
+        }
+        res = calculateFromTargetMarkup({ cost: costVal, targetMarkup: targetVal });
+      }
+
+      if (!res.isValid && res.errorMessage) {
+        showError(res.errorMessage);
+        showEmptyState();
+        return;
+      }
+
+      hideEmptyState();
+
+      // Update Dominant Primary Metric based on active mode
+      if (currentMode === 'standard') {
+        if (primaryValue) {
+          primaryValue.textContent = res.isZeroCost && res.revenue > 0 ? 'Undefined' : formatPercent(res.markup);
+        }
+        if (valueSecondaryModeSpecific) valueSecondaryModeSpecific.textContent = formatCurrency(res.revenue);
+      } else {
+        if (primaryValue) primaryValue.textContent = formatCurrency(res.revenue);
+        if (valueSecondaryModeSpecific) {
+          valueSecondaryModeSpecific.textContent = res.isZeroCost && res.revenue > 0 ? 'Undefined' : formatPercent(res.markup);
+        }
+      }
+
+      // Update Primary Supporting Metric (Gross Profit)
+      if (resultProfit) {
+        resultProfit.textContent = formatCurrency(res.profit);
+        if (res.isLoss) {
+          resultProfit.classList.add('text-[var(--negative-text)]');
+          resultProfit.classList.remove('text-[var(--positive-text)]');
+        } else {
+          resultProfit.classList.remove('text-[var(--negative-text)]');
+          resultProfit.classList.add('text-[var(--positive-text)]');
+        }
+      }
+
+      // Update Secondary Typographic Metrics
+      if (resultMargin) resultMargin.textContent = formatPercent(res.margin);
+      if (resultReturn) {
+        resultReturn.textContent = res.isZeroCost && res.revenue > 0 ? 'Undefined' : formatPercent(res.returnOnCost);
+      }
+
+      // Detail summary sentence
+      if (summaryDetail) {
+        if (res.isZeroCost && res.revenue > 0) {
+          summaryDetail.innerHTML = `With a $0.00 cost, the entire ${formatCurrency(res.revenue)} is gross profit (100.00% margin). Markup is mathematically undefined.`;
+        } else if (res.isLoss) {
+          summaryDetail.innerHTML = `Selling below cost results in a negative markup of <strong class="text-[var(--negative-text)] font-semibold">${formatPercent(res.markup)}</strong> and a loss of <strong class="text-[var(--negative-text)] font-semibold">${formatCurrency(Math.abs(res.profit))}</strong>.`;
+        } else {
+          summaryDetail.innerHTML = `A <strong class="text-[var(--text-primary)] font-semibold">${formatPercent(res.markup)} markup</strong> adds ${formatCurrency(res.profit)} in gross profit per unit, yielding a <strong class="text-[var(--text-primary)] font-semibold">${formatPercent(res.margin)} profit margin</strong>.`;
+        }
+      }
+
+      // Update Per $100 Breakdown
+      if (per100Cost && per100Profit && res.revenue > 0) {
+        const costRatio = (res.cost / res.revenue) * 100;
+        const profitRatio = (res.profit / res.revenue) * 100;
+
+        per100Cost.textContent = formatCurrency(costRatio);
+        per100Profit.textContent = formatCurrency(profitRatio);
+        if (per100ProfitSummary) {
+          per100ProfitSummary.textContent = formatCurrency(profitRatio);
+        }
+
+        if (profitRatio < 0) {
+          per100Profit.classList.add('text-[var(--negative-text)]');
+          per100Profit.classList.remove('text-[var(--positive-text)]');
+        } else {
+          per100Profit.classList.remove('text-[var(--negative-text)]');
+          per100Profit.classList.add('text-[var(--positive-text)]');
+        }
+      }
+    }
+
+    // Event listeners
+    tabStandard?.addEventListener('click', () => setMode('standard'));
+    tabTarget?.addEventListener('click', () => setMode('target'));
+
+    costInput?.addEventListener('input', recalculate);
+    revenueInput?.addEventListener('input', recalculate);
+    targetMarkupInput?.addEventListener('input', recalculate);
+
+    resetBtn?.addEventListener('click', () => {
+      if (costInput) costInput.value = '40';
+      if (revenueInput) revenueInput.value = '100';
+      if (targetMarkupInput) targetMarkupInput.value = '150';
+      setMode('standard');
+    });
+
+    presetButtons.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLButtonElement;
+        const cost = target.getAttribute('data-cost');
+        const rev = target.getAttribute('data-revenue');
+        const tgt = target.getAttribute('data-target');
+
+        if (cost && costInput) costInput.value = cost;
+        if (rev && revenueInput) revenueInput.value = rev;
+        if (tgt && targetMarkupInput) targetMarkupInput.value = tgt;
+        recalculate();
+      });
+    });
+
+    // Initial run
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMarkupCalculator);
+  } else {
+    initMarkupCalculator();
+  }
+  document.addEventListener('astro:page-load', initMarkupCalculator);
+</script>

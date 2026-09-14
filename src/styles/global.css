@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+@layer base {
+  /* Default Dark Theme: Apple-level Neutral Dark & Geist Typography */
+  :root,
+  [data-theme="dark"] {
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Backgrounds & Surfaces (#0A0A0A base) */
+    --background: #0A0A0A;
+    --surface: #111111;
+    --surface-elevated: #151515;
+    --surface-subtle: #131313;
+    --input-background: #0E0E0E;
+
+    /* Borders (Subtle, restrained) */
+    --border: rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-focus: rgba(255, 255, 255, 0.25);
+    --input-border: rgba(255, 255, 255, 0.1);
+
+    /* Typography (#F5F5F3 primary, #A1A1A1 secondary, #6F6F6F muted) */
+    --text-primary: #F5F5F3;
+    --text-secondary: #A1A1A1;
+    --text-muted: #6F6F6F;
+
+    /* Accent (Clean, restrained physical light in dark mode) */
+    --accent: #F5F5F3;
+    --accent-foreground: #0A0A0A;
+    --accent-surface: rgba(255, 255, 255, 0.06);
+
+    /* Positive / Financial Green (Restrained #35C98A) */
+    --positive: #35C98A;
+    --positive-surface: rgba(53, 201, 138, 0.08);
+    --positive-border: rgba(53, 201, 138, 0.2);
+    --positive-text: #35C98A;
+
+    /* Negative / Financial Red (Restrained) */
+    --negative: #EB5757;
+    --negative-surface: rgba(235, 87, 87, 0.08);
+    --negative-border: rgba(235, 87, 87, 0.2);
+    --negative-text: #EB5757;
+
+    /* Focus ring & Chrome */
+    --focus-ring: rgba(255, 255, 255, 0.25);
+    --header-bg: rgba(10, 10, 10, 0.85);
+    --header-border: rgba(255, 255, 255, 0.08);
+    --footer-bg: #0A0A0A;
+    --footer-border: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Alternative Light Theme (Clean Neutral Slate / White) */
+  [data-theme="light"] {
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Backgrounds & Surfaces */
+    --background: #FAFAFA;
+    --surface: #FFFFFF;
+    --surface-elevated: #F4F4F5;
+    --surface-subtle: #F9F9FB;
+    --input-background: #FFFFFF;
+
+    /* Borders */
+    --border: rgba(0, 0, 0, 0.08);
+    --border-subtle: rgba(0, 0, 0, 0.04);
+    --border-focus: rgba(0, 0, 0, 0.35);
+    --input-border: rgba(0, 0, 0, 0.12);
+
+    /* Typography */
+    --text-primary: #111111;
+    --text-secondary: #555555;
+    --text-muted: #888888;
+
+    /* Accent */
+    --accent: #111111;
+    --accent-foreground: #FFFFFF;
+    --accent-surface: rgba(0, 0, 0, 0.05);
+
+    /* Positive / Financial Green */
+    --positive: #16A34A;
+    --positive-surface: rgba(22, 163, 74, 0.08);
+    --positive-border: rgba(22, 163, 74, 0.2);
+    --positive-text: #15803D;
+
+    /* Negative / Financial Red */
+    --negative: #DC2626;
+    --negative-surface: rgba(220, 38, 38, 0.08);
+    --negative-border: rgba(220, 38, 38, 0.2);
+    --negative-text: #B91C1C;
+
+    /* Focus ring & Chrome */
+    --focus-ring: rgba(0, 0, 0, 0.3);
+    --header-bg: rgba(250, 250, 250, 0.88);
+    --header-border: rgba(0, 0, 0, 0.08);
+    --footer-bg: #FAFAFA;
+    --footer-border: rgba(0, 0, 0, 0.08);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    background-color: var(--background);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--text-primary);
+  }
+
+  /* Refined typography defaults */
+  h1 {
+    font-weight: 680;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+  }
+
+  h2, h3, h4 {
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    color: var(--text-primary);
+  }
+
+  p, li, dt, dd {
+    letter-spacing: -0.008em;
+  }
+
+  /* Quiet, high-precision focus states */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--focus-ring);
+  }
+
+  /* Precision tabular numerals for financial UI */
+  .tabular-nums,
+  input[type="number"],
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "cv05" 1, "cv11" 1;
+  }
+}
+
+/* Theme Icon Visibility Rules */
+[data-theme="dark"] .theme-icon-moon {
+  display: block;
+}
+[data-theme="dark"] .theme-icon-sun {
+  display: none;
+}
+[data-theme="light"] .theme-icon-moon {
+  display: none;
+}
+[data-theme="light"] .theme-icon-sun {
+  display: block;
+}
+
+/* Tab Segmented Control Active / Inactive helper styles */
+.calc-tab-btn {
+  border: 1px solid transparent;
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+.calc-tab-btn[aria-selected="true"] {
+  background-color: var(--surface-elevated);
+  color: var(--text-primary);
+  border-color: var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  font-weight: 550;
+}
+.calc-tab-btn[aria-selected="false"] {
+  background-color: transparent;
+  color: var(--text-muted);
+}
+.calc-tab-btn[aria-selected="false"]:hover {
+  color: var(--text-secondary);
+}
+
+/* Subtle Ambient Background Lighting (Dark Theme Only) */
+.ambient-glow-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1200px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme="light"] .ambient-glow-wrapper {
+  display: none;
+}
+
+/* Atmospheric illumination from above, centered behind hero */
+.ambient-glow-top,
+.ambient-glow-primary {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1400px;
+  height: 860px;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0.16) 25%,
+    rgba(255, 255, 255, 0.08) 48%,
+    rgba(255, 255, 255, 0.025) 70%,
+    transparent 85%
+  );
+  filter: blur(80px);
+}
+
+.ambient-glow-secondary {
+  display: none;
+}
+
+/* Responsive adjustment for mobile viewports */
+@media (max-width: 640px) {
+  .ambient-glow-top,
+  .ambient-glow-primary {
+    height: 560px;
+    background: radial-gradient(
+      ellipse 95% 65% at 50% 0%,
+      rgba(255, 255, 255, 0.24) 0%,
+      rgba(255, 255, 255, 0.13) 25%,
+      rgba(255, 255, 255, 0.06) 48%,
+      rgba(255, 255, 255, 0.018) 70%,
+      transparent 85%
+    );
+    filter: blur(55px);
+  }
+}
+
+/* Subtle print styles */
+@media print {
+  header, footer, nav, .no-print {
+    display: none !important;
+  }
+}

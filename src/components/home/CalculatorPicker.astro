@@ -1,0 +1,364 @@
+---
+import { Search, X } from 'lucide-astro';
+import { CATEGORIES, getAllCalculators } from '../../lib/calculators/registry';
+
+const allCalculators = getAllCalculators();
+
+// Keywords mapping for accurate business search matching
+const KEYWORDS: Record<string, string> = {
+  'profit-margin': 'margin markup profit gross revenue cost cogs pricing price return',
+  markup: 'markup margin profit cost price revenue return pricing',
+  'selling-price': 'selling price cost target margin pricing quote retail cogs',
+  discount: 'discount sale savings percentage reduction pricing markdown clearance',
+  'gross-profit': 'gross profit revenue cogs margin cost sales earnings',
+  'break-even': 'break even breakeven fixed variable costs units volume revenue finance',
+  'target-profit': 'target profit sales volume goal income revenue required units finance',
+  revenue: 'revenue sales volume price units projections earnings finance',
+  commission: 'commission sales bonus tiered payout rate earnings compensation finance',
+  roi: 'roi return on investment capital gain project yield profitability finance',
+  roas: 'roas return on ad spend advertising marketing paid ads campaign efficiency',
+  cac: 'cac customer acquisition cost marketing paid organic acquisition blend',
+  ltv: 'ltv customer lifetime value retention churn revenue marketing growth',
+  'ltv-cac': 'ltv cac ratio unit economics sustainability efficiency benchmark marketing growth',
+  'conversion-rate': 'conversion rate visitors leads checkouts funnel landing page marketing growth',
+};
+
+let globalCounter = 0;
+const categorizedCalculators = CATEGORIES.map((cat) => {
+  const calcs = allCalculators.filter((c) => c.category === cat.id);
+  const itemsWithIndex = calcs.map((c) => {
+    globalCounter += 1;
+    return {
+      ...c,
+      displayNum: String(globalCounter).padStart(2, '0'),
+      keywords: KEYWORDS[c.id] || '',
+    };
+  });
+  return {
+    ...cat,
+    calculators: itemsWithIndex,
+  };
+});
+---
+
+<!-- Calculator Picker Modal Overlay -->
+<div
+  id="calculator-picker-modal"
+  class="fixed inset-0 z-50 hidden flex items-start justify-center p-4 sm:p-6 sm:pt-20 bg-black/70 backdrop-blur-xs transition-opacity duration-150"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="picker-title"
+>
+  <!-- Modal Dialog Window: Compact, 580px max-width, no glassmorphism, no gradient -->
+  <div
+    id="picker-dialog"
+    class="w-full max-w-xl bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+  >
+    <!-- Modal Header -->
+    <div class="p-4 sm:p-5 border-b border-[var(--border)] space-y-3">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 id="picker-title" class="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)]">
+            Choose a calculator
+          </h2>
+          <p class="text-xs text-[var(--text-secondary)] mt-0.5">
+            Search by name, category, or what you need to calculate.
+          </p>
+        </div>
+        <button
+          type="button"
+          id="picker-close-btn"
+          class="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)] transition-colors rounded-md shrink-0 cursor-pointer"
+          aria-label="Close picker"
+        >
+          <X class="w-4 h-4" />
+        </button>
+      </div>
+
+      <!-- Search Field: Primary Focus -->
+      <div class="relative flex items-center rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2.5 focus-within:border-[var(--text-primary)] focus-within:ring-1 focus-within:ring-[var(--border-focus)] transition-all">
+        <Search class="w-4 h-4 text-[var(--text-muted)] shrink-0 mr-2.5" />
+        <input
+          type="search"
+          id="picker-search-input"
+          placeholder="Search calculators..."
+          autocomplete="off"
+          class="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
+        />
+        <kbd class="hidden sm:inline-flex px-1.5 py-0.5 text-[10px] font-mono text-[var(--text-muted)] bg-[var(--surface)] border border-[var(--border)] rounded shrink-0 select-none">
+          ESC
+        </kbd>
+      </div>
+    </div>
+
+    <!-- Scrollable Results Content -->
+    <div id="picker-scroll-area" class="overflow-y-auto p-3 sm:p-4 space-y-5 flex-1">
+      <!-- Empty Search State -->
+      <div id="picker-empty-state" class="hidden py-8 text-center space-y-1">
+        <p class="text-sm font-medium text-[var(--text-primary)]">No calculators found</p>
+        <p class="text-xs text-[var(--text-muted)]">
+          Try searching for profit, pricing, finance, or marketing.
+        </p>
+      </div>
+
+      <!-- Categorized Results -->
+      <div id="picker-list-container" class="space-y-5">
+        {categorizedCalculators.map((category) => (
+          <div class="picker-category-group space-y-1" data-category-id={category.id}>
+            <h3 class="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] px-3 py-1">
+              {category.name}
+            </h3>
+
+            <div class="divide-y divide-[var(--border-subtle)]">
+              {category.calculators.map((calc) => {
+                const isActive = calc.status === 'active';
+                return (
+                  <div
+                    class="picker-item"
+                    data-name={calc.name.toLowerCase()}
+                    data-shortname={calc.shortName.toLowerCase()}
+                    data-category={category.name.toLowerCase()}
+                    data-desc={calc.description.toLowerCase()}
+                    data-tagline={calc.tagline.toLowerCase()}
+                    data-keywords={calc.keywords.toLowerCase()}
+                  >
+                    {isActive ? (
+                      <a
+                        href={`/${calc.slug}`}
+                        class="picker-row flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-[var(--surface-subtle)] transition-colors group focus-visible:outline-none focus:bg-[var(--surface-subtle)] focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)]"
+                      >
+                        <div class="flex items-center gap-3 min-w-0">
+                          <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums shrink-0">
+                            {calc.displayNum}
+                          </span>
+                          <div class="min-w-0">
+                            <span class="font-medium text-sm text-[var(--text-primary)] block truncate">
+                              {calc.name}
+                            </span>
+                            <span class="text-xs text-[var(--text-secondary)] font-normal block truncate max-w-[190px] sm:max-w-md">
+                              {calc.tagline}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0 ml-3">
+                          <span class="text-[10px] font-medium uppercase tracking-wider text-[var(--positive-text)] hidden sm:inline">
+                            Active
+                          </span>
+                          <span class="text-xs text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-0.5 transition-all" aria-hidden="true">
+                            &rarr;
+                          </span>
+                        </div>
+                      </a>
+                    ) : (
+                      <div class="picker-row flex items-center justify-between py-2.5 px-3 rounded-lg opacity-50 select-none cursor-default">
+                        <div class="flex items-center gap-3 min-w-0">
+                          <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums shrink-0">
+                            {calc.displayNum}
+                          </span>
+                          <div class="min-w-0">
+                            <span class="font-normal text-sm text-[var(--text-secondary)] block truncate">
+                              {calc.name}
+                            </span>
+                            <span class="text-xs text-[var(--text-muted)] font-normal block truncate max-w-[190px] sm:max-w-md">
+                              {calc.tagline}
+                            </span>
+                          </div>
+                        </div>
+                        <span class="text-[10px] text-[var(--text-muted)] shrink-0 ml-3">
+                          In development
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-4 py-2.5 bg-[var(--surface-subtle)] border-t border-[var(--border)] flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+      <span>15 calculators in catalog</span>
+      <a href="/calculators" class="hover:text-[var(--text-primary)] transition-colors font-medium">
+        Browse all calculators &rarr;
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setupCalculatorPicker() {
+    const modal = document.getElementById('calculator-picker-modal');
+    const searchInput = document.getElementById('picker-search-input') as HTMLInputElement | null;
+    const closeBtn = document.getElementById('picker-close-btn');
+    const categoryGroups = document.querySelectorAll<HTMLElement>('.picker-category-group');
+    const emptyState = document.getElementById('picker-empty-state');
+
+    if (!modal) return;
+
+    let activeNavIndex = -1;
+
+    function getVisibleActiveLinks(): HTMLAnchorElement[] {
+      const links: HTMLAnchorElement[] = [];
+      const visibleItems = modal?.querySelectorAll<HTMLElement>('.picker-item:not(.hidden)') || [];
+      visibleItems.forEach((item) => {
+        const a = item.querySelector<HTMLAnchorElement>('a.picker-row');
+        if (a) links.push(a);
+      });
+      return links;
+    }
+
+    function updateLinkHighlight(links: HTMLAnchorElement[]) {
+      links.forEach((link, idx) => {
+        if (idx === activeNavIndex) {
+          link.classList.add('bg-[var(--surface-subtle)]', 'ring-1', 'ring-[var(--focus-ring)]');
+          link.scrollIntoView({ block: 'nearest' });
+        } else {
+          link.classList.remove('bg-[var(--surface-subtle)]', 'ring-1', 'ring-[var(--focus-ring)]');
+        }
+      });
+    }
+
+    function openModal() {
+      modal?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      activeNavIndex = -1;
+      setTimeout(() => {
+        searchInput?.focus();
+        searchInput?.select();
+      }, 50);
+    }
+
+    function closeModal() {
+      modal?.classList.add('hidden');
+      document.body.style.overflow = '';
+      activeNavIndex = -1;
+      if (searchInput) {
+        searchInput.value = '';
+        filterItems();
+      }
+    }
+
+    function filterItems() {
+      const query = searchInput?.value.trim().toLowerCase() || '';
+      let visibleTotal = 0;
+      activeNavIndex = -1;
+
+      categoryGroups.forEach((group) => {
+        let visibleInGroup = 0;
+        const groupItems = group.querySelectorAll<HTMLElement>('.picker-item');
+
+        groupItems.forEach((item) => {
+          if (!query) {
+            item.classList.remove('hidden');
+            visibleInGroup += 1;
+            visibleTotal += 1;
+            return;
+          }
+
+          const name = item.getAttribute('data-name') || '';
+          const shortName = item.getAttribute('data-shortname') || '';
+          const category = item.getAttribute('data-category') || '';
+          const desc = item.getAttribute('data-desc') || '';
+          const tagline = item.getAttribute('data-tagline') || '';
+          const keywords = item.getAttribute('data-keywords') || '';
+
+          const matches =
+            name.includes(query) ||
+            shortName.includes(query) ||
+            category.includes(query) ||
+            desc.includes(query) ||
+            tagline.includes(query) ||
+            keywords.includes(query);
+
+          if (matches) {
+            item.classList.remove('hidden');
+            visibleInGroup += 1;
+            visibleTotal += 1;
+          } else {
+            item.classList.add('hidden');
+          }
+        });
+
+        if (visibleInGroup === 0 && query) {
+          group.classList.add('hidden');
+        } else {
+          group.classList.remove('hidden');
+        }
+      });
+
+      if (emptyState) {
+        if (visibleTotal === 0 && query) {
+          emptyState.classList.remove('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+        }
+      }
+    }
+
+    // Keyboard navigation (ArrowDown, ArrowUp, Enter)
+    function handleKeyDown(e: KeyboardEvent) {
+      if (modal?.classList.contains('hidden')) {
+        // Global shortcut Ctrl+K / Cmd+K
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          openModal();
+        }
+        return;
+      }
+
+      // Escape closes
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+        return;
+      }
+
+      const activeLinks = getVisibleActiveLinks();
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (activeLinks.length > 0) {
+          activeNavIndex = (activeNavIndex + 1) % activeLinks.length;
+          updateLinkHighlight(activeLinks);
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (activeLinks.length > 0) {
+          activeNavIndex = (activeNavIndex - 1 + activeLinks.length) % activeLinks.length;
+          updateLinkHighlight(activeLinks);
+        }
+      } else if (e.key === 'Enter') {
+        if (activeNavIndex >= 0 && activeNavIndex < activeLinks.length) {
+          e.preventDefault();
+          activeLinks[activeNavIndex]?.click();
+        } else if (activeLinks.length === 1) {
+          e.preventDefault();
+          activeLinks[0]?.click();
+        }
+      }
+    }
+
+    // Event listeners
+    window.addEventListener('profitivas:open-picker', openModal);
+    closeBtn?.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    searchInput?.addEventListener('input', filterItems);
+    window.addEventListener('keydown', handleKeyDown);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupCalculatorPicker);
+  } else {
+    setupCalculatorPicker();
+  }
+  document.addEventListener('astro:page-load', setupCalculatorPicker);
+</script>

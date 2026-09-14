@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/common/Breadcrumbs.astro';
+
+const pageTitle = 'Privacy Policy — Profitivas';
+const pageDescription = 'Profitivas Privacy Policy: our calculators execute locally in your browser. Learn how we handle privacy, local storage, and website data.';
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonicalUrl="https://profitivas.com/privacy"
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <!-- Breadcrumbs -->
+    <Breadcrumbs items={[{ label: 'Privacy Policy' }]} />
+
+    <header class="mt-6 mb-10 sm:mb-12">
+      <p class="text-xs font-medium text-[var(--text-muted)] tracking-[0.2em] uppercase mb-2.5">
+        Legal & Transparency
+      </p>
+      <h1 class="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
+        Privacy Policy
+      </h1>
+      <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-3 leading-relaxed font-normal">
+        Last updated: September 2026. How Profitivas protects your privacy and commercial calculations.
+      </p>
+    </header>
+
+    <article class="space-y-10 sm:space-y-12 text-sm text-[var(--text-secondary)] leading-relaxed">
+      <!-- Client-Side Calculation Privacy -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          1. Local Client-Side Calculation
+        </h2>
+        <p>
+          Profitivas calculators are built with client-side JavaScript that executes strictly inside your web browser. When you enter unit costs, retail prices, sales volumes, or target margins, that data never leaves your device.
+        </p>
+        <p>
+          We do not record, transmit, analyze, or sell any commercial or financial figures you input into our calculation tools.
+        </p>
+      </section>
+
+      <!-- Local Storage -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          2. Local Storage & Cookies
+        </h2>
+        <p>
+          Profitivas does not use tracking cookies or marketing profiling cookies.
+        </p>
+        <p>
+          We use browser <code class="font-mono text-xs text-[var(--text-primary)] bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded border border-[var(--border)]">localStorage</code> for one sole purpose: remembering your visual theme preference (<code class="font-mono text-xs text-[var(--text-primary)]">profitivas-theme</code> set to "light" or "dark") across page visits so that you do not experience a flash of mismatched styling.
+        </p>
+      </section>
+
+      <!-- Hosting Logs -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          3. Standard Server Logs
+        </h2>
+        <p>
+          Like virtually all web properties, our hosting servers automatically record basic technical access logs when you request web pages. These logs may include your IP address, browser type, referral source, and request timestamps. These logs are used strictly for network security, abuse mitigation, and server reliability.
+        </p>
+      </section>
+
+      <!-- Third-Party Services -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          4. External Links & Future Services
+        </h2>
+        <p>
+          Our website may link to third-party resources or industry references. We are not responsible for the privacy practices or content of third-party websites. If monetization services or advertising partners are introduced in the future, this policy will be updated to reflect applicable disclosures in compliance with industry guidelines.
+        </p>
+      </section>
+
+      <!-- Contact -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          5. Questions
+        </h2>
+        <p>
+          If you have questions regarding this privacy policy or our data practices, please review our <a href="/about" class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80">About page</a> or contact the Profitivas team.
+        </p>
+      </section>
+    </article>
+  </div>
+</BaseLayout>

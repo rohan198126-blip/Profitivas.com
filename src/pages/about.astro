@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/common/Breadcrumbs.astro';
+
+const pageTitle = 'About Profitivas — Business & Financial Calculators';
+const pageDescription = 'Learn about Profitivas: fast, precise, client-side business calculators designed for founders, operators, and pricing analysts.';
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonicalUrl="https://profitivas.com/about"
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <!-- Breadcrumbs -->
+    <Breadcrumbs items={[{ label: 'About' }]} />
+
+    <header class="mt-6 mb-10 sm:mb-12">
+      <p class="text-xs font-medium text-[var(--text-muted)] tracking-[0.2em] uppercase mb-2.5">
+        About Profitivas
+      </p>
+      <h1 class="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
+        Business numbers. Better decisions.
+      </h1>
+      <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-3 leading-relaxed font-normal">
+        A focused utility platform built to provide fast, reliable calculations for everyday commercial decisions.
+      </p>
+    </header>
+
+    <article class="space-y-10 sm:space-y-12 text-sm text-[var(--text-secondary)] leading-relaxed">
+      <!-- Section: Why Profitivas Exists -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          Why Profitivas Exists
+        </h2>
+        <p>
+          Most financial calculators on the web today are buried underneath intrusive advertisements, paywalls, mandatory email signups, and bloated dashboard interfaces. Calculating a simple profit margin or retail markup should not require navigating popups or waiting for heavy JavaScript libraries to load.
+        </p>
+        <p>
+          Profitivas was built to do the opposite: provide clean, distraction-free calculation instruments that load instantly, execute entirely on your device, and present the numbers you need with maximum clarity.
+        </p>
+      </section>
+
+      <!-- Section: Core Principles -->
+      <section class="space-y-4 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          Core Principles
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-1">
+          <div class="space-y-1.5">
+            <h3 class="font-medium text-sm text-[var(--text-primary)]">
+              Client-Side Computation
+            </h3>
+            <p class="text-xs text-[var(--text-secondary)] leading-normal">
+              Calculations execute locally within your browser. Your commercial costs, pricing strategies, and revenue targets are never uploaded to our servers.
+            </p>
+          </div>
+          <div class="space-y-1.5">
+            <h3 class="font-medium text-sm text-[var(--text-primary)]">
+              Verified Financial Logic
+            </h3>
+            <p class="text-xs text-[var(--text-secondary)] leading-normal">
+              Every formula is documented openly with transparent methodology, explicit accounting definitions, and realistic worked business examples.
+            </p>
+          </div>
+          <div class="space-y-1.5">
+            <h3 class="font-medium text-sm text-[var(--text-primary)]">
+              No Sign-Up or Paywalls
+            </h3>
+            <p class="text-xs text-[var(--text-secondary)] leading-normal">
+              All tools are accessible without registration, email capture, or paid tiers. You get immediate answers to your business questions.
+            </p>
+          </div>
+          <div class="space-y-1.5">
+            <h3 class="font-medium text-sm text-[var(--text-primary)]">
+              Speed & Precision
+            </h3>
+            <p class="text-xs text-[var(--text-secondary)] leading-normal">
+              Built with zero runtime bloat, minimal client-side dependencies, and full support for keyboard navigation, dark mode, and mobile devices.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: How to Contact -->
+      <section class="space-y-3 pt-6 border-t border-[var(--border)]">
+        <h2 class="text-base sm:text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          Contact & Feedback
+        </h2>
+        <p>
+          Have questions about our calculation methodology or suggestions for new business tools? We welcome feedback from operators, founders, and accountants.
+        </p>
+        <p>
+          Explore our complete directory of tools on the <a href="/calculators" class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80">calculators directory</a> or review our <a href="/privacy" class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80">Privacy Policy</a> and <a href="/terms" class="text-[var(--text-primary)] underline underline-offset-4 hover:opacity-80">Terms of Service</a>.
+        </p>
+      </section>
+    </article>
+  </div>
+</BaseLayout>

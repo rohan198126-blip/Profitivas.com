@@ -1,0 +1,56 @@
+---
+import { Moon, Sun } from 'lucide-astro';
+---
+
+<button
+  type="button"
+  id="theme-toggle"
+  class="inline-flex items-center justify-center w-8 h-8 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)] focus:outline-none"
+  aria-label="Switch to light theme"
+  title="Switch theme (Current: Dark)"
+>
+  <!-- Moon icon shown when dark theme is active -->
+  <Moon class="w-4 h-4 theme-icon-moon transition-transform" />
+  <!-- Sun icon shown when light theme is active -->
+  <Sun class="w-4 h-4 theme-icon-sun transition-transform" />
+  <span class="sr-only">Toggle theme</span>
+</button>
+
+<script>
+  function setupThemeToggle() {
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (!toggleBtn) return;
+
+    function updateAriaState(currentTheme: string) {
+      if (currentTheme === 'light') {
+        toggleBtn?.setAttribute('aria-label', 'Switch to dark theme');
+        toggleBtn?.setAttribute('title', 'Theme: Light (click for Dark)');
+      } else {
+        toggleBtn?.setAttribute('aria-label', 'Switch to light theme');
+        toggleBtn?.setAttribute('title', 'Theme: Dark (click for Light)');
+      }
+    }
+
+    // Initialize button labels based on active theme
+    const activeTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    updateAriaState(activeTheme);
+
+    toggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
+
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      try {
+        localStorage.setItem('profitivas-theme', nextTheme);
+      } catch (_) {}
+
+      updateAriaState(nextTheme);
+    });
+  }
+
+  // Run on initial load
+  setupThemeToggle();
+
+  // Support Astro view transitions or soft navigations if used
+  document.addEventListener('astro:after-swap', setupThemeToggle);
+</script>

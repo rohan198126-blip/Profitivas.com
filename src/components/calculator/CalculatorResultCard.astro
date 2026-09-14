@@ -1,0 +1,62 @@
+---
+export interface Props {
+  id?: string;
+  label: string;
+  value: string;
+  subtext?: string;
+  variant?: 'primary' | 'secondary' | 'neutral';
+  class?: string;
+}
+
+const {
+  id,
+  label,
+  value,
+  subtext,
+  variant = 'neutral',
+  class: className = '',
+} = Astro.props;
+
+const styles = {
+  primary: 'bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)] shadow-xs p-5 sm:p-6 rounded-xl relative',
+  secondary: 'bg-[var(--positive-surface)] text-[var(--positive-text)] border border-[var(--positive-border)] shadow-xs p-3.5 sm:p-4 rounded-lg',
+  neutral: 'bg-[var(--surface)] text-[var(--text-primary)] border border-[var(--border)] shadow-xs p-3.5 sm:p-4 rounded-lg',
+};
+
+const labelStyles = {
+  primary: 'text-[11px] font-semibold tracking-widest uppercase text-[var(--text-muted)]',
+  secondary: 'text-[10px] font-medium tracking-wider uppercase text-[var(--positive-text)] opacity-90',
+  neutral: 'text-[10px] font-medium tracking-wider uppercase text-[var(--text-muted)]',
+};
+
+const valueStyles = {
+  primary: 'text-5xl sm:text-6xl font-bold tracking-tight text-[var(--text-primary)] mt-2 mb-1.5 tabular-nums',
+  secondary: 'text-xl sm:text-2xl font-semibold tracking-tight text-[var(--positive-text)] mt-1 tabular-nums',
+  neutral: 'text-xl sm:text-2xl font-semibold tracking-tight text-[var(--text-primary)] mt-1 tabular-nums',
+};
+
+const subtextStyles = {
+  primary: 'text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-normal mt-1',
+  secondary: 'text-[11px] text-[var(--positive-text)] opacity-80 mt-0.5 leading-normal font-normal',
+  neutral: 'text-[11px] text-[var(--text-muted)] mt-0.5 leading-normal font-normal',
+};
+---
+
+<div
+  class={`transition-all ${styles[variant]} ${className}`}
+>
+  <p class={labelStyles[variant]}>
+    {label}
+  </p>
+  <p
+    id={id}
+    class={valueStyles[variant]}
+  >
+    {value}
+  </p>
+  {subtext && (
+    <p class={subtextStyles[variant]}>
+      {subtext}
+    </p>
+  )}
+</div>

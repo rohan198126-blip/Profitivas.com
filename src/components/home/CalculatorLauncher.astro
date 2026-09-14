@@ -1,0 +1,57 @@
+---
+// Compact Central Product Interaction Box
+---
+
+<div class="w-full max-w-[620px] mx-auto">
+  <!-- Compact Product Box Surface: Refined, understated, no glassmorphism, no shadows -->
+  <div class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-8 sm:p-10 text-center">
+    <!-- Focused Title -->
+    <h2 class="text-lg sm:text-xl font-semibold tracking-tight text-[var(--text-primary)]">
+      Find a calculator
+    </h2>
+
+    <!-- Short Muted Description -->
+    <p class="text-xs sm:text-sm text-[var(--text-secondary)] font-normal mt-1.5 mb-7">
+      Choose the calculation you need.
+    </p>
+
+    <!-- Two Clear Actions Only -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+      <button
+        type="button"
+        id="btn-open-picker"
+        class="w-full sm:w-auto inline-flex items-center justify-center bg-[var(--text-primary)] text-[var(--background)] hover:opacity-90 font-medium px-5 py-2.5 rounded-lg text-sm transition-opacity cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+      >
+        Choose a calculator
+      </button>
+
+      <a
+        href="/calculators"
+        class="w-full sm:w-auto inline-flex items-center justify-center border border-[var(--border)] bg-transparent hover:bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium px-5 py-2.5 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)]"
+      >
+        Browse all calculators
+      </a>
+    </div>
+
+    <!-- Small Muted Trust Line -->
+    <p class="text-xs text-[var(--text-muted)] mt-7">
+      Free · No sign-up · Instant results
+    </p>
+  </div>
+</div>
+
+<script>
+  function setupLauncherButton() {
+    const openBtn = document.getElementById('btn-open-picker');
+    openBtn?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('profitivas:open-picker'));
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupLauncherButton);
+  } else {
+    setupLauncherButton();
+  }
+  document.addEventListener('astro:page-load', setupLauncherButton);
+</script>

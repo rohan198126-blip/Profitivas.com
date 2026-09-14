@@ -1,0 +1,106 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/common/Breadcrumbs.astro';
+import FormulaExplanation from '../components/calculator/FormulaExplanation.astro';
+import WorkedExampleSection from '../components/calculator/WorkedExample.astro';
+import FaqSection from '../components/calculator/FaqSection.astro';
+import RelatedCalculators from '../components/calculator/RelatedCalculators.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { getSoftwareApplicationSchema } from '../lib/seo/schema';
+import type { CalculatorContent } from '../lib/calculators/types';
+
+export interface Props {
+  content: CalculatorContent;
+}
+
+const { content } = Astro.props;
+const { meta, formulas, workedExample, assumptions, faqs, relatedSlugs } = content;
+
+const categoryLabels = {
+  'pricing-profit': 'Pricing & Profit',
+  business: 'Business Finance',
+  marketing: 'Marketing & Growth',
+};
+---
+
+<BaseLayout
+  title={meta.seoTitle}
+  description={meta.seoDescription}
+  canonicalUrl={`https://profitivas.com/${meta.slug}`}
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+    <!-- Breadcrumbs: Subtle, muted text -->
+    <Breadcrumbs
+      items={[
+        { label: 'Calculators', href: '/calculators' },
+        { label: categoryLabels[meta.category], href: `/calculators#${meta.category}` },
+        { label: meta.name },
+      ]}
+    />
+
+    <!-- Header Section: Clean editorial intro -->
+    <header class="mt-4 mb-8 sm:mt-6 sm:mb-10 max-w-2xl">
+      <h1 class="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight leading-[1.12]">
+        {meta.name}
+      </h1>
+      <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-2 leading-relaxed font-normal">
+        {meta.tagline}
+      </p>
+    </header>
+
+    <!-- Calculator Interactive Workstation Island -->
+    <section aria-label="Interactive Calculator Tool" class="mb-16 sm:mb-20">
+      <slot />
+    </section>
+
+    <!-- Supporting Documentation & Context -->
+    <div class="pt-12 sm:pt-16 border-t border-[var(--border)] space-y-14 sm:space-y-16">
+      <!-- Formulas & Logic -->
+      <FormulaExplanation formulas={formulas} />
+
+      <!-- Worked Business Example -->
+      <WorkedExampleSection example={workedExample} />
+
+      <!-- Methodology & Assumptions -->
+      {assumptions && assumptions.length > 0 && (
+        <section aria-labelledby="assumptions-heading" class="space-y-4">
+          <div>
+            <h2 id="assumptions-heading" class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+              Methodology & Assumptions
+            </h2>
+            <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
+              Underlying definitions and operational accounting principles.
+            </p>
+          </div>
+          <dl class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 pt-1">
+            {assumptions.map((item) => (
+              <div class="space-y-1.5">
+                <dt class="font-medium text-[var(--text-primary)] text-sm">
+                  {item.term}
+                </dt>
+                <dd class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-normal">
+                  {item.definition}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
+      <!-- Frequently Asked Questions -->
+      <FaqSection faqs={faqs} />
+
+      <!-- Related Calculators -->
+      <RelatedCalculators relatedSlugs={relatedSlugs} />
+    </div>
+  </div>
+
+  <!-- JSON-LD Application Schema -->
+  <JsonLd
+    schema={getSoftwareApplicationSchema({
+      name: meta.name,
+      description: meta.seoDescription,
+      slug: meta.slug,
+    })}
+  />
+</BaseLayout>

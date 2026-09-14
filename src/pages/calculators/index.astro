@@ -1,0 +1,343 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/common/Breadcrumbs.astro';
+import { Search } from 'lucide-astro';
+import { CATEGORIES, getAllCalculators } from '../../lib/calculators/registry';
+
+const allCalculators = getAllCalculators();
+
+// Keywords mapping for accurate business search matching
+const KEYWORDS: Record<string, string> = {
+  'profit-margin': 'margin markup profit gross revenue cost cogs pricing price return economics',
+  markup: 'markup margin profit cost price revenue return pricing cost-plus',
+  'selling-price': 'selling price cost target margin pricing quote retail cogs wholesale',
+  discount: 'discount sale savings percentage reduction pricing markdown clearance promotional',
+  'gross-profit': 'gross profit revenue cogs margin cost sales earnings income',
+  'break-even': 'break even breakeven fixed variable costs units volume revenue finance threshold',
+  'target-profit': 'target profit sales volume goal income revenue required units finance planning',
+  revenue: 'revenue sales volume price units projections earnings finance top-line',
+  commission: 'commission sales bonus tiered payout rate earnings compensation finance incentive',
+  roi: 'roi return on investment capital gain project yield profitability finance hurdle',
+  roas: 'roas return on ad spend advertising marketing paid ads campaign efficiency media',
+  cac: 'cac customer acquisition cost marketing paid organic acquisition blend spend',
+  ltv: 'ltv customer lifetime value retention churn revenue marketing growth value',
+  'ltv-cac': 'ltv cac ratio unit economics sustainability efficiency benchmark marketing growth payback',
+  'conversion-rate': 'conversion rate visitors leads checkouts funnel landing page marketing growth optimize',
+};
+
+let globalCounter = 0;
+const categorizedCalculators = CATEGORIES.map((cat) => {
+  const calcs = allCalculators.filter((c) => c.category === cat.id);
+  const itemsWithIndex = calcs.map((c) => {
+    globalCounter += 1;
+    return {
+      ...c,
+      displayNum: String(globalCounter).padStart(2, '0'),
+      keywords: KEYWORDS[c.id] || '',
+    };
+  });
+  return {
+    ...cat,
+    calculators: itemsWithIndex,
+  };
+});
+
+const pageTitle = 'Business Calculators — Profitivas';
+const pageDescription = 'Explore the complete directory of Profitivas business calculators for pricing, profit, finance, marketing, and unit economics.';
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonicalUrl="https://profitivas.com/calculators"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <!-- Breadcrumbs -->
+    <Breadcrumbs items={[{ label: 'Calculators' }]} />
+
+    <!-- Compact Centered Introduction -->
+    <header class="text-center max-w-xl mx-auto mt-6 mb-10 sm:mb-12">
+      <p class="text-xs font-medium text-[var(--text-muted)] tracking-[0.2em] uppercase mb-2.5">
+        Calculators
+      </p>
+      <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
+        Business calculations, all in one place.
+      </h1>
+      <p class="text-sm sm:text-base text-[var(--text-secondary)] mt-2.5 font-normal leading-relaxed">
+        Simple tools for pricing, profit, finance, marketing, and growth.
+      </p>
+    </header>
+
+    <!-- Search & Filter Controls -->
+    <div class="max-w-2xl mx-auto mb-10 sm:mb-12 space-y-4">
+      <!-- Search Field: Instant Client-Side -->
+      <div class="relative flex items-center rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 focus-within:border-[var(--text-primary)] focus-within:ring-1 focus-within:ring-[var(--border-focus)] transition-all">
+        <Search class="w-4 h-4 text-[var(--text-muted)] mr-3 shrink-0" />
+        <input
+          type="search"
+          id="directory-search-input"
+          placeholder="Search calculators..."
+          autocomplete="off"
+          class="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
+          aria-label="Search calculators"
+        />
+        <kbd class="hidden sm:inline-flex px-1.5 py-0.5 text-[10px] font-mono text-[var(--text-muted)] bg-[var(--surface-elevated)] border border-[var(--border)] rounded shrink-0 select-none">
+          ESC
+        </kbd>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div id="categories" class="scroll-mt-24"></div>
+      <div
+        id="category-tabs"
+        class="flex items-center justify-center flex-wrap gap-1 sm:gap-2 pt-1"
+        role="tablist"
+        aria-label="Calculator Categories"
+      >
+        <button
+          type="button"
+          role="tab"
+          class="cat-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)]"
+          data-category="all"
+          aria-selected="true"
+        >
+          All
+        </button>
+        {CATEGORIES.map((cat) => (
+          <button
+            type="button"
+            role="tab"
+            class="cat-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] border border-transparent"
+            data-category={cat.id}
+            aria-selected="false"
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- Empty Search State -->
+    <div id="directory-empty-state" class="hidden py-16 text-center space-y-2">
+      <p class="text-sm font-medium text-[var(--text-primary)]">No calculators found</p>
+      <p class="text-xs text-[var(--text-muted)]">
+        Try: profit, pricing, finance, marketing
+      </p>
+    </div>
+
+    <!-- Editorial Calculator Directory Groups -->
+    <div id="directory-list-container" class="space-y-12 sm:space-y-16">
+      {categorizedCalculators.map((category, catIndex) => {
+        const catNum = String(catIndex + 1).padStart(2, '0');
+
+        return (
+          <section
+            id={`section-${category.id}`}
+            class="directory-category-section pt-6 border-t border-[var(--border)]"
+            data-category-id={category.id}
+            aria-labelledby={`heading-${category.id}`}
+          >
+            <!-- Editorial Category Header -->
+            <div class="flex items-baseline gap-2 mb-4">
+              <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums">
+                {catNum} /
+              </span>
+              <h2
+                id={`heading-${category.id}`}
+                class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]"
+              >
+                {category.name}
+              </h2>
+            </div>
+
+            <!-- Directory Rows with Subtle Dividers -->
+            <div class="divide-y divide-[var(--border)]">
+              {category.calculators.map((calc) => {
+                const isActive = calc.status === 'active';
+
+                return (
+                  <div
+                    class="directory-item"
+                    data-name={calc.name.toLowerCase()}
+                    data-shortname={calc.shortName.toLowerCase()}
+                    data-category={category.id}
+                    data-desc={calc.description.toLowerCase()}
+                    data-tagline={calc.tagline.toLowerCase()}
+                    data-keywords={calc.keywords.toLowerCase()}
+                  >
+                    {isActive ? (
+                      <a
+                        href={`/${calc.slug}`}
+                        class="group flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 sm:gap-6 py-4 sm:py-5 px-3 -mx-3 rounded-lg hover:bg-[var(--surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--focus-ring)]"
+                      >
+                        <div class="flex items-baseline gap-4 sm:gap-6 min-w-0 max-w-2xl">
+                          <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums shrink-0 w-6">
+                            {calc.displayNum}
+                          </span>
+                          <div class="min-w-0">
+                            <div class="flex items-center gap-2.5">
+                              <h3 class="text-sm sm:text-base font-medium text-[var(--text-primary)] group-hover:text-[var(--text-primary)]">
+                                {calc.name}
+                              </h3>
+                              <span class="text-[10px] font-medium uppercase tracking-wider text-[var(--positive-text)]">
+                                Active
+                              </span>
+                            </div>
+                            <p class="text-xs sm:text-sm text-[var(--text-secondary)] font-normal mt-0.5 leading-relaxed">
+                              {calc.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div class="shrink-0 flex items-center gap-1 text-xs text-[var(--text-muted)] group-hover:text-[var(--text-primary)] self-start sm:self-center">
+                          <span class="hidden sm:inline font-medium">Open calculator</span>
+                          <span class="group-hover:translate-x-1 transition-transform" aria-hidden="true">
+                            &rarr;
+                          </span>
+                        </div>
+                      </a>
+                    ) : (
+                      <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 sm:gap-6 py-4 sm:py-5 px-3 -mx-3 rounded-lg select-none opacity-60">
+                        <div class="flex items-baseline gap-4 sm:gap-6 min-w-0 max-w-2xl">
+                          <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums shrink-0 w-6">
+                            {calc.displayNum}
+                          </span>
+                          <div class="min-w-0">
+                            <h3 class="text-sm sm:text-base font-normal text-[var(--text-secondary)]">
+                              {calc.name}
+                            </h3>
+                            <p class="text-xs sm:text-sm text-[var(--text-muted)] font-normal mt-0.5 leading-relaxed">
+                              {calc.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div class="shrink-0 text-xs text-[var(--text-muted)] self-start sm:self-center">
+                          <span>In development</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  function setupCalculatorDirectory() {
+    const searchInput = document.getElementById('directory-search-input') as HTMLInputElement | null;
+    const tabButtons = document.querySelectorAll<HTMLButtonElement>('.cat-tab');
+    const categorySections = document.querySelectorAll<HTMLElement>('.directory-category-section');
+    const emptyState = document.getElementById('directory-empty-state');
+
+    let activeCategory = 'all';
+
+    function filterDirectory() {
+      const query = (searchInput?.value || '').trim().toLowerCase();
+      const terms = query.split(/\s+/).filter(Boolean);
+
+      let totalVisible = 0;
+
+      categorySections.forEach((section) => {
+        const sectionCategoryId = section.getAttribute('data-category-id') || '';
+        const categoryMatchesFilter = activeCategory === 'all' || activeCategory === sectionCategoryId;
+
+        let sectionVisibleCount = 0;
+
+        const sectionItems = section.querySelectorAll<HTMLElement>('.directory-item');
+        sectionItems.forEach((item) => {
+          if (!categoryMatchesFilter) {
+            item.classList.add('hidden');
+            return;
+          }
+
+          if (terms.length === 0) {
+            item.classList.remove('hidden');
+            sectionVisibleCount++;
+            totalVisible++;
+            return;
+          }
+
+          const name = item.getAttribute('data-name') || '';
+          const shortname = item.getAttribute('data-shortname') || '';
+          const category = item.getAttribute('data-category') || '';
+          const desc = item.getAttribute('data-desc') || '';
+          const tagline = item.getAttribute('data-tagline') || '';
+          const keywords = item.getAttribute('data-keywords') || '';
+
+          const searchableString = `${name} ${shortname} ${category} ${desc} ${tagline} ${keywords}`;
+
+          const matchesSearch = terms.every((term) => searchableString.includes(term));
+
+          if (matchesSearch) {
+            item.classList.remove('hidden');
+            sectionVisibleCount++;
+            totalVisible++;
+          } else {
+            item.classList.add('hidden');
+          }
+        });
+
+        // Hide category header if 0 visible calculators in that category
+        if (sectionVisibleCount === 0 || !categoryMatchesFilter) {
+          section.classList.add('hidden');
+        } else {
+          section.classList.remove('hidden');
+        }
+      });
+
+      // Show empty state if no calculators match query
+      if (totalVisible === 0) {
+        emptyState?.classList.remove('hidden');
+      } else {
+        emptyState?.classList.add('hidden');
+      }
+    }
+
+    // Category tab click handler
+    tabButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        activeCategory = btn.getAttribute('data-category') || 'all';
+
+        tabButtons.forEach((b) => {
+          const isSelected = b === btn;
+          b.setAttribute('aria-selected', String(isSelected));
+          if (isSelected) {
+            b.className =
+              'cat-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border)]';
+          } else {
+            b.className =
+              'cat-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] border border-transparent';
+          }
+        });
+
+        filterDirectory();
+      });
+    });
+
+    // Real-time instant search input listener
+    searchInput?.addEventListener('input', filterDirectory);
+
+    // Escape key to clear search
+    searchInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (searchInput.value) {
+          searchInput.value = '';
+          filterDirectory();
+        }
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupCalculatorDirectory);
+  } else {
+    setupCalculatorDirectory();
+  }
+  document.addEventListener('astro:page-load', setupCalculatorDirectory);
+</script>

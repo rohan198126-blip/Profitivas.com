@@ -1,0 +1,75 @@
+---
+import type { WorkedExample } from '../../lib/calculators/types';
+
+export interface Props {
+  example: WorkedExample;
+}
+
+const { example } = Astro.props;
+---
+
+<section aria-labelledby="worked-example-heading" class="space-y-4">
+  <div>
+    <h2 id="worked-example-heading" class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+      Worked Example
+    </h2>
+    <p class="text-xs sm:text-sm text-[var(--text-secondary)]">
+      {example.title}
+    </p>
+  </div>
+
+  <div class="space-y-5 pt-1">
+    <p class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+      {example.scenario}
+    </p>
+
+    <!-- Inputs & Results comparison -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 py-4 border-y border-[var(--border)]">
+      <div>
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-2">
+          Given
+        </span>
+        <dl class="space-y-2 text-xs sm:text-sm">
+          {Object.entries(example.inputs).map(([key, val]) => (
+            <div class="flex justify-between items-center">
+              <dt class="text-[var(--text-secondary)]">{key}</dt>
+              <dd class="font-medium text-[var(--text-primary)] tabular-nums">{val}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div>
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-2">
+          Calculated
+        </span>
+        <dl class="space-y-2 text-xs sm:text-sm">
+          {Object.entries(example.results).map(([key, val]) => (
+            <div class="flex justify-between items-center">
+              <dt class="text-[var(--text-secondary)]">{key}</dt>
+              <dd class="font-medium text-[var(--positive-text)] tabular-nums">{val}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+
+    <!-- Step by Step -->
+    <div class="space-y-2">
+      <span class="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block mb-2">
+        Calculation
+      </span>
+      <ol class="space-y-1.5 text-xs sm:text-sm">
+        {example.steps.map((step) => (
+          <li class="font-mono text-xs sm:text-sm text-[var(--text-primary)] tabular-nums">
+            {step}
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <p class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed pt-1">
+      <strong class="font-medium text-[var(--text-primary)]">Takeaway:</strong> {example.takeaway}
+    </p>
+  </div>
+</section>

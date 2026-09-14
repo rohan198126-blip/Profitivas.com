@@ -1,0 +1,26 @@
+---
+import { getActiveCalculators } from '../lib/calculators/registry';
+import CalculatorLayout from '../layouts/CalculatorLayout.astro';
+import ProfitMarginCalculator from '../components/calculator/ProfitMarginCalculator.astro';
+import MarkupCalculator from '../components/calculator/MarkupCalculator.astro';
+import type { CalculatorContent } from '../lib/calculators/types';
+
+export async function getStaticPaths() {
+  const activeCalculators = getActiveCalculators();
+  return activeCalculators.map((calc) => ({
+    params: { slug: calc.meta.slug },
+    props: { content: calc },
+  }));
+}
+
+export interface Props {
+  content: CalculatorContent;
+}
+
+const { content } = Astro.props;
+---
+
+<CalculatorLayout content={content}>
+  {content.meta.id === 'profit-margin' && <ProfitMarginCalculator />}
+  {content.meta.id === 'markup' && <MarkupCalculator />}
+</CalculatorLayout>
