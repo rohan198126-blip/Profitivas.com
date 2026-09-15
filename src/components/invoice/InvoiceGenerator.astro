@@ -1043,44 +1043,44 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       <!-- Printable Sheet Container -->
       <div
         id="invoice-paper-sheet"
-        class="bg-white text-neutral-900 rounded-lg shadow-xl border border-neutral-300 p-6 sm:p-8 print:p-0 font-sans text-xs leading-normal max-w-full overflow-hidden relative"
+        class="bg-white text-neutral-900 rounded-lg shadow-xl border border-neutral-300 p-8 sm:p-10 print:p-0 font-sans text-sm leading-relaxed max-w-full overflow-hidden relative"
       >
         <!-- Sample Watermark / Badge -->
-        <div id="doc-sample-badge" class="hidden absolute top-4 right-4 text-[9px] uppercase tracking-wider font-mono font-bold text-neutral-500 border border-neutral-300 rounded px-2 py-0.5 bg-neutral-100/90 no-print select-none">
+        <div id="doc-sample-badge" class="hidden absolute top-4 right-4 text-[10px] uppercase tracking-wider font-mono font-bold text-neutral-500 border border-neutral-300 rounded px-2.5 py-0.5 bg-neutral-100/90 no-print select-none">
           EXAMPLE PREVIEW
         </div>
 
         <!-- Optional Copy Label Tag -->
-        <div id="doc-copy-label" class="hidden text-right pb-2 text-[10px] uppercase font-mono tracking-widest text-neutral-500 font-semibold border-b border-neutral-200 mb-4">
+        <div id="doc-copy-label" class="hidden text-right pb-2 text-[11px] uppercase font-mono tracking-widest text-neutral-500 font-semibold border-b border-neutral-200 mb-4">
         </div>
 
         <!-- Document Top: Supplier Details & Document Title/Meta -->
-        <div id="doc-top-header" class="flex flex-col sm:flex-row justify-between gap-4 sm:gap-6 pb-4 border-b border-neutral-200">
+        <div id="doc-top-header" class="flex flex-col sm:flex-row justify-between gap-6 pb-4 border-b border-neutral-200">
           <!-- Left: Brand / Supplier Info -->
-          <div class="space-y-1.5 max-w-[320px]">
+          <div class="space-y-1.5 max-w-[340px]">
             <div id="doc-logo-wrap" class="hidden pb-1">
-              <img id="doc-logo-img" src="" alt="Business Logo" class="max-h-12 max-w-[160px] object-contain" />
+              <img id="doc-logo-img" src="" alt="Business Logo" class="max-h-14 max-w-[180px] object-contain" />
             </div>
-            <h3 id="doc-seller-name" class="text-base sm:text-lg font-bold tracking-tight text-neutral-900 leading-tight">
+            <h3 id="doc-seller-name" class="text-lg sm:text-xl font-bold tracking-tight text-neutral-900 leading-tight">
             </h3>
-            <p id="doc-seller-address" class="text-xs text-neutral-600 whitespace-pre-line leading-relaxed hidden">
+            <p id="doc-seller-address" class="text-sm text-neutral-600 whitespace-pre-line leading-relaxed hidden">
             </p>
-            <div id="doc-seller-contact" class="text-xs text-neutral-600 space-y-0.5 pt-0.5">
+            <div id="doc-seller-contact" class="text-sm text-neutral-600 space-y-0.5 pt-0.5">
               <div id="doc-seller-email" class="hidden"></div>
               <div id="doc-seller-phone" class="hidden"></div>
-              <div id="doc-seller-tax-id" class="font-mono text-[11px] pt-0.5 hidden"></div>
-              <div id="doc-seller-pan" class="font-mono text-[11px] hidden"></div>
-              <div id="doc-seller-state" class="text-[11px] text-neutral-600 hidden"></div>
-              <div id="doc-seller-website" class="text-[11px] text-neutral-500 hidden"></div>
+              <div id="doc-seller-tax-id" class="font-mono text-xs sm:text-[13px] pt-0.5 hidden"></div>
+              <div id="doc-seller-pan" class="font-mono text-xs sm:text-[13px] hidden"></div>
+              <div id="doc-seller-state" class="text-xs sm:text-[13px] text-neutral-600 hidden"></div>
+              <div id="doc-seller-website" class="text-xs sm:text-[13px] text-neutral-500 hidden"></div>
             </div>
           </div>
 
           <!-- Right: Document Type Heading & Meta Box -->
-          <div class="sm:text-right space-y-1 min-w-[200px]">
-            <h2 id="doc-title" class="text-xl sm:text-2xl font-black tracking-tight text-neutral-900 uppercase">
+          <div class="sm:text-right space-y-1.5 min-w-[220px]">
+            <h2 id="doc-title" class="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 uppercase">
               {t.document.invoiceTitle}
             </h2>
-            <div class="space-y-1 text-xs pt-0.5">
+            <div class="space-y-1 text-xs sm:text-sm pt-1">
               <div id="doc-number-row" class="flex sm:justify-end gap-2">
                 <span id="doc-number-label" class="text-neutral-500">{t.document.invoiceNumberLabel}:</span>
                 <span id="doc-invoice-number" class="font-mono font-bold text-neutral-900"></span>
@@ -1106,38 +1106,38 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         </div>
 
         <!-- Bill To & Ship To Grid (Zero footprint: columns hide if empty) -->
-        <div id="doc-entities-row" class="py-3.5 border-b border-neutral-200 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div id="doc-entities-row" class="py-4 border-b border-neutral-200 grid grid-cols-1 sm:grid-cols-2 gap-6">
           <!-- Bill To Card -->
           <div id="doc-bill-to-card" class="space-y-1">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-0.5">
+            <span class="text-[11px] font-bold uppercase tracking-widest text-neutral-400 block mb-1">
               {t.document.billToLabel}
             </span>
-            <div id="doc-customer-company" class="text-sm font-bold text-neutral-900"></div>
-            <div id="doc-customer-name" class="text-xs text-neutral-700 font-medium hidden"></div>
-            <div id="doc-customer-address" class="text-xs text-neutral-600 whitespace-pre-line leading-relaxed hidden"></div>
-            <div id="doc-customer-contact" class="text-xs text-neutral-600 space-y-0.5 pt-0.5">
+            <div id="doc-customer-company" class="text-base font-bold text-neutral-900"></div>
+            <div id="doc-customer-name" class="text-sm text-neutral-700 font-medium hidden"></div>
+            <div id="doc-customer-address" class="text-sm text-neutral-600 whitespace-pre-line leading-relaxed hidden"></div>
+            <div id="doc-customer-contact" class="text-sm text-neutral-600 space-y-0.5 pt-0.5">
               <div id="doc-customer-email" class="hidden"></div>
               <div id="doc-customer-phone" class="hidden"></div>
-              <div id="doc-customer-tax-id" class="font-mono text-[11px] hidden"></div>
-              <div id="doc-customer-pan" class="font-mono text-[11px] hidden"></div>
-              <div id="doc-customer-state" class="text-[11px] text-neutral-600 hidden"></div>
+              <div id="doc-customer-tax-id" class="font-mono text-xs sm:text-[13px] hidden"></div>
+              <div id="doc-customer-pan" class="font-mono text-xs sm:text-[13px] hidden"></div>
+              <div id="doc-customer-state" class="text-xs sm:text-[13px] text-neutral-600 hidden"></div>
             </div>
           </div>
 
           <!-- Ship To / Consignee Card (Only if enabled) -->
           <div id="doc-ship-to-card" class="hidden space-y-1 sm:border-l sm:border-neutral-200 sm:pl-6">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-0.5">
+            <span class="text-[11px] font-bold uppercase tracking-widest text-neutral-400 block mb-1">
               {t.document.shipToLabel}
             </span>
-            <div id="doc-ship-name" class="text-sm font-bold text-neutral-900"></div>
-            <div id="doc-ship-address" class="text-xs text-neutral-600 whitespace-pre-line leading-relaxed hidden"></div>
-            <div id="doc-ship-destination" class="text-xs text-neutral-700 font-medium hidden"></div>
-            <div id="doc-ship-tax-id" class="font-mono text-[11px] text-neutral-600 hidden"></div>
+            <div id="doc-ship-name" class="text-base font-bold text-neutral-900"></div>
+            <div id="doc-ship-address" class="text-sm text-neutral-600 whitespace-pre-line leading-relaxed hidden"></div>
+            <div id="doc-ship-destination" class="text-sm text-neutral-700 font-medium hidden"></div>
+            <div id="doc-ship-tax-id" class="font-mono text-xs sm:text-[13px] text-neutral-600 hidden"></div>
           </div>
         </div>
 
         <!-- Optional References Strip -->
-        <div id="doc-references-strip" class="hidden py-2 border-b border-neutral-200 text-xs flex flex-wrap gap-x-6 gap-y-1 text-neutral-700">
+        <div id="doc-references-strip" class="hidden py-2.5 border-b border-neutral-200 text-xs sm:text-sm flex flex-wrap gap-x-6 gap-y-1.5 text-neutral-700">
           <div id="doc-ref-order" class="hidden">
             <span class="text-neutral-400">Order/PO:</span> <strong id="doc-ref-order-val" class="text-neutral-900 font-medium"></strong>
           </div>
@@ -1153,145 +1153,145 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         </div>
 
         <!-- Dynamic Items Table -->
-        <div id="doc-items-table-wrap" class="py-3.5 overflow-x-auto">
-          <table class="w-full text-left border-collapse min-w-[340px]">
+        <div id="doc-items-table-wrap" class="py-4 overflow-x-auto">
+          <table class="w-full text-left border-collapse min-w-[360px]">
             <thead id="doc-items-thead">
-              <tr class="border-b-2 border-neutral-300 text-[11px] uppercase font-bold text-neutral-600 tracking-wider">
-                <th class="py-1.5 pr-2 w-8">#</th>
-                <th class="py-1.5 px-2">{t.document.descHeader}</th>
-                <th id="th-hsn" class="hidden py-1.5 px-2 text-right w-20">{t.document.hsnHeader}</th>
-                <th id="th-unit" class="hidden py-1.5 px-2 text-right w-16">{t.document.unitHeader}</th>
-                <th class="py-1.5 px-2 text-right w-14">{t.document.qtyHeader}</th>
-                <th class="py-1.5 px-2 text-right w-24">{t.document.priceHeader}</th>
-                <th id="th-discount" class="hidden py-1.5 px-2 text-right w-18">{t.document.discountHeader}</th>
-                <th id="th-tax" class="hidden py-1.5 px-2 text-right w-16">{t.document.taxHeader}</th>
-                <th class="py-1.5 pl-2 text-right w-24">{t.document.amountHeader}</th>
+              <tr class="border-b-2 border-neutral-300 text-xs uppercase font-bold text-neutral-600 tracking-wider">
+                <th class="py-2 pr-2 w-8">#</th>
+                <th class="py-2 px-2.5">{t.document.descHeader}</th>
+                <th id="th-hsn" class="hidden py-2 px-2.5 text-right w-20">{t.document.hsnHeader}</th>
+                <th id="th-unit" class="hidden py-2 px-2.5 text-right w-16">{t.document.unitHeader}</th>
+                <th class="py-2 px-2.5 text-right w-16">{t.document.qtyHeader}</th>
+                <th class="py-2 px-2.5 text-right w-24">{t.document.priceHeader}</th>
+                <th id="th-discount" class="hidden py-2 px-2.5 text-right w-18">{t.document.discountHeader}</th>
+                <th id="th-tax" class="hidden py-2 px-2.5 text-right w-16">{t.document.taxHeader}</th>
+                <th class="py-2 pl-2.5 text-right w-28">{t.document.amountHeader}</th>
               </tr>
             </thead>
-            <tbody id="doc-items-tbody" class="divide-y divide-neutral-200 text-xs">
+            <tbody id="doc-items-tbody" class="divide-y divide-neutral-200 text-sm">
               <!-- Rendered via JS -->
             </tbody>
           </table>
         </div>
 
         <!-- Lower Financial & Closing Block -->
-        <div id="doc-financial-block" class="pt-3 border-t-2 border-neutral-200 flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-6">
+        <div id="doc-financial-block" class="pt-4 border-t-2 border-neutral-200 flex flex-col sm:flex-row justify-between items-start gap-6">
           <!-- Left: Amount in Words, Bank Details, Notes, Terms, Declaration -->
-          <div class="flex-1 space-y-2.5 text-xs text-neutral-700 w-full max-w-sm">
+          <div class="flex-1 space-y-3 text-sm text-neutral-700 w-full max-w-sm">
             <!-- Amount in Words -->
-            <div id="doc-amount-in-words-wrap" class="hidden p-2 rounded border border-neutral-200 bg-neutral-50/80 space-y-0.5">
-              <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 block">
+            <div id="doc-amount-in-words-wrap" class="hidden p-2.5 rounded border border-neutral-200 bg-neutral-50/80 space-y-0.5">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
                 {t.document.amountInWordsLabel}
               </span>
-              <p id="doc-amount-in-words-val" class="font-medium text-neutral-900 leading-snug"></p>
+              <p id="doc-amount-in-words-val" class="font-medium text-neutral-900 leading-normal"></p>
             </div>
 
             <!-- Bank & UPI Details -->
-            <div id="doc-bank-box" class="hidden p-2.5 rounded border border-neutral-200 bg-neutral-50/80 space-y-1">
-              <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 block">
+            <div id="doc-bank-box" class="hidden p-3 rounded border border-neutral-200 bg-neutral-50/80 space-y-1">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
                 {t.document.bankDetailsLabel}
               </span>
-              <div id="doc-bank-line-name" class="hidden font-medium text-neutral-900"></div>
-              <div id="doc-bank-line-acct" class="hidden font-mono text-[11px]"></div>
-              <div id="doc-bank-line-ifsc" class="hidden font-mono text-[11px]"></div>
-              <div id="doc-bank-line-upi" class="hidden font-mono text-[11px] text-neutral-900 font-medium"></div>
+              <div id="doc-bank-line-name" class="hidden font-semibold text-neutral-900"></div>
+              <div id="doc-bank-line-acct" class="hidden font-mono text-xs sm:text-[13px] text-neutral-800"></div>
+              <div id="doc-bank-line-ifsc" class="hidden font-mono text-xs sm:text-[13px] text-neutral-800"></div>
+              <div id="doc-bank-line-upi" class="hidden font-mono text-xs sm:text-[13px] text-neutral-900 font-medium"></div>
             </div>
 
             <!-- Notes -->
             <div id="doc-notes-box" class="hidden space-y-1">
-              <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 block">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
                 {t.document.notesLabel}
               </span>
-              <p id="doc-notes-val" class="whitespace-pre-line leading-relaxed text-neutral-600"></p>
+              <p id="doc-notes-val" class="whitespace-pre-line leading-relaxed text-xs sm:text-sm text-neutral-600"></p>
             </div>
 
             <!-- Terms & Conditions -->
             <div id="doc-terms-box" class="hidden space-y-1">
-              <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 block">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
                 {t.document.termsLabel}
               </span>
-              <p id="doc-terms-val" class="whitespace-pre-line leading-relaxed text-neutral-600"></p>
+              <p id="doc-terms-val" class="whitespace-pre-line leading-relaxed text-xs sm:text-sm text-neutral-600"></p>
             </div>
 
             <!-- Declaration -->
             <div id="doc-declaration-box" class="hidden space-y-1">
-              <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 block">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
                 {t.document.declarationLabel}
               </span>
-              <p id="doc-declaration-val" class="italic text-[11px] leading-relaxed text-neutral-500"></p>
+              <p id="doc-declaration-val" class="italic text-xs sm:text-[13px] leading-relaxed text-neutral-500"></p>
             </div>
 
             <!-- Jurisdiction -->
-            <div id="doc-jurisdiction-box" class="hidden text-[11px] font-medium text-neutral-600 pt-0.5">
+            <div id="doc-jurisdiction-box" class="hidden text-xs sm:text-[13px] font-medium text-neutral-600 pt-0.5">
             </div>
           </div>
 
           <!-- Right: Mathematical Totals Breakdown -->
-          <div class="w-full sm:w-64 space-y-1 text-xs">
-            <div class="flex justify-between py-0.5 text-neutral-600">
+          <div class="w-full sm:w-72 space-y-1.5 text-sm">
+            <div class="flex justify-between py-1 text-neutral-600">
               <span>{t.document.subtotalLabel}</span>
               <span id="doc-subtotal-val" class="font-mono font-medium text-neutral-900">$0.00</span>
             </div>
 
-            <div id="doc-discount-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+            <div id="doc-discount-row" class="hidden flex justify-between py-1 text-neutral-600">
               <span>{t.document.discountTotalLabel}</span>
               <span id="doc-discount-val" class="font-mono font-medium text-neutral-900">-$0.00</span>
             </div>
 
-            <div id="doc-taxable-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+            <div id="doc-taxable-row" class="hidden flex justify-between py-1 text-neutral-600">
               <span>{t.document.taxableTotalLabel}</span>
               <span id="doc-taxable-val" class="font-mono font-medium text-neutral-900">$0.00</span>
             </div>
 
-            <div id="doc-cgst-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+            <div id="doc-cgst-row" class="hidden flex justify-between py-1 text-neutral-600">
               <span id="doc-cgst-label">CGST</span>
               <span id="doc-cgst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
             </div>
 
-            <div id="doc-sgst-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+            <div id="doc-sgst-row" class="hidden flex justify-between py-1 text-neutral-600">
               <span id="doc-sgst-label">SGST</span>
               <span id="doc-sgst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
             </div>
 
-            <div id="doc-igst-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+            <div id="doc-igst-row" class="hidden flex justify-between py-1 text-neutral-600">
               <span id="doc-igst-label">IGST</span>
               <span id="doc-igst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
             </div>
 
-            <div id="doc-custom-tax-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+            <div id="doc-custom-tax-row" class="hidden flex justify-between py-1 text-neutral-600">
               <span id="doc-custom-tax-label">Tax</span>
               <span id="doc-custom-tax-val" class="font-mono font-medium text-neutral-900">$0.00</span>
             </div>
 
-            <div id="doc-round-off-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+            <div id="doc-round-off-row" class="hidden flex justify-between py-1 text-neutral-600">
               <span>{t.document.roundOffLabel}</span>
               <span id="doc-round-off-val" class="font-mono font-medium text-neutral-900">+$0.00</span>
             </div>
 
-            <div class="flex justify-between py-1.5 border-t-2 border-neutral-900 text-sm font-bold text-neutral-900">
+            <div class="flex justify-between py-2 border-t-2 border-neutral-900 text-base sm:text-lg font-bold text-neutral-900">
               <span>{t.document.totalLabel}</span>
-              <span id="doc-total-val" class="font-mono">$0.00</span>
+              <span id="doc-total-val" class="font-mono text-lg sm:text-xl font-black text-neutral-900">$0.00</span>
             </div>
 
-            <div id="doc-reverse-charge-notice" class="hidden pt-0.5 text-[10px] text-neutral-500 italic text-right">
+            <div id="doc-reverse-charge-notice" class="hidden pt-1 text-xs text-neutral-500 italic text-right">
               Tax payable under reverse charge
             </div>
           </div>
         </div>
 
         <!-- Document Signatory & Computer Generated Footer -->
-        <div id="doc-footer-closing" class="pt-4 border-t border-neutral-200 mt-4 flex flex-col sm:flex-row justify-between items-end gap-4 text-[11px]">
-          <div id="doc-computer-gen-notice" class="text-neutral-400 italic text-[10px]">
+        <div id="doc-footer-closing" class="pt-6 border-t border-neutral-200 mt-6 flex flex-col sm:flex-row justify-between items-end gap-4 text-xs">
+          <div id="doc-computer-gen-notice" class="text-neutral-400 italic text-xs">
             {t.document.computerGeneratedNotice}
           </div>
 
-          <div id="doc-signatory-box" class="hidden text-right min-w-[160px] space-y-1">
-            <div id="doc-sig-for" class="font-medium text-neutral-800">For Your Business</div>
-            <div class="h-8 flex items-end justify-end">
-              <div class="w-32 border-b border-neutral-300"></div>
+          <div id="doc-signatory-box" class="hidden text-right min-w-[180px] space-y-1">
+            <div id="doc-sig-for" class="font-medium text-neutral-800 text-xs sm:text-sm">For Your Business</div>
+            <div class="h-10 flex items-end justify-end">
+              <div class="w-36 border-b border-neutral-400"></div>
             </div>
-            <div id="doc-sig-name" class="font-bold text-neutral-900"></div>
-            <div id="doc-sig-title" class="text-neutral-500 text-[10px]">Authorized Signatory</div>
+            <div id="doc-sig-name" class="font-bold text-neutral-900 text-sm sm:text-base"></div>
+            <div id="doc-sig-title" class="text-neutral-500 text-xs">Authorized Signatory</div>
           </div>
         </div>
       </div>
@@ -1304,7 +1304,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
   @media print {
     @page {
       size: A4 portrait;
-      margin: 8mm 10mm;
+      margin: 10mm 12mm;
     }
 
     * {
@@ -1332,8 +1332,8 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       color: #000000 !important;
       padding: 0 !important;
       margin: 0 !important;
-      font-size: 11px !important;
-      line-height: 1.35 !important;
+      font-size: 13.5px !important; /* ~10.2pt, standard readable print font */
+      line-height: 1.45 !important;
     }
 
     main {
@@ -1367,8 +1367,8 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       max-width: 100% !important;
       background: #ffffff !important;
       color: #111111 !important;
-      font-size: 11px !important;
-      line-height: 1.35 !important;
+      font-size: 13.5px !important;
+      line-height: 1.45 !important;
     }
 
     /* Keep essential sections together on one page */
@@ -1382,24 +1382,24 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       page-break-inside: avoid !important;
     }
 
-    /* Compact spacing in print */
+    /* Clean, balanced print spacing */
     #doc-top-header {
-      padding-bottom: 8px !important;
+      padding-bottom: 12px !important;
     }
     #doc-entities-row {
-      padding-top: 6px !important;
-      padding-bottom: 6px !important;
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
     }
     #doc-items-table-wrap {
-      padding-top: 6px !important;
-      padding-bottom: 6px !important;
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
     }
     #doc-financial-block {
-      padding-top: 6px !important;
+      padding-top: 10px !important;
     }
     #doc-footer-closing {
-      padding-top: 6px !important;
-      margin-top: 6px !important;
+      padding-top: 12px !important;
+      margin-top: 12px !important;
     }
   }
 </style>
@@ -2433,17 +2433,17 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         tr.className = 'text-neutral-800';
 
         tr.innerHTML = `
-          <td class="py-1.5 print:py-1 pr-2 font-mono text-[11px] text-neutral-400 align-top">${idx + 1}</td>
-          <td class="py-1.5 print:py-1 px-2 font-normal text-neutral-900 align-top">
+          <td class="py-2.5 pr-2 font-mono text-xs text-neutral-400 align-top">${idx + 1}</td>
+          <td class="py-2.5 px-2.5 font-normal text-neutral-900 align-top text-sm leading-relaxed">
             ${item.description ? item.description.replace(/\n/g, '<br/>') : '<span class="text-neutral-300">—</span>'}
           </td>
-          ${hasAnyHsn ? `<td class="py-1.5 print:py-1 px-2 text-right font-mono text-neutral-500 align-top">${item.hsnSac || '—'}</td>` : ''}
-          ${hasAnyUnit ? `<td class="py-1.5 print:py-1 px-2 text-right text-neutral-500 align-top">${item.unit || '—'}</td>` : ''}
-          <td class="py-1.5 print:py-1 px-2 text-right font-mono tabular-nums text-neutral-900 align-top">${qty}</td>
-          <td class="py-1.5 print:py-1 px-2 text-right font-mono tabular-nums text-neutral-900 align-top">${formatMoney(price, state.currency)}</td>
-          ${hasAnyDiscount ? `<td class="py-1.5 print:py-1 px-2 text-right font-mono tabular-nums text-neutral-500 align-top">${discPct > 0 ? `${discPct}%` : '—'}</td>` : ''}
-          ${isTaxActive ? `<td class="py-1.5 print:py-1 px-2 text-right font-mono tabular-nums text-neutral-500 align-top">${effectiveTaxPct > 0 ? `${effectiveTaxPct}%` : '—'}</td>` : ''}
-          <td class="py-1.5 print:py-1 pl-2 text-right font-mono font-medium text-neutral-900 tabular-nums align-top">${formatMoney(lineTotal, state.currency)}</td>
+          ${hasAnyHsn ? `<td class="py-2.5 px-2.5 text-right font-mono text-xs sm:text-[13px] text-neutral-600 align-top">${item.hsnSac || '—'}</td>` : ''}
+          ${hasAnyUnit ? `<td class="py-2.5 px-2.5 text-right text-xs sm:text-sm text-neutral-600 align-top">${item.unit || '—'}</td>` : ''}
+          <td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-sm text-neutral-900 align-top">${qty}</td>
+          <td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-sm text-neutral-900 align-top">${formatMoney(price, state.currency)}</td>
+          ${hasAnyDiscount ? `<td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-xs sm:text-sm text-neutral-600 align-top">${discPct > 0 ? `${discPct}%` : '—'}</td>` : ''}
+          ${isTaxActive ? `<td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-xs sm:text-sm text-neutral-600 align-top">${effectiveTaxPct > 0 ? `${effectiveTaxPct}%` : '—'}</td>` : ''}
+          <td class="py-2.5 pl-2.5 text-right font-mono font-semibold text-sm text-neutral-900 tabular-nums align-top">${formatMoney(lineTotal, state.currency)}</td>
         `;
 
         docItemsTbody.appendChild(tr);
