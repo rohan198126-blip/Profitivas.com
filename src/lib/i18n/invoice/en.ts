@@ -104,7 +104,7 @@ export const enInvoice: InvoiceTranslations = {
     jurisdiction: 'Jurisdiction / Governing Law',
     signatoryName: 'Authorized Signatory Name',
     signatoryTitle: 'Designation / Title',
-    notesPlaceholder: 'Payment terms, warranty details, or client notes...',
+    notesPlaceholder: 'Add any special instructions, delivery details, or client notes...',
   },
   document: {
     invoiceTitle: 'INVOICE',

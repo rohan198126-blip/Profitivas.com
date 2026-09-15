@@ -1123,7 +1123,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
               id="invoice-terms"
               rows="2"
               class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
-              placeholder="1. Goods once sold will not be taken back. 2. Interest @18% per annum charged on overdue payments."
+              placeholder="1. Payment terms, validity period, or service conditions..."
             ></textarea>
           </div>
 
@@ -1136,7 +1136,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
               id="invoice-declaration"
               rows="2"
               class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
-              placeholder="We declare that this document shows the actual price of the goods or services described and that all particulars are true and correct."
+              placeholder="We declare that this document shows the actual price and that all particulars are true and correct."
             ></textarea>
           </div>
 
@@ -1870,6 +1870,46 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
             tableColumns: { ...blank.tableColumns, ...(parsed.tableColumns || {}) },
             sectionsConfig: { ...blank.sectionsConfig, ...(parsed.sectionsConfig || {}) },
           };
+
+          // Fictional sample strings from btnLoadSample
+          const sampleTerms = '1. Payment is due within 30 days of invoice date.\n2. Overdue balances are subject to a 1.5% monthly finance charge.\n3. All project deliverables remain intellectual property until full settlement.';
+          const sampleDeclaration = 'We declare that this invoice shows the actual price of the services described and that all particulars are true and correct.';
+          const sampleNotes = 'Thank you for your business. Please reach out to hello@northstar-example.com for any billing inquiries.';
+
+          const isFictionalSampleSupplier = state.sellerName === 'Northstar Creative Studio';
+
+          if (isFictionalSampleSupplier) {
+            isSampleActive = true;
+          } else {
+            // If the user entered their own business details, eliminate any unrequested leftover sample clauses
+            if (state.termsAndConditions?.trim() === sampleTerms.trim()) {
+              state.termsAndConditions = '';
+              state.sectionsConfig.terms = false;
+            }
+            if (state.declaration?.trim() === sampleDeclaration.trim()) {
+              state.declaration = '';
+              state.sectionsConfig.declaration = false;
+            }
+            if (state.notes?.trim() === sampleNotes.trim()) {
+              state.notes = '';
+              state.sectionsConfig.notes = false;
+            }
+            if (state.bankName === 'First Example Bank') {
+              state.bankDetailsEnabled = false;
+              state.bankName = '';
+              state.bankAccountName = '';
+              state.bankAccountNumber = '';
+              state.bankIfsc = '';
+              state.bankBranch = '';
+              state.sectionsConfig.payment = false;
+            }
+            if (state.signatoryName === 'Alex Morgan') {
+              state.signatoryEnabled = false;
+              state.signatoryName = '';
+              state.signatoryDesignation = '';
+              state.sectionsConfig.signature = false;
+            }
+          }
         }
       } else {
         const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
@@ -2184,11 +2224,11 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
       if (secToggleShipping) secToggleShipping.checked = !!state.shippingEnabled;
       if (secToggleReferences) secToggleReferences.checked = !!(state.refOrderNumber || state.refOrderDate || state.refQuoteNumber || state.refQuoteDate || state.sectionsConfig?.references);
-      if (secTogglePayment) secTogglePayment.checked = !!state.bankDetailsEnabled;
-      if (secToggleNotes) secToggleNotes.checked = !!state.notes;
-      if (secToggleTerms) secToggleTerms.checked = !!state.termsAndConditions;
-      if (secToggleDeclaration) secToggleDeclaration.checked = !!state.declaration;
-      if (secToggleSignature) secToggleSignature.checked = !!state.signatoryEnabled;
+      if (secTogglePayment) secTogglePayment.checked = Boolean(state.bankDetailsEnabled && state.sectionsConfig?.payment !== false);
+      if (secToggleNotes) secToggleNotes.checked = Boolean(state.sectionsConfig?.notes !== false && (state.notes?.trim() || state.sectionsConfig?.notes));
+      if (secToggleTerms) secToggleTerms.checked = Boolean(state.sectionsConfig?.terms !== false && (state.termsAndConditions?.trim() || state.sectionsConfig?.terms));
+      if (secToggleDeclaration) secToggleDeclaration.checked = Boolean(state.sectionsConfig?.declaration !== false && (state.declaration?.trim() || state.sectionsConfig?.declaration));
+      if (secToggleSignature) secToggleSignature.checked = Boolean(state.signatoryEnabled && state.sectionsConfig?.signature !== false);
 
       if (docTypeSelect) docTypeSelect.value = state.documentType;
       if (docCustomTitleInput) docCustomTitleInput.value = state.customTitle || '';
@@ -2265,18 +2305,18 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       }
 
       // Seller fields visibility
-      if (state.sellerTaxId) document.getElementById('seller-tax-wrap')?.classList.remove('hidden');
-      if (state.sellerPan) document.getElementById('seller-pan-wrap')?.classList.remove('hidden');
-      if (state.sellerPhone) document.getElementById('seller-phone-wrap')?.classList.remove('hidden');
-      if (state.sellerState || state.sellerStateCode) document.getElementById('seller-state-wrap')?.classList.remove('hidden');
-      if (state.sellerWebsite) document.getElementById('seller-web-wrap')?.classList.remove('hidden');
+      document.getElementById('seller-tax-wrap')?.classList.toggle('hidden', !state.sellerTaxId?.trim());
+      document.getElementById('seller-pan-wrap')?.classList.toggle('hidden', !state.sellerPan?.trim());
+      document.getElementById('seller-phone-wrap')?.classList.toggle('hidden', !state.sellerPhone?.trim());
+      document.getElementById('seller-state-wrap')?.classList.toggle('hidden', !state.sellerState?.trim() && !state.sellerStateCode?.trim());
+      document.getElementById('seller-web-wrap')?.classList.toggle('hidden', !state.sellerWebsite?.trim());
 
       // Customer fields visibility
-      if (state.customerAddress) document.getElementById('customer-address-wrap')?.classList.remove('hidden');
-      if (state.customerTaxId) document.getElementById('customer-tax-wrap')?.classList.remove('hidden');
-      if (state.customerPan) document.getElementById('customer-pan-wrap')?.classList.remove('hidden');
-      if (state.customerEmail || state.customerPhone) document.getElementById('customer-contact-wrap')?.classList.remove('hidden');
-      if (state.customerState || state.customerStateCode) document.getElementById('customer-state-wrap')?.classList.remove('hidden');
+      document.getElementById('customer-address-wrap')?.classList.toggle('hidden', !state.customerAddress?.trim());
+      document.getElementById('customer-tax-wrap')?.classList.toggle('hidden', !state.customerTaxId?.trim());
+      document.getElementById('customer-pan-wrap')?.classList.toggle('hidden', !state.customerPan?.trim());
+      document.getElementById('customer-contact-wrap')?.classList.toggle('hidden', !state.customerEmail?.trim() && !state.customerPhone?.trim());
+      document.getElementById('customer-state-wrap')?.classList.toggle('hidden', !state.customerState?.trim() && !state.customerStateCode?.trim());
 
       // Shipping
       if (shippingFieldsWrap) {
@@ -2284,25 +2324,24 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       }
 
       // Details
-      if (state.placeOfSupply || state.placeOfSupplyCode) document.getElementById('place-of-supply-wrap')?.classList.remove('hidden');
-      if (state.refOrderNumber || state.refOrderDate || state.sectionsConfig?.references) document.getElementById('order-ref-wrap')?.classList.remove('hidden');
-      if (state.refQuoteNumber || state.refQuoteDate || state.sectionsConfig?.references) document.getElementById('quote-ref-wrap')?.classList.remove('hidden');
+      document.getElementById('place-of-supply-wrap')?.classList.toggle('hidden', !state.placeOfSupply?.trim() && !state.placeOfSupplyCode?.trim());
+      document.getElementById('order-ref-wrap')?.classList.toggle('hidden', !state.refOrderNumber?.trim() && !state.refOrderDate?.trim() && !state.sectionsConfig?.references);
+      document.getElementById('quote-ref-wrap')?.classList.toggle('hidden', !state.refQuoteNumber?.trim() && !state.refQuoteDate?.trim() && !state.sectionsConfig?.references);
 
       // Tax Panels
       if (customTaxPanel) customTaxPanel.classList.toggle('hidden', state.taxMode !== 'custom');
       if (indianGstPanel) indianGstPanel.classList.toggle('hidden', state.taxMode !== 'gst');
 
       // Banking & Legal
-      if (state.bankDetailsEnabled || state.bankName || state.bankAccountNumber || state.bankUpiId) {
-        bankingFieldsWrap?.classList.remove('hidden');
+      const hasBankFields = Boolean(state.bankDetailsEnabled || state.bankName?.trim() || state.bankAccountNumber?.trim() || state.bankUpiId?.trim() || state.paymentTerms?.trim());
+      if (bankingFieldsWrap) {
+        bankingFieldsWrap.classList.toggle('hidden', !hasBankFields);
       }
-      if (state.notes || state.sectionsConfig?.notes) document.getElementById('notes-wrap')?.classList.remove('hidden');
-      if (state.termsAndConditions || state.sectionsConfig?.terms) document.getElementById('terms-wrap')?.classList.remove('hidden');
-      if (state.declaration || state.sectionsConfig?.declaration) document.getElementById('declaration-wrap')?.classList.remove('hidden');
-      if (state.jurisdiction) document.getElementById('jurisdiction-wrap')?.classList.remove('hidden');
-      if (state.signatoryEnabled || state.signatoryName || state.signatoryDesignation || state.sectionsConfig?.signature) {
-        document.getElementById('signatory-wrap')?.classList.remove('hidden');
-      }
+      document.getElementById('notes-wrap')?.classList.toggle('hidden', !state.notes?.trim());
+      document.getElementById('terms-wrap')?.classList.toggle('hidden', !state.termsAndConditions?.trim());
+      document.getElementById('declaration-wrap')?.classList.toggle('hidden', !state.declaration?.trim());
+      document.getElementById('jurisdiction-wrap')?.classList.toggle('hidden', !state.jurisdiction?.trim());
+      document.getElementById('signatory-wrap')?.classList.toggle('hidden', !state.signatoryEnabled && !state.signatoryName?.trim() && !state.signatoryDesignation?.trim());
     }
 
     function updateLogoDisplay() {
@@ -2974,10 +3013,11 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       }
 
       // 10. Payment Details & Notes Row (Side-by-side 2-column grid when both active)
-      const hasBank =
+      const hasBank = Boolean(
         state.bankDetailsEnabled &&
         state.sectionsConfig?.payment !== false &&
-        Boolean(state.bankName?.trim() || state.bankAccountNumber?.trim() || state.bankUpiId?.trim());
+        (state.bankName?.trim() || state.bankAccountNumber?.trim() || state.bankUpiId?.trim())
+      );
       const hasNotes = Boolean(state.sectionsConfig?.notes !== false && state.notes?.trim());
 
       if (docPaymentNotesRow) {
@@ -3010,7 +3050,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       }
 
       if (docNotesBox && docNotesVal) {
-        if (hasNotes && state.notes) {
+        if (hasNotes && state.notes?.trim()) {
           docNotesVal.textContent = state.notes.trim();
           docNotesBox.classList.remove('hidden');
           docNotesBox.classList.toggle('sm:col-span-2', !hasBank);
@@ -3019,13 +3059,13 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         }
       }
 
-      // 11. Terms and Conditions Row
+      // 11. Terms and Conditions Row (Zero footprint if empty)
       const hasTerms = Boolean(state.sectionsConfig?.terms !== false && state.termsAndConditions?.trim());
       if (docTermsRow) {
         docTermsRow.classList.toggle('hidden', !hasTerms);
       }
       if (docTermsBox && docTermsVal) {
-        if (hasTerms && state.termsAndConditions) {
+        if (hasTerms && state.termsAndConditions?.trim()) {
           docTermsVal.textContent = state.termsAndConditions.trim();
           docTermsBox.classList.remove('hidden');
         } else {
@@ -3034,8 +3074,9 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       }
 
       // 12. Execution Row: Declaration, Jurisdiction, Notice on Left; Signatory on Right
+      const hasDeclaration = Boolean(state.sectionsConfig?.declaration !== false && state.declaration?.trim());
       if (docDeclarationBox && docDeclarationVal) {
-        if (state.sectionsConfig?.declaration !== false && state.declaration?.trim()) {
+        if (hasDeclaration && state.declaration?.trim()) {
           docDeclarationVal.textContent = state.declaration.trim();
           docDeclarationBox.classList.remove('hidden');
         } else {
@@ -3043,8 +3084,9 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         }
       }
 
+      const hasJurisdiction = Boolean(state.jurisdiction?.trim());
       if (docJurisdictionBox) {
-        if (state.jurisdiction?.trim()) {
+        if (hasJurisdiction && state.jurisdiction?.trim()) {
           docJurisdictionBox.textContent = state.jurisdiction.trim();
           docJurisdictionBox.classList.remove('hidden');
         } else {
@@ -3073,11 +3115,13 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         }
       }
 
+      const docComputerGenNotice = document.getElementById('doc-computer-gen-notice');
+      if (docComputerGenNotice) {
+        docComputerGenNotice.classList.toggle('hidden', hasSig);
+      }
+
       if (docExecutionRow) {
-        const hasLegal = Boolean(
-          (state.sectionsConfig?.declaration !== false && state.declaration?.trim()) ||
-          state.jurisdiction?.trim()
-        );
+        const hasLegal = hasDeclaration || hasJurisdiction;
         docExecutionRow.classList.toggle('hidden', !hasLegal && !hasSig);
       }
     }
@@ -3335,30 +3379,40 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
     bankNameInput?.addEventListener('input', (e) => {
       state.bankName = (e.target as HTMLInputElement).value;
       state.bankDetailsEnabled = true;
+      state.sectionsConfig.payment = true;
+      if (secTogglePayment) secTogglePayment.checked = true;
       updatePreview();
       saveToStorage();
     });
     bankAccountNameInput?.addEventListener('input', (e) => {
       state.bankAccountName = (e.target as HTMLInputElement).value;
       state.bankDetailsEnabled = true;
+      state.sectionsConfig.payment = true;
+      if (secTogglePayment) secTogglePayment.checked = true;
       updatePreview();
       saveToStorage();
     });
     bankAccountNumberInput?.addEventListener('input', (e) => {
       state.bankAccountNumber = (e.target as HTMLInputElement).value;
       state.bankDetailsEnabled = true;
+      state.sectionsConfig.payment = true;
+      if (secTogglePayment) secTogglePayment.checked = true;
       updatePreview();
       saveToStorage();
     });
     bankIfscInput?.addEventListener('input', (e) => {
       state.bankIfsc = (e.target as HTMLInputElement).value;
       state.bankDetailsEnabled = true;
+      state.sectionsConfig.payment = true;
+      if (secTogglePayment) secTogglePayment.checked = true;
       updatePreview();
       saveToStorage();
     });
     bankUpiIdInput?.addEventListener('input', (e) => {
       state.bankUpiId = (e.target as HTMLInputElement).value;
       state.bankDetailsEnabled = true;
+      state.sectionsConfig.payment = true;
+      if (secTogglePayment) secTogglePayment.checked = true;
       updatePreview();
       saveToStorage();
     });
@@ -3370,16 +3424,28 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
     invoiceNotesInput?.addEventListener('input', (e) => {
       state.notes = (e.target as HTMLTextAreaElement).value;
+      if (state.notes.trim()) {
+        state.sectionsConfig.notes = true;
+        if (secToggleNotes) secToggleNotes.checked = true;
+      }
       updatePreview();
       saveToStorage();
     });
     invoiceTermsInput?.addEventListener('input', (e) => {
       state.termsAndConditions = (e.target as HTMLTextAreaElement).value;
+      if (state.termsAndConditions.trim()) {
+        state.sectionsConfig.terms = true;
+        if (secToggleTerms) secToggleTerms.checked = true;
+      }
       updatePreview();
       saveToStorage();
     });
     invoiceDeclarationInput?.addEventListener('input', (e) => {
       state.declaration = (e.target as HTMLTextAreaElement).value;
+      if (state.declaration.trim()) {
+        state.sectionsConfig.declaration = true;
+        if (secToggleDeclaration) secToggleDeclaration.checked = true;
+      }
       updatePreview();
       saveToStorage();
     });
@@ -3391,12 +3457,16 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
     sigNameInput?.addEventListener('input', (e) => {
       state.signatoryName = (e.target as HTMLInputElement).value;
       state.signatoryEnabled = true;
+      state.sectionsConfig.signature = true;
+      if (secToggleSignature) secToggleSignature.checked = true;
       updatePreview();
       saveToStorage();
     });
     sigTitleInput?.addEventListener('input', (e) => {
       state.signatoryDesignation = (e.target as HTMLInputElement).value;
       state.signatoryEnabled = true;
+      state.sectionsConfig.signature = true;
+      if (secToggleSignature) secToggleSignature.checked = true;
       updatePreview();
       saveToStorage();
     });
@@ -3431,16 +3501,39 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
     btnToggleBanking?.addEventListener('click', () => {
       state.bankDetailsEnabled = true;
+      state.sectionsConfig.payment = true;
+      if (secTogglePayment) secTogglePayment.checked = true;
       revealField('banking-fields-wrap', 'bank-name');
+      saveToStorage();
     });
 
-    document.getElementById('btn-toggle-notes')?.addEventListener('click', () => revealField('notes-wrap', 'invoice-notes'));
-    document.getElementById('btn-toggle-terms')?.addEventListener('click', () => revealField('terms-wrap', 'invoice-terms'));
-    document.getElementById('btn-toggle-declaration')?.addEventListener('click', () => revealField('declaration-wrap', 'invoice-declaration'));
-    document.getElementById('btn-toggle-jurisdiction')?.addEventListener('click', () => revealField('jurisdiction-wrap', 'invoice-jurisdiction'));
+    document.getElementById('btn-toggle-notes')?.addEventListener('click', () => {
+      state.sectionsConfig.notes = true;
+      if (secToggleNotes) secToggleNotes.checked = true;
+      revealField('notes-wrap', 'invoice-notes');
+      saveToStorage();
+    });
+    document.getElementById('btn-toggle-terms')?.addEventListener('click', () => {
+      state.sectionsConfig.terms = true;
+      if (secToggleTerms) secToggleTerms.checked = true;
+      revealField('terms-wrap', 'invoice-terms');
+      saveToStorage();
+    });
+    document.getElementById('btn-toggle-declaration')?.addEventListener('click', () => {
+      state.sectionsConfig.declaration = true;
+      if (secToggleDeclaration) secToggleDeclaration.checked = true;
+      revealField('declaration-wrap', 'invoice-declaration');
+      saveToStorage();
+    });
+    document.getElementById('btn-toggle-jurisdiction')?.addEventListener('click', () => {
+      revealField('jurisdiction-wrap', 'invoice-jurisdiction');
+    });
     document.getElementById('btn-toggle-signatory')?.addEventListener('click', () => {
       state.signatoryEnabled = true;
+      state.sectionsConfig.signature = true;
+      if (secToggleSignature) secToggleSignature.checked = true;
       revealField('signatory-wrap', 'sig-name');
+      saveToStorage();
     });
 
     // Customizer Listeners: Layout & Density
@@ -3785,10 +3878,12 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         } catch {}
 
         isSampleActive = false;
+        if (docSampleBadge) docSampleBadge.classList.add('hidden');
         state = createBlankState();
         populateFormFields();
         renderEditorLineItems();
         updatePreview();
+        saveToStorage();
       }
     });
 
