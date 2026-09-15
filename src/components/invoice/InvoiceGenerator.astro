@@ -1,7 +1,21 @@
 ---
-import { Printer, Download, RotateCcw, Plus, Upload, CheckCircle2 } from 'lucide-astro';
+import {
+  Printer,
+  Download,
+  RotateCcw,
+  Plus,
+  Upload,
+  Sparkles,
+  Building2,
+  User,
+  FileText,
+  ShieldCheck,
+  CreditCard,
+  PenTool,
+} from 'lucide-astro';
 import type { SupportedLocale } from '../../lib/i18n/types';
 import { getInvoiceTranslations, SUPPORTED_CURRENCIES } from '../../lib/i18n/invoice';
+import type { DocumentType } from '../../lib/i18n/invoice/types';
 
 export interface Props {
   locale?: SupportedLocale;
@@ -12,6 +26,19 @@ const t = getInvoiceTranslations(locale);
 
 const todayStr = new Date().toISOString().split('T')[0];
 const defaultDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
+  { value: 'invoice', label: t.docTypes.invoice },
+  { value: 'quotation', label: t.docTypes.quotation },
+  { value: 'proforma', label: t.docTypes.proforma },
+  { value: 'estimate', label: t.docTypes.estimate },
+  { value: 'purchase_order', label: t.docTypes.purchase_order },
+  { value: 'receipt', label: t.docTypes.receipt },
+  { value: 'credit_note', label: t.docTypes.credit_note },
+  { value: 'debit_note', label: t.docTypes.debit_note },
+  { value: 'delivery_challan', label: t.docTypes.delivery_challan },
+  { value: 'custom', label: t.docTypes.custom },
+];
 ---
 
 <div id="invoice-generator-root" class="w-full" data-locale={locale} data-confirm-clear={t.actions.confirmClear}>
@@ -35,9 +62,9 @@ const defaultDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOStri
 
   <!-- Primary Workspace Grid -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-    <!-- LEFT COLUMN: Editor Controls -->
+    <!-- LEFT COLUMN: Progressive Form Editor -->
     <div id="invoice-editor-col" class="lg:block lg:col-span-6 space-y-6 no-print">
-      <!-- Action Toolbar (Top Quick Actions) -->
+      <!-- Action Toolbar -->
       <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
         <div class="flex items-center gap-2">
           <button
@@ -52,46 +79,125 @@ const defaultDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOStri
             type="button"
             id="btn-save-pdf"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
-            title="Save invoice using your browser's PDF print option"
+            title={t.actions.savePdf}
           >
             <Download class="w-3.5 h-3.5" />
             <span>{t.actions.savePdf}</span>
           </button>
         </div>
 
-        <button
-          type="button"
-          id="btn-clear-draft"
-          class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--negative-text)] hover:bg-[var(--surface-elevated)] rounded-md transition-colors cursor-pointer"
-          title={t.actions.clearDraft}
-        >
-          <RotateCcw class="w-3 h-3" />
-          <span>{t.actions.clearDraft}</span>
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            id="btn-load-sample"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-elevated)] border border-[var(--border)] rounded-md hover:border-[var(--border-focus)] transition-colors cursor-pointer"
+            title={t.actions.loadSample}
+          >
+            <Sparkles class="w-3.5 h-3.5 text-amber-500" />
+            <span>{t.actions.loadSample}</span>
+          </button>
+          <button
+            type="button"
+            id="btn-clear-draft"
+            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--negative-text)] hover:bg-[var(--surface-elevated)] rounded-md transition-colors cursor-pointer"
+            title={t.actions.clearDraft}
+          >
+            <RotateCcw class="w-3 h-3" />
+            <span>{t.actions.clearDraft}</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Progressive Form Sections Accordion / Cards -->
+      <!-- Progressive Form Sections -->
       <div class="space-y-5">
-        <!-- 1. Seller Information -->
+        <!-- 1. Document Setup -->
         <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
-            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-              {t.sections.seller}
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] flex items-center gap-2">
+              <FileText class="w-3.5 h-3.5" />
+              <span>{t.sections.document}</span>
             </h2>
             <span class="text-[11px] text-[var(--text-muted)]">Step 1</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label for="doc-type-select" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.docType}
+              </label>
+              <select
+                id="doc-type-select"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+              >
+                {docTypeOptions.map((opt) => (
+                  <option value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="invoice-currency" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.currency}
+              </label>
+              <select
+                id="invoice-currency"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+              >
+                {SUPPORTED_CURRENCIES.map((curr) => (
+                  <option value={curr.code}>{curr.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div id="doc-custom-title-wrap" class="hidden sm:col-span-2 space-y-1.5">
+              <label for="doc-custom-title-input" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.customTitle}
+              </label>
+              <input
+                type="text"
+                id="doc-custom-title-input"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="e.g. COMMERCIAL QUOTE / SERVICE RECEIPT"
+              />
+            </div>
+
+            <div class="sm:col-span-2 space-y-1.5">
+              <label for="doc-copy-label-select" class="block text-xs font-medium text-[var(--text-secondary)]">
+                Document Copy Tag
+              </label>
+              <select
+                id="doc-copy-label-select"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+              >
+                <option value="">None (Standard Document)</option>
+                <option value="Original for Recipient">Original for Recipient</option>
+                <option value="Duplicate for Supplier">Duplicate for Supplier</option>
+                <option value="Triplicate for Transporter">Triplicate for Transporter</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Seller / Business Information -->
+        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] flex items-center gap-2">
+              <Building2 class="w-3.5 h-3.5" />
+              <span>{t.sections.seller}</span>
+            </h2>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 2</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2 space-y-1.5">
               <label for="seller-name" class="block text-xs font-medium text-[var(--text-secondary)]">
-                {t.fields.businessName} *
+                {t.fields.businessName}
               </label>
               <input
                 type="text"
                 id="seller-name"
                 class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="Acme Studio Inc."
-                value="Acme Studio Inc."
+                placeholder="e.g. Gracedivine Solutions / Studio XYZ"
               />
             </div>
 
@@ -100,26 +206,22 @@ const defaultDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOStri
               <label class="block text-xs font-medium text-[var(--text-secondary)]">
                 {t.fields.businessLogo}
               </label>
-              <div class="flex items-center gap-3">
-                <label
-                  for="logo-file-input"
-                  class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
-                >
+              <div class="flex items-center gap-4">
+                <div id="logo-preview-thumb-wrap" class="hidden relative w-12 h-12 rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] p-1 flex items-center justify-center overflow-hidden">
+                  <img id="logo-preview-thumb" src="" alt="Logo" class="max-w-full max-h-full object-contain" />
+                </div>
+                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
                   <Upload class="w-3.5 h-3.5" />
                   <span>{t.fields.uploadLogo}</span>
-                  <input
-                    type="file"
-                    id="logo-file-input"
-                    accept="image/png, image/jpeg, image/webp, image/svg+xml"
-                    class="sr-only"
-                  />
+                  <input type="file" id="logo-file-input" accept="image/png, image/jpeg, image/svg+xml" class="sr-only" />
                 </label>
-                <div id="logo-preview-thumb-wrap" class="hidden flex items-center gap-2">
-                  <img id="logo-preview-thumb" src="" alt="Logo thumbnail" class="h-7 w-auto max-w-[80px] object-contain rounded border border-[var(--border)] p-0.5 bg-white" />
-                  <button type="button" id="btn-remove-logo" class="text-xs text-[var(--text-muted)] hover:text-[var(--negative-text)] transition-colors cursor-pointer">
-                    {t.fields.removeLogo}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  id="btn-remove-logo"
+                  class="hidden text-xs text-[var(--text-muted)] hover:text-[var(--negative-text)] transition-colors cursor-pointer"
+                >
+                  {t.fields.removeLogo}
+                </button>
               </div>
             </div>
 
@@ -130,10 +232,9 @@ const defaultDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOStri
               <textarea
                 id="seller-address"
                 rows="2"
-                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="100 Market St, Suite 400&#10;San Francisco, CA 94105"
-              >100 Market St, Suite 400
-San Francisco, CA 94105</textarea>
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
+                placeholder="Street address, City, PIN/Postal Code"
+              ></textarea>
             </div>
 
             <div class="space-y-1.5">
@@ -144,12 +245,11 @@ San Francisco, CA 94105</textarea>
                 type="email"
                 id="seller-email"
                 class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="billing@acmestudio.com"
-                value="billing@acmestudio.com"
+                placeholder="billing@yourbusiness.com"
               />
             </div>
 
-            <div class="space-y-1.5">
+            <div id="seller-phone-wrap" class="hidden space-y-1.5">
               <label for="seller-phone" class="block text-xs font-medium text-[var(--text-secondary)]">
                 {t.fields.phone}
               </label>
@@ -157,50 +257,104 @@ San Francisco, CA 94105</textarea>
                 type="text"
                 id="seller-phone"
                 class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="+1 (555) 019-2834"
-                value="+1 (555) 019-2834"
+                placeholder="+91 98765 43210"
               />
             </div>
 
-            <div class="space-y-1.5">
+            <div id="seller-tax-wrap" class="hidden space-y-1.5">
               <label for="seller-tax-id" class="block text-xs font-medium text-[var(--text-secondary)]">
                 {t.fields.taxId}
               </label>
               <input
                 type="text"
                 id="seller-tax-id"
-                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="US-EIN 12-3456789"
-                value="US-EIN 12-3456789"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="27AADCG1234F1Z5"
               />
             </div>
 
-            <div class="space-y-1.5">
+            <div id="seller-pan-wrap" class="hidden space-y-1.5">
+              <label for="seller-pan" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.pan}
+              </label>
+              <input
+                type="text"
+                id="seller-pan"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="AADCG1234F"
+              />
+            </div>
+
+            <div id="seller-state-wrap" class="hidden sm:col-span-2 grid grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label for="seller-state" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.state}
+                </label>
+                <input
+                  type="text"
+                  id="seller-state"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="e.g. Maharashtra"
+                />
+              </div>
+              <div class="space-y-1.5">
+                <label for="seller-state-code" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.stateCode}
+                </label>
+                <input
+                  type="text"
+                  id="seller-state-code"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="27"
+                />
+              </div>
+            </div>
+
+            <div id="seller-web-wrap" class="hidden sm:col-span-2 space-y-1.5">
               <label for="seller-website" class="block text-xs font-medium text-[var(--text-secondary)]">
                 {t.fields.website}
               </label>
               <input
-                type="text"
+                type="url"
                 id="seller-website"
                 class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="https://acmestudio.com"
-                value="https://acmestudio.com"
+                placeholder="https://example.com"
               />
             </div>
           </div>
+
+          <!-- Progressive Disclosure Action Pills for Business -->
+          <div class="pt-2 flex flex-wrap gap-2 text-xs">
+            <button type="button" id="btn-toggle-seller-tax" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addGstin}
+            </button>
+            <button type="button" id="btn-toggle-seller-pan" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addPan}
+            </button>
+            <button type="button" id="btn-toggle-seller-phone" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addPhone}
+            </button>
+            <button type="button" id="btn-toggle-seller-state" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              + Add State & Code
+            </button>
+            <button type="button" id="btn-toggle-seller-web" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addWebsite}
+            </button>
+          </div>
         </section>
 
-        <!-- 2. Customer Information -->
+        <!-- 3. Customer / Bill To -->
         <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
-            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-              {t.sections.customer}
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] flex items-center gap-2">
+              <User class="w-3.5 h-3.5" />
+              <span>{t.sections.customer}</span>
             </h2>
-            <span class="text-[11px] text-[var(--text-muted)]">Step 2</span>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 3</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="space-y-1.5">
+            <div class="sm:col-span-2 space-y-1.5">
               <label for="customer-company" class="block text-xs font-medium text-[var(--text-secondary)]">
                 {t.fields.companyName}
               </label>
@@ -208,8 +362,7 @@ San Francisco, CA 94105</textarea>
                 type="text"
                 id="customer-company"
                 class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="Venture Brands LLC"
-                value="Venture Brands LLC"
+                placeholder="e.g. Apex Industries Pvt. Ltd."
               />
             </div>
 
@@ -221,77 +374,200 @@ San Francisco, CA 94105</textarea>
                 type="text"
                 id="customer-name"
                 class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="Sarah Jenkins"
-                value="Sarah Jenkins"
+                placeholder="Attn: Purchasing Dept."
               />
             </div>
 
-            <div class="sm:col-span-2 space-y-1.5">
+            <div id="customer-address-wrap" class="hidden sm:col-span-2 space-y-1.5">
               <label for="customer-address" class="block text-xs font-medium text-[var(--text-secondary)]">
                 {t.fields.address}
               </label>
               <textarea
                 id="customer-address"
                 rows="2"
-                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="450 Broadway Ave, Floor 8&#10;New York, NY 10013"
-              >450 Broadway Ave, Floor 8
-New York, NY 10013</textarea>
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
+                placeholder="Client business address, city, state"
+              ></textarea>
             </div>
 
-            <div class="space-y-1.5">
-              <label for="customer-email" class="block text-xs font-medium text-[var(--text-secondary)]">
-                {t.fields.email}
-              </label>
-              <input
-                type="email"
-                id="customer-email"
-                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="accounting@venturebrands.com"
-                value="accounting@venturebrands.com"
-              />
-            </div>
-
-            <div class="space-y-1.5">
+            <div id="customer-tax-wrap" class="hidden space-y-1.5">
               <label for="customer-tax-id" class="block text-xs font-medium text-[var(--text-secondary)]">
                 {t.fields.taxId}
               </label>
               <input
                 type="text"
                 id="customer-tax-id"
-                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="Tax ID (optional)"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="27AABCU9603R1ZM"
               />
+            </div>
+
+            <div id="customer-pan-wrap" class="hidden space-y-1.5">
+              <label for="customer-pan" class="block text-xs font-medium text-[var(--text-secondary)]">
+                {t.fields.pan}
+              </label>
+              <input
+                type="text"
+                id="customer-pan"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="AABCU9603R"
+              />
+            </div>
+
+            <div id="customer-contact-wrap" class="hidden sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label for="customer-email" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.email}
+                </label>
+                <input
+                  type="email"
+                  id="customer-email"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="contact@client.com"
+                />
+              </div>
+              <div class="space-y-1.5">
+                <label for="customer-phone" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.phone}
+                </label>
+                <input
+                  type="text"
+                  id="customer-phone"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="+1 555-0199"
+                />
+              </div>
+            </div>
+
+            <div id="customer-state-wrap" class="hidden sm:col-span-2 grid grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label for="customer-state" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.state}
+                </label>
+                <input
+                  type="text"
+                  id="customer-state"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="State / Region"
+                />
+              </div>
+              <div class="space-y-1.5">
+                <label for="customer-state-code" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.stateCode}
+                </label>
+                <input
+                  type="text"
+                  id="customer-state-code"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="27"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Action Pills -->
+          <div class="pt-2 flex flex-wrap gap-2 text-xs">
+            <button type="button" id="btn-toggle-cust-address" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              + Add Address
+            </button>
+            <button type="button" id="btn-toggle-cust-tax" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addGstin}
+            </button>
+            <button type="button" id="btn-toggle-cust-pan" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addPan}
+            </button>
+            <button type="button" id="btn-toggle-cust-contact" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              + Add Email & Phone
+            </button>
+            <button type="button" id="btn-toggle-cust-state" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              + Add State & Code
+            </button>
+          </div>
+
+          <!-- Ship To / Consignee Toggle -->
+          <div class="pt-3 border-t border-[var(--border)] space-y-3">
+            <label class="flex items-center gap-2.5 text-xs text-[var(--text-secondary)] cursor-pointer select-none">
+              <input type="checkbox" id="toggle-ship-to" class="rounded border-[var(--border)] text-[var(--text-primary)] focus:ring-[var(--focus-ring)]" />
+              <span class="font-medium text-[var(--text-primary)]">Deliver to a different address (Ship To / Consignee)</span>
+            </label>
+
+            <div id="shipping-fields-wrap" class="hidden p-3.5 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div class="sm:col-span-2 space-y-1">
+                  <label for="ship-recipient-name" class="block text-[11px] text-[var(--text-secondary)]">
+                    {t.fields.recipientName}
+                  </label>
+                  <input
+                    type="text"
+                    id="ship-recipient-name"
+                    class="w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                    placeholder="Warehouse / Consignee name"
+                  />
+                </div>
+                <div class="sm:col-span-2 space-y-1">
+                  <label for="ship-address" class="block text-[11px] text-[var(--text-secondary)]">
+                    {t.fields.address}
+                  </label>
+                  <textarea
+                    id="ship-address"
+                    rows="2"
+                    class="w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
+                    placeholder="Delivery site address, plant or factory location"
+                  ></textarea>
+                </div>
+                <div class="space-y-1">
+                  <label for="ship-destination" class="block text-[11px] text-[var(--text-secondary)]">
+                    {t.fields.destination}
+                  </label>
+                  <input
+                    type="text"
+                    id="ship-destination"
+                    class="w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                    placeholder="e.g. Bhiwandi / Plant II"
+                  />
+                </div>
+                <div class="space-y-1">
+                  <label for="ship-tax-id" class="block text-[11px] text-[var(--text-secondary)]">
+                    Consignee GSTIN / Tax ID
+                  </label>
+                  <input
+                    type="text"
+                    id="ship-tax-id"
+                    class="w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                    placeholder="Consignee GSTIN"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- 3. Invoice Meta & Currency -->
+        <!-- 4. Document Details & References -->
         <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
-            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-              {t.sections.invoiceDetails}
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] flex items-center gap-2">
+              <FileText class="w-3.5 h-3.5" />
+              <span>{t.sections.invoiceDetails}</span>
             </h2>
-            <span class="text-[11px] text-[var(--text-muted)]">Step 3</span>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 4</span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="space-y-1.5">
               <label for="invoice-number" class="block text-xs font-medium text-[var(--text-secondary)]">
-                {t.fields.invoiceNumber} *
+                {t.fields.invoiceNumber}
               </label>
               <input
                 type="text"
                 id="invoice-number"
-                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="INV-2026-001"
-                value="INV-2026-001"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="DOC-001"
               />
             </div>
 
             <div class="space-y-1.5">
               <label for="invoice-date" class="block text-xs font-medium text-[var(--text-secondary)]">
-                {t.fields.invoiceDate} *
+                {t.fields.invoiceDate}
               </label>
               <input
                 type="date"
@@ -301,8 +577,8 @@ New York, NY 10013</textarea>
               />
             </div>
 
-            <div class="space-y-1.5">
-              <label for="invoice-due-date" class="block text-xs font-medium text-[var(--text-secondary)]">
+            <div id="due-date-container" class="space-y-1.5">
+              <label id="due-date-label" for="invoice-due-date" class="block text-xs font-medium text-[var(--text-secondary)]">
                 {t.fields.dueDate}
               </label>
               <input
@@ -313,171 +589,583 @@ New York, NY 10013</textarea>
               />
             </div>
 
-            <div class="space-y-1.5">
-              <label for="invoice-currency" class="block text-xs font-medium text-[var(--text-secondary)]">
-                {t.fields.currency}
-              </label>
-              <select
-                id="invoice-currency"
-                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] cursor-pointer"
-              >
-                {SUPPORTED_CURRENCIES.map((curr) => (
-                  <option value={curr.code} selected={curr.code === 'USD'}>
-                    {curr.name}
-                  </option>
-                ))}
-              </select>
+            <!-- Optional References & Place of Supply -->
+            <div id="place-of-supply-wrap" class="hidden sm:col-span-3 grid grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label for="place-of-supply" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.placeOfSupply}
+                </label>
+                <input
+                  type="text"
+                  id="place-of-supply"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="e.g. Maharashtra (27)"
+                />
+              </div>
+              <div class="space-y-1.5">
+                <label for="place-of-supply-code" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  State Code
+                </label>
+                <input
+                  type="text"
+                  id="place-of-supply-code"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="27"
+                />
+              </div>
             </div>
 
-            <div class="sm:col-span-2 space-y-1.5">
-              <label for="invoice-payment-terms" class="block text-xs font-medium text-[var(--text-secondary)]">
-                {t.fields.paymentTerms}
-              </label>
-              <input
-                type="text"
-                id="invoice-payment-terms"
-                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-                placeholder="Net 30 / Due on Receipt"
-                value="Net 30"
-              />
+            <div id="order-ref-wrap" class="hidden sm:col-span-3 grid grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label for="ref-order-num" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.orderNumber}
+                </label>
+                <input
+                  type="text"
+                  id="ref-order-num"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="PO-8921 / ORD-2026"
+                />
+              </div>
+              <div class="space-y-1.5">
+                <label for="ref-order-date" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.orderDate}
+                </label>
+                <input
+                  type="date"
+                  id="ref-order-date"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+                />
+              </div>
+            </div>
+
+            <div id="quote-ref-wrap" class="hidden sm:col-span-3 grid grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label for="ref-quote-num" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.quoteNumber}
+                </label>
+                <input
+                  type="text"
+                  id="ref-quote-num"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="QTE-2026-04"
+                />
+              </div>
+              <div class="space-y-1.5">
+                <label for="ref-quote-date" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.quoteDate}
+                </label>
+                <input
+                  type="date"
+                  id="ref-quote-date"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+                />
+              </div>
             </div>
           </div>
-        </section>
 
-        <!-- 4. Line Items -->
-        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
-            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-              {t.sections.items}
-            </h2>
-            <span class="text-[11px] text-[var(--text-muted)]">Step 4</span>
-          </div>
-
-          <!-- Dynamic Line Items Container -->
-          <div id="line-items-container" class="space-y-3.5">
-            <!-- Rendered via JS -->
-          </div>
-
-          <!-- Add Line Item Button -->
-          <div class="pt-2">
-            <button
-              type="button"
-              id="btn-add-line-item"
-              class="w-full py-2.5 px-4 text-xs font-medium rounded-lg border border-dashed border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <Plus class="w-3.5 h-3.5" />
-              <span>{t.fields.addItem}</span>
+          <!-- Document Details Action Pills -->
+          <div class="pt-2 flex flex-wrap gap-2 text-xs">
+            <button type="button" id="btn-toggle-place-of-supply" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              + Add Place of Supply
+            </button>
+            <button type="button" id="btn-toggle-order-ref" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              + Add PO / Order Ref
+            </button>
+            <button type="button" id="btn-toggle-quote-ref" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              + Add Quote Ref
             </button>
           </div>
         </section>
 
-        <!-- 5. Notes & Terms -->
-        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-3">
-          <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] pb-2 border-b border-[var(--border)]">
-            {t.sections.notes}
-          </h2>
-          <textarea
-            id="invoice-notes"
-            rows="3"
-            class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-            placeholder={t.fields.notesPlaceholder}
-          >Payment is due within 30 days of invoice date. Please transfer to Wire/ACH: Bank of America, Routing #123456789, Account #987654321. Thank you for your business!</textarea>
+        <!-- 5. Line Items -->
+        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] flex items-center gap-2">
+              <span>{t.sections.items}</span>
+            </h2>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 5</span>
+          </div>
+
+          <!-- Column Visibility Options -->
+          <div class="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)] pb-1">
+            <span class="text-[11px] font-medium text-[var(--text-secondary)]">Optional Columns:</span>
+            <button type="button" id="btn-col-toggle-hsn" class="px-2.5 py-1 rounded-md border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer" data-active="false">
+              + HSN/SAC
+            </button>
+            <button type="button" id="btn-col-toggle-unit" class="px-2.5 py-1 rounded-md border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer" data-active="false">
+              + Unit
+            </button>
+            <button type="button" id="btn-col-toggle-disc" class="px-2.5 py-1 rounded-md border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer" data-active="false">
+              + Discount %
+            </button>
+            <button type="button" id="btn-col-toggle-tax" class="px-2.5 py-1 rounded-md border border-[var(--border)] hover:bg-[var(--surface-elevated)] transition-colors cursor-pointer" data-active="false">
+              + Item Tax %
+            </button>
+          </div>
+
+          <!-- Line Items List -->
+          <div id="line-items-container" class="space-y-3.5">
+            <!-- Dynamic Items Injected Here -->
+          </div>
+
+          <button
+            type="button"
+            id="btn-add-line-item"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg border border-dashed border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer w-full justify-center"
+          >
+            <Plus class="w-3.5 h-3.5" />
+            <span>{t.fields.addItem}</span>
+          </button>
         </section>
 
-        <!-- Privacy & Local Security Notice -->
-        <div class="p-4 rounded-lg bg-[var(--surface-subtle)] border border-[var(--border)] text-xs text-[var(--text-muted)] leading-relaxed flex items-start gap-2.5">
-          <CheckCircle2 class="w-4 h-4 text-[var(--positive-text)] shrink-0 mt-0.5" />
+        <!-- 6. Tax & Indian GST Configuration -->
+        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] flex items-center gap-2">
+              <ShieldCheck class="w-3.5 h-3.5" />
+              <span>{t.sections.taxConfig}</span>
+            </h2>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 6</span>
+          </div>
+
+          <!-- Tax Mode Radios -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+            <label class="p-3 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] flex items-center gap-2.5 cursor-pointer">
+              <input type="radio" name="tax-mode" value="none" checked class="text-[var(--text-primary)] focus:ring-[var(--focus-ring)]" />
+              <div>
+                <span class="font-medium text-[var(--text-primary)] block">{t.fields.noTax}</span>
+                <span class="text-[11px] text-[var(--text-muted)]">Clean, tax-free billing</span>
+              </div>
+            </label>
+
+            <label class="p-3 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] flex items-center gap-2.5 cursor-pointer">
+              <input type="radio" name="tax-mode" value="custom" class="text-[var(--text-primary)] focus:ring-[var(--focus-ring)]" />
+              <div>
+                <span class="font-medium text-[var(--text-primary)] block">{t.fields.customTax}</span>
+                <span class="text-[11px] text-[var(--text-muted)]">Standard flat VAT/Sales Tax</span>
+              </div>
+            </label>
+
+            <label class="p-3 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] flex items-center gap-2.5 cursor-pointer">
+              <input type="radio" name="tax-mode" value="gst" class="text-[var(--text-primary)] focus:ring-[var(--focus-ring)]" />
+              <div>
+                <span class="font-medium text-[var(--text-primary)] block">{t.fields.indianGst}</span>
+                <span class="text-[11px] text-[var(--text-muted)]">CGST + SGST or IGST</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Custom Tax Controls -->
+          <div id="custom-tax-panel" class="hidden p-3.5 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] space-y-2">
+            <label for="custom-tax-rate" class="block text-xs font-medium text-[var(--text-secondary)]">
+              Default Tax Rate (%)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="any"
+              id="custom-tax-rate"
+              class="w-36 rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] font-mono tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
+              value="18"
+            />
+          </div>
+
+          <!-- Indian GST Controls -->
+          <div id="indian-gst-panel" class="hidden p-4 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] space-y-3.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label for="gst-rate-input" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  Applicable GST Rate (%)
+                </label>
+                <select
+                  id="gst-rate-input"
+                  class="w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--text-primary)]"
+                >
+                  <option value="18">18% (Standard Services / Goods)</option>
+                  <option value="12">12%</option>
+                  <option value="5">5%</option>
+                  <option value="28">28% (Luxury / Automobiles)</option>
+                  <option value="0">0% (Exempt)</option>
+                </select>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block text-xs font-medium text-[var(--text-secondary)]">
+                  GST Supply Structure
+                </label>
+                <div class="flex items-center gap-3 pt-1 text-xs">
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="radio" name="gst-supply-type" value="cgst_sgst" checked class="text-[var(--text-primary)]" />
+                    <span>Intra-State (CGST + SGST)</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="radio" name="gst-supply-type" value="igst" class="text-[var(--text-primary)]" />
+                    <span>Inter-State (IGST)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4 pt-1 text-xs text-[var(--text-secondary)]">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="gst-reverse-charge" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.fields.reverseCharge}</span>
+              </label>
+
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="gst-round-off" checked class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.fields.roundOff}</span>
+              </label>
+            </div>
+
+            <p class="text-[11px] text-[var(--text-muted)] leading-relaxed pt-1 border-t border-[var(--border)]">
+              Profitivas generates professional business documents for commercial and billing use. It does not file returns or connect directly to the GSTN portal.
+            </p>
+          </div>
+        </section>
+
+        <!-- 7. Bank & UPI Details -->
+        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] flex items-center gap-2">
+              <CreditCard class="w-3.5 h-3.5" />
+              <span>{t.sections.banking}</span>
+            </h2>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 7</span>
+          </div>
+
+          <div id="banking-fields-wrap" class="hidden space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label for="bank-name" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.bankName}
+                </label>
+                <input
+                  type="text"
+                  id="bank-name"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="e.g. HDFC Bank / Chase"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label for="bank-account-name" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.accountName}
+                </label>
+                <input
+                  type="text"
+                  id="bank-account-name"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="Account beneficiary name"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label for="bank-account-number" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.accountNumber}
+                </label>
+                <input
+                  type="text"
+                  id="bank-account-number"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="50200012345678"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label for="bank-ifsc" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.ifsc}
+                </label>
+                <input
+                  type="text"
+                  id="bank-ifsc"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="HDFC0000240 / Routing #"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label for="bank-upi-id" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.upiId}
+                </label>
+                <input
+                  type="text"
+                  id="bank-upi-id"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] font-mono placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="business@upi"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label for="invoice-payment-terms" class="block text-xs font-medium text-[var(--text-secondary)]">
+                  {t.fields.paymentTerms}
+                </label>
+                <input
+                  type="text"
+                  id="invoice-payment-terms"
+                  class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="e.g. Net 30 / Due on Receipt"
+                />
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            id="btn-toggle-banking"
+            class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer"
+          >
+            {t.actions.addBankDetails}
+          </button>
+        </section>
+
+        <!-- 8. Notes, Terms, Declaration & Signature -->
+        <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+            <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] flex items-center gap-2">
+              <PenTool class="w-3.5 h-3.5" />
+              <span>{t.sections.legal}</span>
+            </h2>
+            <span class="text-[11px] text-[var(--text-muted)]">Step 8</span>
+          </div>
+
+          <!-- Notes Textarea -->
+          <div id="notes-wrap" class="hidden space-y-1.5">
+            <label for="invoice-notes" class="block text-xs font-medium text-[var(--text-secondary)]">
+              {t.document.notesLabel}
+            </label>
+            <textarea
+              id="invoice-notes"
+              rows="2"
+              class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
+              placeholder={t.fields.notesPlaceholder}
+            ></textarea>
+          </div>
+
+          <!-- Terms & Conditions -->
+          <div id="terms-wrap" class="hidden space-y-1.5">
+            <label for="invoice-terms" class="block text-xs font-medium text-[var(--text-secondary)]">
+              {t.fields.terms}
+            </label>
+            <textarea
+              id="invoice-terms"
+              rows="2"
+              class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
+              placeholder="1. Goods once sold will not be taken back. 2. Interest @18% per annum charged on overdue payments."
+            ></textarea>
+          </div>
+
+          <!-- Declaration -->
+          <div id="declaration-wrap" class="hidden space-y-1.5">
+            <label for="invoice-declaration" class="block text-xs font-medium text-[var(--text-secondary)]">
+              {t.fields.declaration}
+            </label>
+            <textarea
+              id="invoice-declaration"
+              rows="2"
+              class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
+              placeholder="We declare that this document shows the actual price of the goods or services described and that all particulars are true and correct."
+            ></textarea>
+          </div>
+
+          <!-- Jurisdiction -->
+          <div id="jurisdiction-wrap" class="hidden space-y-1.5">
+            <label for="invoice-jurisdiction" class="block text-xs font-medium text-[var(--text-secondary)]">
+              {t.fields.jurisdiction}
+            </label>
+            <input
+              type="text"
+              id="invoice-jurisdiction"
+              class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+              placeholder="Subject to Mumbai Jurisdiction"
+            />
+          </div>
+
+          <!-- Authorized Signatory -->
+          <div id="signatory-wrap" class="hidden p-3.5 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div class="space-y-1">
+                <label for="sig-name" class="block text-[11px] text-[var(--text-secondary)]">
+                  {t.fields.signatoryName}
+                </label>
+                <input
+                  type="text"
+                  id="sig-name"
+                  class="w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="Authorised Signatory"
+                />
+              </div>
+              <div class="space-y-1">
+                <label for="sig-title" class="block text-[11px] text-[var(--text-secondary)]">
+                  {t.fields.signatoryTitle}
+                </label>
+                <input
+                  type="text"
+                  id="sig-title"
+                  class="w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
+                  placeholder="Director / Partner / Owner"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Legal Action Pills -->
+          <div class="pt-2 flex flex-wrap gap-2 text-xs">
+            <button type="button" id="btn-toggle-notes" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addNotes}
+            </button>
+            <button type="button" id="btn-toggle-terms" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addTerms}
+            </button>
+            <button type="button" id="btn-toggle-declaration" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addDeclaration}
+            </button>
+            <button type="button" id="btn-toggle-jurisdiction" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addJurisdiction}
+            </button>
+            <button type="button" id="btn-toggle-signatory" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
+              {t.actions.addSignature}
+            </button>
+          </div>
+        </section>
+
+        <!-- Privacy Notice -->
+        <div class="p-3.5 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] text-[11px] text-[var(--text-muted)] leading-relaxed">
           <span>{t.privacyNotice}</span>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT COLUMN: Professional Paper Live Preview -->
+    <!-- RIGHT COLUMN: Professional Paper Live Preview (Zero Visual Footprint) -->
     <div id="invoice-preview-col" class="hidden lg:block lg:col-span-6 lg:sticky lg:top-24">
-      <!-- Printable Sheet Container (Styled like standard document paper) -->
+      <!-- Printable Sheet Container -->
       <div
         id="invoice-paper-sheet"
-        class="bg-white text-neutral-900 rounded-lg shadow-xl border border-neutral-300 p-8 sm:p-10 font-sans text-xs sm:text-sm leading-normal max-w-full overflow-hidden"
+        class="bg-white text-neutral-900 rounded-lg shadow-xl border border-neutral-300 p-8 sm:p-10 font-sans text-xs sm:text-sm leading-normal max-w-full overflow-hidden relative"
       >
-        <!-- Document Header: Seller Info + Invoice Title/Meta -->
-        <div class="flex flex-col sm:flex-row justify-between gap-6 pb-8 border-b border-neutral-200">
-          <!-- Left: Brand / Seller -->
-          <div class="space-y-2 max-w-[280px]">
+        <!-- Sample Watermark / Badge -->
+        <div id="doc-sample-badge" class="hidden absolute top-4 right-4 text-[9px] uppercase tracking-wider font-mono font-bold text-neutral-500 border border-neutral-300 rounded px-2 py-0.5 bg-neutral-100/90 no-print select-none">
+          EXAMPLE PREVIEW
+        </div>
+
+        <!-- Optional Copy Label Tag -->
+        <div id="doc-copy-label" class="hidden text-right pb-2 text-[10px] uppercase font-mono tracking-widest text-neutral-500 font-semibold border-b border-neutral-200 mb-4">
+        </div>
+
+        <!-- Document Top: Supplier Details & Document Title/Meta -->
+        <div class="flex flex-col sm:flex-row justify-between gap-6 pb-6 border-b border-neutral-200">
+          <!-- Left: Brand / Supplier Info -->
+          <div class="space-y-1.5 max-w-[320px]">
             <div id="doc-logo-wrap" class="hidden pb-1">
               <img id="doc-logo-img" src="" alt="Business Logo" class="max-h-12 max-w-[160px] object-contain" />
             </div>
-            <h3 id="doc-seller-name" class="text-lg sm:text-xl font-bold tracking-tight text-neutral-900 leading-tight">
-              Acme Studio Inc.
+            <h3 id="doc-seller-name" class="text-base sm:text-xl font-bold tracking-tight text-neutral-900 leading-tight">
             </h3>
-            <p id="doc-seller-address" class="text-xs text-neutral-600 whitespace-pre-line leading-relaxed">
-              100 Market St, Suite 400
-              San Francisco, CA 94105
+            <p id="doc-seller-address" class="text-xs text-neutral-600 whitespace-pre-line leading-relaxed hidden">
             </p>
             <div id="doc-seller-contact" class="text-xs text-neutral-600 space-y-0.5 pt-0.5">
-              <div id="doc-seller-email">billing@acmestudio.com</div>
-              <div id="doc-seller-phone">+1 (555) 019-2834</div>
-              <div id="doc-seller-tax-id" class="font-mono text-[11px] pt-1">Tax ID: US-EIN 12-3456789</div>
+              <div id="doc-seller-email" class="hidden"></div>
+              <div id="doc-seller-phone" class="hidden"></div>
+              <div id="doc-seller-tax-id" class="font-mono text-[11px] pt-0.5 hidden"></div>
+              <div id="doc-seller-pan" class="font-mono text-[11px] hidden"></div>
+              <div id="doc-seller-state" class="text-[11px] text-neutral-600 hidden"></div>
+              <div id="doc-seller-website" class="text-[11px] text-neutral-500 hidden"></div>
             </div>
           </div>
 
-          <!-- Right: Document Name & Meta Box -->
-          <div class="sm:text-right space-y-2 min-w-[180px]">
-            <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-neutral-900 uppercase">
+          <!-- Right: Document Type Heading & Meta Box -->
+          <div class="sm:text-right space-y-1.5 min-w-[200px]">
+            <h2 id="doc-title" class="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 uppercase">
               {t.document.invoiceTitle}
             </h2>
             <div class="space-y-1 text-xs pt-1">
-              <div class="flex sm:justify-end gap-2">
-                <span class="text-neutral-500">{t.document.invoiceNumberLabel}:</span>
-                <span id="doc-invoice-number" class="font-mono font-bold text-neutral-900">INV-2026-001</span>
+              <div id="doc-number-row" class="flex sm:justify-end gap-2">
+                <span id="doc-number-label" class="text-neutral-500">{t.document.invoiceNumberLabel}:</span>
+                <span id="doc-invoice-number" class="font-mono font-bold text-neutral-900"></span>
               </div>
-              <div class="flex sm:justify-end gap-2">
+              <div id="doc-date-row" class="flex sm:justify-end gap-2">
                 <span class="text-neutral-500">{t.document.dateLabel}:</span>
                 <span id="doc-invoice-date" class="font-medium text-neutral-900">{todayStr}</span>
               </div>
-              <div class="flex sm:justify-end gap-2">
-                <span class="text-neutral-500">{t.document.dueDateLabel}:</span>
+              <div id="doc-due-date-row" class="flex sm:justify-end gap-2">
+                <span id="doc-due-date-label" class="text-neutral-500">{t.document.dueDateLabel}:</span>
                 <span id="doc-invoice-due-date" class="font-medium text-neutral-900">{defaultDueDate}</span>
               </div>
-              <div id="doc-payment-terms-wrap" class="flex sm:justify-end gap-2">
+              <div id="doc-place-supply-row" class="hidden flex sm:justify-end gap-2">
+                <span class="text-neutral-500">{t.fields.placeOfSupply}:</span>
+                <span id="doc-place-supply-val" class="font-medium text-neutral-900"></span>
+              </div>
+              <div id="doc-payment-terms-wrap" class="hidden flex sm:justify-end gap-2">
                 <span class="text-neutral-500">{t.document.paymentTermsLabel}:</span>
-                <span id="doc-payment-terms" class="font-medium text-neutral-900">Net 30</span>
+                <span id="doc-payment-terms" class="font-medium text-neutral-900"></span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Bill To Section -->
-        <div class="py-6 border-b border-neutral-200">
-          <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-1.5">
-            {t.document.billToLabel}
-          </span>
-          <div id="doc-customer-company" class="text-base font-bold text-neutral-900">
-            Venture Brands LLC
+        <!-- Bill To & Ship To Grid (Zero footprint: columns hide if empty) -->
+        <div id="doc-entities-row" class="py-5 border-b border-neutral-200 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <!-- Bill To Card -->
+          <div id="doc-bill-to-card" class="space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-1">
+              {t.document.billToLabel}
+            </span>
+            <div id="doc-customer-company" class="text-sm sm:text-base font-bold text-neutral-900"></div>
+            <div id="doc-customer-name" class="text-xs text-neutral-700 font-medium hidden"></div>
+            <div id="doc-customer-address" class="text-xs text-neutral-600 whitespace-pre-line leading-relaxed hidden"></div>
+            <div id="doc-customer-contact" class="text-xs text-neutral-600 space-y-0.5 pt-0.5">
+              <div id="doc-customer-email" class="hidden"></div>
+              <div id="doc-customer-phone" class="hidden"></div>
+              <div id="doc-customer-tax-id" class="font-mono text-[11px] hidden"></div>
+              <div id="doc-customer-pan" class="font-mono text-[11px] hidden"></div>
+              <div id="doc-customer-state" class="text-[11px] text-neutral-600 hidden"></div>
+            </div>
           </div>
-          <div id="doc-customer-name" class="text-xs text-neutral-700 font-medium mt-0.5">
-            Attn: Sarah Jenkins
-          </div>
-          <div id="doc-customer-address" class="text-xs text-neutral-600 whitespace-pre-line mt-1 leading-relaxed">
-            450 Broadway Ave, Floor 8
-            New York, NY 10013
-          </div>
-          <div id="doc-customer-contact" class="text-xs text-neutral-600 mt-1 space-y-0.5">
-            <div id="doc-customer-email">accounting@venturebrands.com</div>
-            <div id="doc-customer-tax-id" class="font-mono text-[11px]"></div>
+
+          <!-- Ship To / Consignee Card (Only if enabled) -->
+          <div id="doc-ship-to-card" class="hidden space-y-1 sm:border-l sm:border-neutral-200 sm:pl-6">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-1">
+              {t.document.shipToLabel}
+            </span>
+            <div id="doc-ship-name" class="text-sm sm:text-base font-bold text-neutral-900"></div>
+            <div id="doc-ship-address" class="text-xs text-neutral-600 whitespace-pre-line leading-relaxed hidden"></div>
+            <div id="doc-ship-destination" class="text-xs text-neutral-700 font-medium hidden"></div>
+            <div id="doc-ship-tax-id" class="font-mono text-[11px] text-neutral-600 hidden"></div>
           </div>
         </div>
 
-        <!-- Items Table -->
-        <div class="py-6 overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
+        <!-- Optional References Strip -->
+        <div id="doc-references-strip" class="hidden py-3 border-b border-neutral-200 text-xs flex flex-wrap gap-x-6 gap-y-1.5 text-neutral-700">
+          <div id="doc-ref-order" class="hidden">
+            <span class="text-neutral-400">Order/PO:</span> <strong id="doc-ref-order-val" class="text-neutral-900 font-medium"></strong>
+          </div>
+          <div id="doc-ref-order-date" class="hidden">
+            <span class="text-neutral-400">Order Date:</span> <span id="doc-ref-order-date-val" class="text-neutral-900"></span>
+          </div>
+          <div id="doc-ref-quote" class="hidden">
+            <span class="text-neutral-400">Quote Ref:</span> <strong id="doc-ref-quote-val" class="text-neutral-900 font-medium"></strong>
+          </div>
+          <div id="doc-ref-quote-date" class="hidden">
+            <span class="text-neutral-400">Quote Date:</span> <span id="doc-ref-quote-date-val" class="text-neutral-900"></span>
+          </div>
+        </div>
+
+        <!-- Dynamic Items Table -->
+        <div class="py-5 overflow-x-auto">
+          <table class="w-full text-left border-collapse min-w-[340px]">
+            <thead id="doc-items-thead">
               <tr class="border-b-2 border-neutral-300 text-[11px] uppercase font-bold text-neutral-600 tracking-wider">
-                <th class="py-2 pr-4">{t.document.descHeader}</th>
-                <th class="py-2 px-2 text-right w-16">{t.document.qtyHeader}</th>
+                <th class="py-2 pr-2 w-8">#</th>
+                <th class="py-2 px-2">{t.document.descHeader}</th>
+                <th id="th-hsn" class="hidden py-2 px-2 text-right w-20">{t.document.hsnHeader}</th>
+                <th id="th-unit" class="hidden py-2 px-2 text-right w-16">{t.document.unitHeader}</th>
+                <th class="py-2 px-2 text-right w-14">{t.document.qtyHeader}</th>
                 <th class="py-2 px-2 text-right w-24">{t.document.priceHeader}</th>
-                <th class="py-2 px-2 text-right w-20">{t.document.discountHeader}</th>
-                <th class="py-2 px-2 text-right w-16">{t.document.taxHeader}</th>
-                <th class="py-2 pl-4 text-right w-24">{t.document.amountHeader}</th>
+                <th id="th-discount" class="hidden py-2 px-2 text-right w-18">{t.document.discountHeader}</th>
+                <th id="th-tax" class="hidden py-2 px-2 text-right w-16">{t.document.taxHeader}</th>
+                <th class="py-2 pl-2 text-right w-24">{t.document.amountHeader}</th>
               </tr>
             </thead>
             <tbody id="doc-items-tbody" class="divide-y divide-neutral-200 text-xs sm:text-sm">
@@ -486,36 +1174,124 @@ New York, NY 10013</textarea>
           </table>
         </div>
 
-        <!-- Totals & Calculations Block -->
+        <!-- Lower Financial & Closing Block -->
         <div class="pt-4 border-t-2 border-neutral-200 flex flex-col sm:flex-row justify-between items-start gap-6">
-          <!-- Notes & Terms on Paper -->
-          <div class="flex-1 space-y-2 text-xs text-neutral-600 max-w-sm">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
-              {t.document.notesLabel}
-            </span>
-            <p id="doc-notes-text" class="whitespace-pre-line leading-relaxed">
-              Payment is due within 30 days of invoice date. Please transfer to Wire/ACH: Bank of America, Routing #123456789, Account #987654321. Thank you for your business!
-            </p>
+          <!-- Left: Amount in Words, Bank Details, Notes, Terms, Declaration -->
+          <div class="flex-1 space-y-4 text-xs text-neutral-700 w-full max-w-sm">
+            <!-- Amount in Words -->
+            <div id="doc-amount-in-words-wrap" class="hidden p-2.5 rounded border border-neutral-200 bg-neutral-50/80 space-y-0.5">
+              <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 block">
+                {t.document.amountInWordsLabel}
+              </span>
+              <p id="doc-amount-in-words-val" class="font-medium text-neutral-900 leading-snug"></p>
+            </div>
+
+            <!-- Bank & UPI Details -->
+            <div id="doc-bank-box" class="hidden p-3 rounded border border-neutral-200 bg-neutral-50/80 space-y-1">
+              <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 block">
+                {t.document.bankDetailsLabel}
+              </span>
+              <div id="doc-bank-line-name" class="hidden font-medium text-neutral-900"></div>
+              <div id="doc-bank-line-acct" class="hidden font-mono text-[11px]"></div>
+              <div id="doc-bank-line-ifsc" class="hidden font-mono text-[11px]"></div>
+              <div id="doc-bank-line-upi" class="hidden font-mono text-[11px] text-neutral-900 font-medium"></div>
+            </div>
+
+            <!-- Notes -->
+            <div id="doc-notes-box" class="hidden space-y-1">
+              <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 block">
+                {t.document.notesLabel}
+              </span>
+              <p id="doc-notes-val" class="whitespace-pre-line leading-relaxed text-neutral-600"></p>
+            </div>
+
+            <!-- Terms & Conditions -->
+            <div id="doc-terms-box" class="hidden space-y-1">
+              <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 block">
+                {t.document.termsLabel}
+              </span>
+              <p id="doc-terms-val" class="whitespace-pre-line leading-relaxed text-neutral-600"></p>
+            </div>
+
+            <!-- Declaration -->
+            <div id="doc-declaration-box" class="hidden space-y-1">
+              <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-400 block">
+                {t.document.declarationLabel}
+              </span>
+              <p id="doc-declaration-val" class="italic text-[11px] leading-relaxed text-neutral-500"></p>
+            </div>
+
+            <!-- Jurisdiction -->
+            <div id="doc-jurisdiction-box" class="hidden text-[11px] font-medium text-neutral-600 pt-1">
+            </div>
           </div>
 
-          <!-- Numerical Breakdown -->
-          <div class="w-full sm:w-64 space-y-2 text-xs">
+          <!-- Right: Mathematical Totals Breakdown -->
+          <div class="w-full sm:w-64 space-y-1.5 text-xs">
             <div class="flex justify-between py-1 text-neutral-600">
               <span>{t.document.subtotalLabel}</span>
               <span id="doc-subtotal-val" class="font-mono font-medium text-neutral-900">$0.00</span>
             </div>
+
             <div id="doc-discount-row" class="hidden flex justify-between py-1 text-neutral-600">
               <span>{t.document.discountTotalLabel}</span>
               <span id="doc-discount-val" class="font-mono font-medium text-neutral-900">-$0.00</span>
             </div>
-            <div id="doc-tax-row" class="hidden flex justify-between py-1 text-neutral-600">
-              <span>{t.document.taxTotalLabel}</span>
-              <span id="doc-tax-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+
+            <div id="doc-taxable-row" class="hidden flex justify-between py-1 text-neutral-600">
+              <span>{t.document.taxableTotalLabel}</span>
+              <span id="doc-taxable-val" class="font-mono font-medium text-neutral-900">$0.00</span>
             </div>
+
+            <div id="doc-cgst-row" class="hidden flex justify-between py-1 text-neutral-600">
+              <span id="doc-cgst-label">CGST</span>
+              <span id="doc-cgst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+            </div>
+
+            <div id="doc-sgst-row" class="hidden flex justify-between py-1 text-neutral-600">
+              <span id="doc-sgst-label">SGST</span>
+              <span id="doc-sgst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+            </div>
+
+            <div id="doc-igst-row" class="hidden flex justify-between py-1 text-neutral-600">
+              <span id="doc-igst-label">IGST</span>
+              <span id="doc-igst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+            </div>
+
+            <div id="doc-custom-tax-row" class="hidden flex justify-between py-1 text-neutral-600">
+              <span id="doc-custom-tax-label">Tax</span>
+              <span id="doc-custom-tax-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+            </div>
+
+            <div id="doc-round-off-row" class="hidden flex justify-between py-1 text-neutral-600">
+              <span>{t.document.roundOffLabel}</span>
+              <span id="doc-round-off-val" class="font-mono font-medium text-neutral-900">+$0.00</span>
+            </div>
+
             <div class="flex justify-between py-2 border-t-2 border-neutral-900 text-sm sm:text-base font-bold text-neutral-900">
               <span>{t.document.totalLabel}</span>
               <span id="doc-total-val" class="font-mono">$0.00</span>
             </div>
+
+            <div id="doc-reverse-charge-notice" class="hidden pt-1 text-[10px] text-neutral-500 italic text-right">
+              Tax payable under reverse charge
+            </div>
+          </div>
+        </div>
+
+        <!-- Document Signatory & Computer Generated Footer -->
+        <div id="doc-footer-closing" class="pt-8 border-t border-neutral-200 mt-6 flex flex-col sm:flex-row justify-between items-end gap-4 text-[11px]">
+          <div id="doc-computer-gen-notice" class="text-neutral-400 italic text-[10px]">
+            {t.document.computerGeneratedNotice}
+          </div>
+
+          <div id="doc-signatory-box" class="hidden text-right min-w-[160px] space-y-1">
+            <div id="doc-sig-for" class="font-medium text-neutral-800">For Your Business</div>
+            <div class="h-10 flex items-end justify-end">
+              <div class="w-32 border-b border-neutral-300"></div>
+            </div>
+            <div id="doc-sig-name" class="font-bold text-neutral-900"></div>
+            <div id="doc-sig-title" class="text-neutral-500 text-[10px]">Authorized Signatory</div>
           </div>
         </div>
       </div>
@@ -531,7 +1307,6 @@ New York, NY 10013</textarea>
       margin: 10mm 12mm;
     }
 
-    /* Hide website UI chrome when printing */
     header,
     footer,
     nav,
@@ -583,102 +1358,171 @@ New York, NY 10013</textarea>
   }
 </style>
 
-<!-- Client-Side Reactive Invoice Engine -->
+<!-- Client-Side Reactive Document Studio Engine -->
 <script>
   import { SUPPORTED_CURRENCIES } from '../../lib/i18n/invoice';
-  import type { InvoiceLineItem } from '../../lib/i18n/invoice/types';
+  import type {
+    DocumentType,
+    CommercialDocumentState,
+    TaxMode,
+    GstSupplyType,
+  } from '../../lib/i18n/invoice/types';
+  import { formatAmountInWords } from '../../lib/utils/numberToWords';
 
-  interface InvoiceState {
-    sellerName: string;
-    sellerLogo: string;
-    sellerAddress: string;
-    sellerEmail: string;
-    sellerPhone: string;
-    sellerTaxId: string;
-    sellerWebsite: string;
-    customerName: string;
-    customerCompany: string;
-    customerAddress: string;
-    customerEmail: string;
-    customerTaxId: string;
-    invoiceNumber: string;
-    invoiceDate: string;
-    dueDate: string;
-    currency: string;
-    paymentTerms: string;
-    items: InvoiceLineItem[];
-    notes: string;
-  }
+  const STORAGE_KEY = 'profitivas_business_document_v2';
+  const LEGACY_STORAGE_KEY = 'profitivas_invoice_draft_v1';
+  const todayDateStr = new Date().toISOString().split('T')[0];
 
-  const STORAGE_KEY = 'profitivas_invoice_draft_v1';
-
-  function initInvoiceGenerator() {
+  function initBusinessDocumentGenerator() {
     const root = document.getElementById('invoice-generator-root');
     if (!root) return;
 
     const currentLocale = root.getAttribute('data-locale') || 'en';
 
-    // Default Initial State
-    const defaultState: InvoiceState = {
-      sellerName: 'Acme Studio Inc.',
-      sellerLogo: '',
-      sellerAddress: '100 Market St, Suite 400\nSan Francisco, CA 94105',
-      sellerEmail: 'billing@acmestudio.com',
-      sellerPhone: '+1 (555) 019-2834',
-      sellerTaxId: 'US-EIN 12-3456789',
-      sellerWebsite: 'https://acmestudio.com',
-      customerName: 'Sarah Jenkins',
-      customerCompany: 'Venture Brands LLC',
-      customerAddress: '450 Broadway Ave, Floor 8\nNew York, NY 10013',
-      customerEmail: 'accounting@venturebrands.com',
-      customerTaxId: '',
-      invoiceNumber: 'INV-2026-001',
-      invoiceDate: new Date().toISOString().split('T')[0],
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      currency: 'USD',
-      paymentTerms: 'Net 30',
-      items: [
-        {
-          id: 'item-1',
-          description: 'Web Design & Brand Identity Consultation',
-          quantity: 1,
-          unitPrice: 1500,
-          discountPercent: 0,
-          taxPercent: 0,
-        },
-        {
-          id: 'item-2',
-          description: 'Frontend Development & Performance Optimization',
-          quantity: 20,
-          unitPrice: 95,
-          discountPercent: 5,
-          taxPercent: 0,
-        },
-      ],
-      notes: 'Payment is due within 30 days of invoice date. Please transfer to Wire/ACH: Bank of America, Routing #123456789, Account #987654321. Thank you for your business!',
+    // Blank State by default (No hardcoded demo data)
+    function createBlankState(): CommercialDocumentState {
+      const today = todayDateStr;
+      const due = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+      return {
+        version: 2,
+        documentType: 'invoice',
+        customTitle: '',
+        documentNumber: 'DOC-001',
+        documentDate: today,
+        dueDate: due,
+        validUntil: due,
+        currency: currentLocale === 'ja' ? 'JPY' : currentLocale === 'ko' ? 'KRW' : currentLocale === 'pt' ? 'BRL' : 'USD',
+        copyLabel: '',
+        placeOfSupply: '',
+        placeOfSupplyCode: '',
+
+        // Supplier
+        sellerName: '',
+        sellerLogo: '',
+        sellerAddress: '',
+        sellerEmail: '',
+        sellerPhone: '',
+        sellerTaxId: '',
+        sellerPan: '',
+        sellerState: '',
+        sellerStateCode: '',
+        sellerWebsite: '',
+
+        // Customer
+        customerCompany: '',
+        customerName: '',
+        customerAddress: '',
+        customerEmail: '',
+        customerPhone: '',
+        customerTaxId: '',
+        customerPan: '',
+        customerState: '',
+        customerStateCode: '',
+
+        // Shipping
+        shippingEnabled: false,
+        shippingSameAsCustomer: true,
+        shippingName: '',
+        shippingAddress: '',
+        shippingTaxId: '',
+        shippingDestination: '',
+
+        // References
+        refOrderNumber: '',
+        refOrderDate: '',
+        refPoNumber: '',
+        refPoDate: '',
+        refQuoteNumber: '',
+        refQuoteDate: '',
+        refDeliveryNote: '',
+
+        // Tax
+        taxMode: 'none',
+        gstSupplyType: 'cgst_sgst',
+        reverseCharge: false,
+        enableRoundOff: true,
+
+        // Banking
+        bankDetailsEnabled: false,
+        bankName: '',
+        bankAccountName: '',
+        bankAccountNumber: '',
+        bankIfsc: '',
+        bankBranch: '',
+        bankUpiId: '',
+        paymentMethod: '',
+        paymentTerms: '',
+
+        // Legal
+        notes: '',
+        termsAndConditions: '',
+        declaration: '',
+        jurisdiction: '',
+        signatoryEnabled: false,
+        signatoryName: '',
+        signatoryDesignation: '',
+        signatoryImage: '',
+
+        items: [
+          {
+            id: 'item-1',
+            description: '',
+            hsnSac: '',
+            quantity: 1,
+            unit: '',
+            unitPrice: 0,
+            discountPercent: 0,
+            taxPercent: 0,
+          },
+        ],
+      };
+    }
+
+    let isSampleActive = false;
+    let state: CommercialDocumentState = createBlankState();
+
+    // Column visibility toggles in editor
+    const colVisibility = {
+      hsn: false,
+      unit: false,
+      discount: false,
+      tax: false,
     };
 
-    let state: InvoiceState = { ...defaultState };
-
-    // Restore from localStorage if present
+    // Restore from localStorage or legacy key
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
-          state = { ...defaultState, ...parsed };
+          state = { ...createBlankState(), ...parsed };
+        }
+      } else {
+        const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+        if (legacy) {
+          const parsedLegacy = JSON.parse(legacy);
+          if (parsedLegacy && Array.isArray(parsedLegacy.items)) {
+            state = {
+              ...createBlankState(),
+              sellerName: parsedLegacy.sellerName || '',
+              sellerAddress: parsedLegacy.sellerAddress || '',
+              sellerEmail: parsedLegacy.sellerEmail || '',
+              customerCompany: parsedLegacy.customerCompany || '',
+              customerName: parsedLegacy.customerName || '',
+              items: parsedLegacy.items,
+            };
+          }
         }
       }
     } catch {
-      // Ignore storage errors safely
+      // Safe fallback
     }
 
     function saveToStorage() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch {
-        // Safe catch if quota exceeded
-      }
+      } catch {}
     }
 
     function getCurrencyConfig(code: string) {
@@ -714,98 +1558,324 @@ New York, NY 10013</textarea>
       }
     }
 
-    // DOM Elements
+    // Top Controls
+    const docTypeSelect = document.getElementById('doc-type-select') as HTMLSelectElement | null;
+    const docCustomTitleWrap = document.getElementById('doc-custom-title-wrap');
+    const docCustomTitleInput = document.getElementById('doc-custom-title-input') as HTMLInputElement | null;
+    const currencySelect = document.getElementById('invoice-currency') as HTMLSelectElement | null;
+    const copyLabelSelect = document.getElementById('doc-copy-label-select') as HTMLSelectElement | null;
+
+    // Seller Controls
     const sellerNameInput = document.getElementById('seller-name') as HTMLInputElement | null;
     const sellerAddressInput = document.getElementById('seller-address') as HTMLTextAreaElement | null;
     const sellerEmailInput = document.getElementById('seller-email') as HTMLInputElement | null;
     const sellerPhoneInput = document.getElementById('seller-phone') as HTMLInputElement | null;
     const sellerTaxIdInput = document.getElementById('seller-tax-id') as HTMLInputElement | null;
+    const sellerPanInput = document.getElementById('seller-pan') as HTMLInputElement | null;
+    const sellerStateInput = document.getElementById('seller-state') as HTMLInputElement | null;
+    const sellerStateCodeInput = document.getElementById('seller-state-code') as HTMLInputElement | null;
     const sellerWebsiteInput = document.getElementById('seller-website') as HTMLInputElement | null;
     const logoFileInput = document.getElementById('logo-file-input') as HTMLInputElement | null;
     const logoPreviewThumbWrap = document.getElementById('logo-preview-thumb-wrap');
     const logoPreviewThumb = document.getElementById('logo-preview-thumb') as HTMLImageElement | null;
     const btnRemoveLogo = document.getElementById('btn-remove-logo');
 
+    // Customer Controls
     const customerCompanyInput = document.getElementById('customer-company') as HTMLInputElement | null;
     const customerNameInput = document.getElementById('customer-name') as HTMLInputElement | null;
     const customerAddressInput = document.getElementById('customer-address') as HTMLTextAreaElement | null;
-    const customerEmailInput = document.getElementById('customer-email') as HTMLInputElement | null;
     const customerTaxIdInput = document.getElementById('customer-tax-id') as HTMLInputElement | null;
+    const customerPanInput = document.getElementById('customer-pan') as HTMLInputElement | null;
+    const customerEmailInput = document.getElementById('customer-email') as HTMLInputElement | null;
+    const customerPhoneInput = document.getElementById('customer-phone') as HTMLInputElement | null;
+    const customerStateInput = document.getElementById('customer-state') as HTMLInputElement | null;
+    const customerStateCodeInput = document.getElementById('customer-state-code') as HTMLInputElement | null;
 
+    // Shipping Controls
+    const toggleShipTo = document.getElementById('toggle-ship-to') as HTMLInputElement | null;
+    const shippingFieldsWrap = document.getElementById('shipping-fields-wrap');
+    const shipRecipientInput = document.getElementById('ship-recipient-name') as HTMLInputElement | null;
+    const shipAddressInput = document.getElementById('ship-address') as HTMLTextAreaElement | null;
+    const shipDestinationInput = document.getElementById('ship-destination') as HTMLInputElement | null;
+    const shipTaxIdInput = document.getElementById('ship-tax-id') as HTMLInputElement | null;
+
+    // Details Controls
     const invoiceNumberInput = document.getElementById('invoice-number') as HTMLInputElement | null;
     const invoiceDateInput = document.getElementById('invoice-date') as HTMLInputElement | null;
     const invoiceDueDateInput = document.getElementById('invoice-due-date') as HTMLInputElement | null;
-    const invoiceCurrencySelect = document.getElementById('invoice-currency') as HTMLSelectElement | null;
-    const invoicePaymentTermsInput = document.getElementById('invoice-payment-terms') as HTMLInputElement | null;
-    const invoiceNotesInput = document.getElementById('invoice-notes') as HTMLTextAreaElement | null;
+    const dueDateLabel = document.getElementById('due-date-label');
+    const placeOfSupplyInput = document.getElementById('place-of-supply') as HTMLInputElement | null;
+    const placeOfSupplyCodeInput = document.getElementById('place-of-supply-code') as HTMLInputElement | null;
+    const refOrderNumInput = document.getElementById('ref-order-num') as HTMLInputElement | null;
+    const refOrderDateInput = document.getElementById('ref-order-date') as HTMLInputElement | null;
+    const refQuoteNumInput = document.getElementById('ref-quote-num') as HTMLInputElement | null;
+    const refQuoteDateInput = document.getElementById('ref-quote-date') as HTMLInputElement | null;
 
+    // Tax Controls
+    const taxModeRadios = document.querySelectorAll<HTMLInputElement>('input[name="tax-mode"]');
+    const customTaxPanel = document.getElementById('custom-tax-panel');
+    const customTaxRateInput = document.getElementById('custom-tax-rate') as HTMLInputElement | null;
+    const indianGstPanel = document.getElementById('indian-gst-panel');
+    const gstRateInput = document.getElementById('gst-rate-input') as HTMLSelectElement | null;
+    const gstSupplyTypeRadios = document.querySelectorAll<HTMLInputElement>('input[name="gst-supply-type"]');
+    const gstReverseCharge = document.getElementById('gst-reverse-charge') as HTMLInputElement | null;
+    const gstRoundOff = document.getElementById('gst-round-off') as HTMLInputElement | null;
+
+    // Banking Controls
+    const btnToggleBanking = document.getElementById('btn-toggle-banking');
+    const bankingFieldsWrap = document.getElementById('banking-fields-wrap');
+    const bankNameInput = document.getElementById('bank-name') as HTMLInputElement | null;
+    const bankAccountNameInput = document.getElementById('bank-account-name') as HTMLInputElement | null;
+    const bankAccountNumberInput = document.getElementById('bank-account-number') as HTMLInputElement | null;
+    const bankIfscInput = document.getElementById('bank-ifsc') as HTMLInputElement | null;
+    const bankUpiIdInput = document.getElementById('bank-upi-id') as HTMLInputElement | null;
+    const invoicePaymentTermsInput = document.getElementById('invoice-payment-terms') as HTMLInputElement | null;
+
+    // Legal Controls
+    const invoiceNotesInput = document.getElementById('invoice-notes') as HTMLTextAreaElement | null;
+    const invoiceTermsInput = document.getElementById('invoice-terms') as HTMLTextAreaElement | null;
+    const invoiceDeclarationInput = document.getElementById('invoice-declaration') as HTMLTextAreaElement | null;
+    const invoiceJurisdictionInput = document.getElementById('invoice-jurisdiction') as HTMLInputElement | null;
+    const sigNameInput = document.getElementById('sig-name') as HTMLInputElement | null;
+    const sigTitleInput = document.getElementById('sig-title') as HTMLInputElement | null;
+
+    // Items Table & Buttons
     const lineItemsContainer = document.getElementById('line-items-container');
     const btnAddLineItem = document.getElementById('btn-add-line-item');
 
-    // Document Preview DOM Elements
+    // Document Preview DOM
+    const docSampleBadge = document.getElementById('doc-sample-badge');
+    const docCopyLabel = document.getElementById('doc-copy-label');
+    const docTitle = document.getElementById('doc-title');
+    const docInvoiceNumber = document.getElementById('doc-invoice-number');
+    const docNumberLabel = document.getElementById('doc-number-label');
+    const docInvoiceDate = document.getElementById('doc-invoice-date');
+    const docInvoiceDueDate = document.getElementById('doc-invoice-due-date');
+    const docDueDateLabel = document.getElementById('doc-due-date-label');
+    const docDueDateRow = document.getElementById('doc-due-date-row');
+    const docPlaceSupplyRow = document.getElementById('doc-place-supply-row');
+    const docPlaceSupplyVal = document.getElementById('doc-place-supply-val');
+    const docPaymentTermsWrap = document.getElementById('doc-payment-terms-wrap');
+    const docPaymentTerms = document.getElementById('doc-payment-terms');
+
+    // Seller Preview
     const docSellerName = document.getElementById('doc-seller-name');
     const docSellerAddress = document.getElementById('doc-seller-address');
     const docSellerEmail = document.getElementById('doc-seller-email');
     const docSellerPhone = document.getElementById('doc-seller-phone');
     const docSellerTaxId = document.getElementById('doc-seller-tax-id');
+    const docSellerPan = document.getElementById('doc-seller-pan');
+    const docSellerState = document.getElementById('doc-seller-state');
+    const docSellerWebsite = document.getElementById('doc-seller-website');
     const docLogoWrap = document.getElementById('doc-logo-wrap');
     const docLogoImg = document.getElementById('doc-logo-img') as HTMLImageElement | null;
 
+    // Customer Preview
     const docCustomerCompany = document.getElementById('doc-customer-company');
     const docCustomerName = document.getElementById('doc-customer-name');
     const docCustomerAddress = document.getElementById('doc-customer-address');
     const docCustomerEmail = document.getElementById('doc-customer-email');
+    const docCustomerPhone = document.getElementById('doc-customer-phone');
     const docCustomerTaxId = document.getElementById('doc-customer-tax-id');
+    const docCustomerPan = document.getElementById('doc-customer-pan');
+    const docCustomerState = document.getElementById('doc-customer-state');
 
-    const docInvoiceNumber = document.getElementById('doc-invoice-number');
-    const docInvoiceDate = document.getElementById('doc-invoice-date');
-    const docInvoiceDueDate = document.getElementById('doc-invoice-due-date');
-    const docPaymentTerms = document.getElementById('doc-payment-terms');
-    const docPaymentTermsWrap = document.getElementById('doc-payment-terms-wrap');
-    const docNotesText = document.getElementById('doc-notes-text');
+    // Shipping Preview
+    const docShipToCard = document.getElementById('doc-ship-to-card');
+    const docShipName = document.getElementById('doc-ship-name');
+    const docShipAddress = document.getElementById('doc-ship-address');
+    const docShipDestination = document.getElementById('doc-ship-destination');
+    const docShipTaxId = document.getElementById('doc-ship-tax-id');
 
+    // References Preview
+    const docReferencesStrip = document.getElementById('doc-references-strip');
+    const docRefOrder = document.getElementById('doc-ref-order');
+    const docRefOrderVal = document.getElementById('doc-ref-order-val');
+    const docRefOrderDate = document.getElementById('doc-ref-order-date');
+    const docRefOrderDateVal = document.getElementById('doc-ref-order-date-val');
+    const docRefQuote = document.getElementById('doc-ref-quote');
+    const docRefQuoteVal = document.getElementById('doc-ref-quote-val');
+    const docRefQuoteDate = document.getElementById('doc-ref-quote-date');
+    const docRefQuoteDateVal = document.getElementById('doc-ref-quote-date-val');
+
+    // Items Preview
+    const thHsn = document.getElementById('th-hsn');
+    const thUnit = document.getElementById('th-unit');
+    const thDiscount = document.getElementById('th-discount');
+    const thTax = document.getElementById('th-tax');
     const docItemsTbody = document.getElementById('doc-items-tbody');
+
+    // Totals Preview
     const docSubtotalVal = document.getElementById('doc-subtotal-val');
     const docDiscountRow = document.getElementById('doc-discount-row');
     const docDiscountVal = document.getElementById('doc-discount-val');
-    const docTaxRow = document.getElementById('doc-tax-row');
-    const docTaxVal = document.getElementById('doc-tax-val');
+    const docTaxableRow = document.getElementById('doc-taxable-row');
+    const docTaxableVal = document.getElementById('doc-taxable-val');
+    const docCgstRow = document.getElementById('doc-cgst-row');
+    const docCgstLabel = document.getElementById('doc-cgst-label');
+    const docCgstVal = document.getElementById('doc-cgst-val');
+    const docSgstRow = document.getElementById('doc-sgst-row');
+    const docSgstLabel = document.getElementById('doc-sgst-label');
+    const docSgstVal = document.getElementById('doc-sgst-val');
+    const docIgstRow = document.getElementById('doc-igst-row');
+    const docIgstLabel = document.getElementById('doc-igst-label');
+    const docIgstVal = document.getElementById('doc-igst-val');
+    const docCustomTaxRow = document.getElementById('doc-custom-tax-row');
+    const docCustomTaxLabel = document.getElementById('doc-custom-tax-label');
+    const docCustomTaxVal = document.getElementById('doc-custom-tax-val');
+    const docRoundOffRow = document.getElementById('doc-round-off-row');
+    const docRoundOffVal = document.getElementById('doc-round-off-val');
     const docTotalVal = document.getElementById('doc-total-val');
+    const docReverseChargeNotice = document.getElementById('doc-reverse-charge-notice');
 
-    // Sync input values to form fields from restored state
+    // Legal & Signatory Preview
+    const docAmountInWordsWrap = document.getElementById('doc-amount-in-words-wrap');
+    const docAmountInWordsVal = document.getElementById('doc-amount-in-words-val');
+    const docBankBox = document.getElementById('doc-bank-box');
+    const docBankLineName = document.getElementById('doc-bank-line-name');
+    const docBankLineAcct = document.getElementById('doc-bank-line-acct');
+    const docBankLineIfsc = document.getElementById('doc-bank-line-ifsc');
+    const docBankLineUpi = document.getElementById('doc-bank-line-upi');
+    const docNotesBox = document.getElementById('doc-notes-box');
+    const docNotesVal = document.getElementById('doc-notes-val');
+    const docTermsBox = document.getElementById('doc-terms-box');
+    const docTermsVal = document.getElementById('doc-terms-val');
+    const docDeclarationBox = document.getElementById('doc-declaration-box');
+    const docDeclarationVal = document.getElementById('doc-declaration-val');
+    const docJurisdictionBox = document.getElementById('doc-jurisdiction-box');
+    const docSignatoryBox = document.getElementById('doc-signatory-box');
+    const docSigFor = document.getElementById('doc-sig-for');
+    const docSigName = document.getElementById('doc-sig-name');
+    const docSigTitle = document.getElementById('doc-sig-title');
+
+    // Populate Form Fields
     function populateFormFields() {
+      if (docTypeSelect) docTypeSelect.value = state.documentType;
+      if (docCustomTitleInput) docCustomTitleInput.value = state.customTitle || '';
+      if (currencySelect) currencySelect.value = state.currency;
+      if (copyLabelSelect) copyLabelSelect.value = state.copyLabel || '';
+
       if (sellerNameInput) sellerNameInput.value = state.sellerName;
       if (sellerAddressInput) sellerAddressInput.value = state.sellerAddress;
       if (sellerEmailInput) sellerEmailInput.value = state.sellerEmail;
       if (sellerPhoneInput) sellerPhoneInput.value = state.sellerPhone;
       if (sellerTaxIdInput) sellerTaxIdInput.value = state.sellerTaxId;
+      if (sellerPanInput) sellerPanInput.value = state.sellerPan || '';
+      if (sellerStateInput) sellerStateInput.value = state.sellerState || '';
+      if (sellerStateCodeInput) sellerStateCodeInput.value = state.sellerStateCode || '';
       if (sellerWebsiteInput) sellerWebsiteInput.value = state.sellerWebsite;
 
       if (customerCompanyInput) customerCompanyInput.value = state.customerCompany;
       if (customerNameInput) customerNameInput.value = state.customerName;
       if (customerAddressInput) customerAddressInput.value = state.customerAddress;
-      if (customerEmailInput) customerEmailInput.value = state.customerEmail;
       if (customerTaxIdInput) customerTaxIdInput.value = state.customerTaxId;
+      if (customerPanInput) customerPanInput.value = state.customerPan || '';
+      if (customerEmailInput) customerEmailInput.value = state.customerEmail;
+      if (customerPhoneInput) customerPhoneInput.value = state.customerPhone;
+      if (customerStateInput) customerStateInput.value = state.customerState || '';
+      if (customerStateCodeInput) customerStateCodeInput.value = state.customerStateCode || '';
 
-      if (invoiceNumberInput) invoiceNumberInput.value = state.invoiceNumber;
-      if (invoiceDateInput) invoiceDateInput.value = state.invoiceDate;
+      if (toggleShipTo) toggleShipTo.checked = !!state.shippingEnabled;
+      if (shipRecipientInput) shipRecipientInput.value = state.shippingName || '';
+      if (shipAddressInput) shipAddressInput.value = state.shippingAddress || '';
+      if (shipDestinationInput) shipDestinationInput.value = state.shippingDestination || '';
+      if (shipTaxIdInput) shipTaxIdInput.value = state.shippingTaxId || '';
+
+      if (invoiceNumberInput) invoiceNumberInput.value = state.documentNumber;
+      if (invoiceDateInput) invoiceDateInput.value = state.documentDate;
       if (invoiceDueDateInput) invoiceDueDateInput.value = state.dueDate;
-      if (invoiceCurrencySelect) invoiceCurrencySelect.value = state.currency;
-      if (invoicePaymentTermsInput) invoicePaymentTermsInput.value = state.paymentTerms;
-      if (invoiceNotesInput) invoiceNotesInput.value = state.notes;
+      if (placeOfSupplyInput) placeOfSupplyInput.value = state.placeOfSupply || '';
+      if (placeOfSupplyCodeInput) placeOfSupplyCodeInput.value = state.placeOfSupplyCode || '';
+      if (refOrderNumInput) refOrderNumInput.value = state.refOrderNumber || '';
+      if (refOrderDateInput) refOrderDateInput.value = state.refOrderDate || '';
+      if (refQuoteNumInput) refQuoteNumInput.value = state.refQuoteNumber || '';
+      if (refQuoteDateInput) refQuoteDateInput.value = state.refQuoteDate || '';
 
+      taxModeRadios.forEach((r) => {
+        r.checked = r.value === state.taxMode;
+      });
+      gstSupplyTypeRadios.forEach((r) => {
+        r.checked = r.value === state.gstSupplyType;
+      });
+      if (gstReverseCharge) gstReverseCharge.checked = !!state.reverseCharge;
+      if (gstRoundOff) gstRoundOff.checked = state.enableRoundOff !== false;
+
+      if (bankNameInput) bankNameInput.value = state.bankName || '';
+      if (bankAccountNameInput) bankAccountNameInput.value = state.bankAccountName || '';
+      if (bankAccountNumberInput) bankAccountNumberInput.value = state.bankAccountNumber || '';
+      if (bankIfscInput) bankIfscInput.value = state.bankIfsc || '';
+      if (bankUpiIdInput) bankUpiIdInput.value = state.bankUpiId || '';
+      if (invoicePaymentTermsInput) invoicePaymentTermsInput.value = state.paymentTerms || '';
+
+      if (invoiceNotesInput) invoiceNotesInput.value = state.notes || '';
+      if (invoiceTermsInput) invoiceTermsInput.value = state.termsAndConditions || '';
+      if (invoiceDeclarationInput) invoiceDeclarationInput.value = state.declaration || '';
+      if (invoiceJurisdictionInput) invoiceJurisdictionInput.value = state.jurisdiction || '';
+      if (sigNameInput) sigNameInput.value = state.signatoryName || '';
+      if (sigTitleInput) sigTitleInput.value = state.signatoryDesignation || '';
+
+      updateVisibilityToggles();
       updateLogoDisplay();
+    }
+
+    function updateVisibilityToggles() {
+      // Document Custom Title
+      if (docCustomTitleWrap) {
+        docCustomTitleWrap.classList.toggle('hidden', state.documentType !== 'custom');
+      }
+
+      // Seller fields visibility
+      if (state.sellerTaxId) document.getElementById('seller-tax-wrap')?.classList.remove('hidden');
+      if (state.sellerPan) document.getElementById('seller-pan-wrap')?.classList.remove('hidden');
+      if (state.sellerPhone) document.getElementById('seller-phone-wrap')?.classList.remove('hidden');
+      if (state.sellerState || state.sellerStateCode) document.getElementById('seller-state-wrap')?.classList.remove('hidden');
+      if (state.sellerWebsite) document.getElementById('seller-web-wrap')?.classList.remove('hidden');
+
+      // Customer fields visibility
+      if (state.customerAddress) document.getElementById('customer-address-wrap')?.classList.remove('hidden');
+      if (state.customerTaxId) document.getElementById('customer-tax-wrap')?.classList.remove('hidden');
+      if (state.customerPan) document.getElementById('customer-pan-wrap')?.classList.remove('hidden');
+      if (state.customerEmail || state.customerPhone) document.getElementById('customer-contact-wrap')?.classList.remove('hidden');
+      if (state.customerState || state.customerStateCode) document.getElementById('customer-state-wrap')?.classList.remove('hidden');
+
+      // Shipping
+      if (shippingFieldsWrap) {
+        shippingFieldsWrap.classList.toggle('hidden', !state.shippingEnabled);
+      }
+
+      // Details
+      if (state.placeOfSupply || state.placeOfSupplyCode) document.getElementById('place-of-supply-wrap')?.classList.remove('hidden');
+      if (state.refOrderNumber || state.refOrderDate) document.getElementById('order-ref-wrap')?.classList.remove('hidden');
+      if (state.refQuoteNumber || state.refQuoteDate) document.getElementById('quote-ref-wrap')?.classList.remove('hidden');
+
+      // Tax Panels
+      if (customTaxPanel) customTaxPanel.classList.toggle('hidden', state.taxMode !== 'custom');
+      if (indianGstPanel) indianGstPanel.classList.toggle('hidden', state.taxMode !== 'gst');
+
+      // Banking & Legal
+      if (state.bankDetailsEnabled || state.bankName || state.bankAccountNumber || state.bankUpiId) {
+        bankingFieldsWrap?.classList.remove('hidden');
+      }
+      if (state.notes) document.getElementById('notes-wrap')?.classList.remove('hidden');
+      if (state.termsAndConditions) document.getElementById('terms-wrap')?.classList.remove('hidden');
+      if (state.declaration) document.getElementById('declaration-wrap')?.classList.remove('hidden');
+      if (state.jurisdiction) document.getElementById('jurisdiction-wrap')?.classList.remove('hidden');
+      if (state.signatoryEnabled || state.signatoryName || state.signatoryDesignation) {
+        document.getElementById('signatory-wrap')?.classList.remove('hidden');
+      }
     }
 
     function updateLogoDisplay() {
       if (state.sellerLogo) {
         if (logoPreviewThumbWrap) logoPreviewThumbWrap.classList.remove('hidden');
         if (logoPreviewThumb) logoPreviewThumb.src = state.sellerLogo;
+        if (btnRemoveLogo) btnRemoveLogo.classList.remove('hidden');
         if (docLogoWrap) docLogoWrap.classList.remove('hidden');
         if (docLogoImg) docLogoImg.src = state.sellerLogo;
       } else {
         if (logoPreviewThumbWrap) logoPreviewThumbWrap.classList.add('hidden');
         if (logoPreviewThumb) logoPreviewThumb.src = '';
+        if (btnRemoveLogo) btnRemoveLogo.classList.add('hidden');
         if (docLogoWrap) docLogoWrap.classList.add('hidden');
         if (docLogoImg) docLogoImg.src = '';
       }
@@ -820,6 +1890,11 @@ New York, NY 10013</textarea>
         const row = document.createElement('div');
         row.className = 'p-3.5 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] space-y-3';
         row.setAttribute('data-id', item.id);
+
+        const hsnVal = item.hsnSac || '';
+        const unitVal = item.unit || '';
+        const discVal = item.discountPercent != null ? item.discountPercent : 0;
+        const taxVal = item.taxPercent != null ? item.taxPercent : 0;
 
         row.innerHTML = `
           <div class="flex items-center justify-between gap-2">
@@ -836,12 +1911,12 @@ New York, NY 10013</textarea>
             <input
               type="text"
               class="item-desc-input w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)]"
-              placeholder="Item description"
+              placeholder="Description of item or service"
               value="${item.description.replace(/"/g, '&quot;')}"
               data-id="${item.id}"
             />
           </div>
-          <div class="grid grid-cols-4 gap-2 text-xs">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             <div>
               <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Qty</label>
               <input
@@ -854,7 +1929,7 @@ New York, NY 10013</textarea>
               />
             </div>
             <div>
-              <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Price</label>
+              <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Rate</label>
               <input
                 type="number"
                 min="0"
@@ -864,7 +1939,27 @@ New York, NY 10013</textarea>
                 data-id="${item.id}"
               />
             </div>
-            <div>
+            <div class="${colVisibility.hsn ? '' : 'hidden'}">
+              <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">HSN/SAC</label>
+              <input
+                type="text"
+                class="item-hsn-input w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2 py-1 text-xs text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="e.g. 8501"
+                value="${hsnVal.replace(/"/g, '&quot;')}"
+                data-id="${item.id}"
+              />
+            </div>
+            <div class="${colVisibility.unit ? '' : 'hidden'}">
+              <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Unit</label>
+              <input
+                type="text"
+                class="item-unit-input w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2 py-1 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+                placeholder="pcs / hrs / nos"
+                value="${unitVal.replace(/"/g, '&quot;')}"
+                data-id="${item.id}"
+              />
+            </div>
+            <div class="${colVisibility.discount ? '' : 'hidden'}">
               <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Disc %</label>
               <input
                 type="number"
@@ -872,11 +1967,11 @@ New York, NY 10013</textarea>
                 max="100"
                 step="any"
                 class="item-disc-input w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2 py-1 text-xs text-[var(--text-primary)] font-mono tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
-                value="${item.discountPercent}"
+                value="${discVal}"
                 data-id="${item.id}"
               />
             </div>
-            <div>
+            <div class="${colVisibility.tax ? '' : 'hidden'}">
               <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Tax %</label>
               <input
                 type="number"
@@ -884,7 +1979,7 @@ New York, NY 10013</textarea>
                 max="100"
                 step="any"
                 class="item-tax-input w-full rounded-md border border-[var(--border)] bg-[var(--input-background)] px-2 py-1 text-xs text-[var(--text-primary)] font-mono tabular-nums focus:outline-none focus:border-[var(--text-primary)]"
-                value="${item.taxPercent}"
+                value="${taxVal}"
                 data-id="${item.id}"
               />
             </div>
@@ -894,7 +1989,7 @@ New York, NY 10013</textarea>
         lineItemsContainer.appendChild(row);
       });
 
-      // Bind row listeners
+      // Bind input handlers
       lineItemsContainer.querySelectorAll('.item-desc-input').forEach((el) => {
         el.addEventListener('input', (e) => {
           const target = e.target as HTMLInputElement;
@@ -902,6 +1997,7 @@ New York, NY 10013</textarea>
           const it = state.items.find((x) => x.id === id);
           if (it) {
             it.description = target.value;
+            isSampleActive = false;
             updatePreview();
             saveToStorage();
           }
@@ -916,6 +2012,7 @@ New York, NY 10013</textarea>
           if (it) {
             const parsed = parseFloat(target.value);
             it.quantity = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+            isSampleActive = false;
             updatePreview();
             saveToStorage();
           }
@@ -930,6 +2027,35 @@ New York, NY 10013</textarea>
           if (it) {
             const parsed = parseFloat(target.value);
             it.unitPrice = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+            isSampleActive = false;
+            updatePreview();
+            saveToStorage();
+          }
+        });
+      });
+
+      lineItemsContainer.querySelectorAll('.item-hsn-input').forEach((el) => {
+        el.addEventListener('input', (e) => {
+          const target = e.target as HTMLInputElement;
+          const id = target.getAttribute('data-id');
+          const it = state.items.find((x) => x.id === id);
+          if (it) {
+            it.hsnSac = target.value;
+            isSampleActive = false;
+            updatePreview();
+            saveToStorage();
+          }
+        });
+      });
+
+      lineItemsContainer.querySelectorAll('.item-unit-input').forEach((el) => {
+        el.addEventListener('input', (e) => {
+          const target = e.target as HTMLInputElement;
+          const id = target.getAttribute('data-id');
+          const it = state.items.find((x) => x.id === id);
+          if (it) {
+            it.unit = target.value;
+            isSampleActive = false;
             updatePreview();
             saveToStorage();
           }
@@ -944,6 +2070,7 @@ New York, NY 10013</textarea>
           if (it) {
             const parsed = parseFloat(target.value);
             it.discountPercent = isNaN(parsed) || parsed < 0 ? 0 : Math.min(100, parsed);
+            isSampleActive = false;
             updatePreview();
             saveToStorage();
           }
@@ -958,6 +2085,7 @@ New York, NY 10013</textarea>
           if (it) {
             const parsed = parseFloat(target.value);
             it.taxPercent = isNaN(parsed) || parsed < 0 ? 0 : Math.min(100, parsed);
+            isSampleActive = false;
             updatePreview();
             saveToStorage();
           }
@@ -977,79 +2105,305 @@ New York, NY 10013</textarea>
       });
     }
 
-    // Update Live Document Preview & Mathematical Totals
+    // Get Document Title
+    function getDisplayTitle(docType: DocumentType): string {
+      if (docType === 'custom' && state.customTitle?.trim()) {
+        return state.customTitle.trim().toUpperCase();
+      }
+      const titleMap: Record<DocumentType, string> = {
+        invoice: 'TAX INVOICE',
+        quotation: 'QUOTATION',
+        proforma: 'PROFORMA INVOICE',
+        estimate: 'COST ESTIMATE',
+        purchase_order: 'PURCHASE ORDER',
+        receipt: 'PAYMENT RECEIPT',
+        credit_note: 'CREDIT NOTE',
+        debit_note: 'DEBIT NOTE',
+        delivery_challan: 'DELIVERY CHALLAN',
+        custom: 'COMMERCIAL DOCUMENT',
+      };
+      return titleMap[docType] || 'INVOICE';
+    }
+
+    // Update Live Document Preview (Zero Visual Footprint)
     function updatePreview() {
-      // 1. Text Fields Sync
-      if (docSellerName) docSellerName.textContent = state.sellerName || 'Your Business Name';
-      if (docSellerAddress) docSellerAddress.textContent = state.sellerAddress || '';
-      if (docSellerEmail) docSellerEmail.textContent = state.sellerEmail || '';
-      if (docSellerPhone) docSellerPhone.textContent = state.sellerPhone || '';
+      // 1. Watermark Sample Badge
+      if (docSampleBadge) {
+        docSampleBadge.classList.toggle('hidden', !isSampleActive);
+      }
+
+      // Copy Label
+      if (docCopyLabel) {
+        if (state.copyLabel?.trim()) {
+          docCopyLabel.textContent = state.copyLabel.trim();
+          docCopyLabel.classList.remove('hidden');
+        } else {
+          docCopyLabel.textContent = '';
+          docCopyLabel.classList.add('hidden');
+        }
+      }
+
+      // 2. Document Title & Contextual Labels
+      const displayTitle = getDisplayTitle(state.documentType);
+      if (docTitle) docTitle.textContent = displayTitle;
+
+      const isQuoteOrEstimate = state.documentType === 'quotation' || state.documentType === 'estimate';
+      const isReceipt = state.documentType === 'receipt';
+
+      if (docNumberLabel) {
+        docNumberLabel.textContent = isReceipt ? 'Receipt No.:' : isQuoteOrEstimate ? 'Quote No.:' : 'Doc No.:';
+      }
+      if (docInvoiceNumber) {
+        docInvoiceNumber.textContent = state.documentNumber || 'DOC-001';
+      }
+      if (docInvoiceDate) {
+        docInvoiceDate.textContent = state.documentDate || todayDateStr;
+      }
+
+      // Due Date vs Valid Until
+      if (docDueDateLabel) {
+        docDueDateLabel.textContent = isQuoteOrEstimate ? 'Valid Until:' : 'Due Date:';
+      }
+      if (dueDateLabel) {
+        dueDateLabel.textContent = isQuoteOrEstimate ? 'Valid Until' : 'Due Date';
+      }
+
+      if (docDueDateRow && docInvoiceDueDate) {
+        if (isReceipt) {
+          docDueDateRow.classList.add('hidden');
+        } else {
+          docDueDateRow.classList.remove('hidden');
+          docInvoiceDueDate.textContent = state.dueDate || '';
+        }
+      }
+
+      // Place of Supply
+      if (docPlaceSupplyRow && docPlaceSupplyVal) {
+        if (state.placeOfSupply?.trim()) {
+          const codePart = state.placeOfSupplyCode?.trim() ? ` (${state.placeOfSupplyCode.trim()})` : '';
+          docPlaceSupplyVal.textContent = `${state.placeOfSupply.trim()}${codePart}`;
+          docPlaceSupplyRow.classList.remove('hidden');
+        } else {
+          docPlaceSupplyRow.classList.add('hidden');
+        }
+      }
+
+      // Payment terms
+      if (docPaymentTermsWrap && docPaymentTerms) {
+        if (state.paymentTerms?.trim()) {
+          docPaymentTerms.textContent = state.paymentTerms.trim();
+          docPaymentTermsWrap.classList.remove('hidden');
+        } else {
+          docPaymentTermsWrap.classList.add('hidden');
+        }
+      }
+
+      // 3. Supplier Details (Zero footprint on empty)
+      if (docSellerName) {
+        docSellerName.textContent = state.sellerName?.trim() || '';
+        docSellerName.classList.toggle('hidden', !state.sellerName?.trim());
+      }
+      if (docSellerAddress) {
+        docSellerAddress.textContent = state.sellerAddress?.trim() || '';
+        docSellerAddress.classList.toggle('hidden', !state.sellerAddress?.trim());
+      }
+      if (docSellerEmail) {
+        docSellerEmail.textContent = state.sellerEmail?.trim() || '';
+        docSellerEmail.classList.toggle('hidden', !state.sellerEmail?.trim());
+      }
+      if (docSellerPhone) {
+        docSellerPhone.textContent = state.sellerPhone?.trim() ? `Ph: ${state.sellerPhone.trim()}` : '';
+        docSellerPhone.classList.toggle('hidden', !state.sellerPhone?.trim());
+      }
       if (docSellerTaxId) {
-        docSellerTaxId.textContent = state.sellerTaxId ? `Tax ID: ${state.sellerTaxId}` : '';
-        docSellerTaxId.style.display = state.sellerTaxId ? 'block' : 'none';
+        docSellerTaxId.textContent = state.sellerTaxId?.trim() ? `GSTIN/Tax ID: ${state.sellerTaxId.trim()}` : '';
+        docSellerTaxId.classList.toggle('hidden', !state.sellerTaxId?.trim());
+      }
+      if (docSellerPan) {
+        docSellerPan.textContent = state.sellerPan?.trim() ? `PAN: ${state.sellerPan.trim()}` : '';
+        docSellerPan.classList.toggle('hidden', !state.sellerPan?.trim());
+      }
+      if (docSellerState) {
+        const sc = state.sellerStateCode?.trim() ? ` (Code: ${state.sellerStateCode.trim()})` : '';
+        docSellerState.textContent = state.sellerState?.trim() ? `State: ${state.sellerState.trim()}${sc}` : '';
+        docSellerState.classList.toggle('hidden', !state.sellerState?.trim());
+      }
+      if (docSellerWebsite) {
+        docSellerWebsite.textContent = state.sellerWebsite?.trim() || '';
+        docSellerWebsite.classList.toggle('hidden', !state.sellerWebsite?.trim());
       }
 
-      if (docCustomerCompany) docCustomerCompany.textContent = state.customerCompany || 'Customer Name / Company';
+      // 4. Customer / Bill To (Zero footprint)
+      if (docCustomerCompany) {
+        docCustomerCompany.textContent = state.customerCompany?.trim() || '';
+        docCustomerCompany.classList.toggle('hidden', !state.customerCompany?.trim());
+      }
       if (docCustomerName) {
-        docCustomerName.textContent = state.customerName ? `Attn: ${state.customerName}` : '';
-        docCustomerName.style.display = state.customerName ? 'block' : 'none';
+        docCustomerName.textContent = state.customerName?.trim() ? `Attn: ${state.customerName.trim()}` : '';
+        docCustomerName.classList.toggle('hidden', !state.customerName?.trim());
       }
-      if (docCustomerAddress) docCustomerAddress.textContent = state.customerAddress || '';
-      if (docCustomerEmail) docCustomerEmail.textContent = state.customerEmail || '';
+      if (docCustomerAddress) {
+        docCustomerAddress.textContent = state.customerAddress?.trim() || '';
+        docCustomerAddress.classList.toggle('hidden', !state.customerAddress?.trim());
+      }
+      if (docCustomerEmail) {
+        docCustomerEmail.textContent = state.customerEmail?.trim() || '';
+        docCustomerEmail.classList.toggle('hidden', !state.customerEmail?.trim());
+      }
+      if (docCustomerPhone) {
+        docCustomerPhone.textContent = state.customerPhone?.trim() ? `Ph: ${state.customerPhone.trim()}` : '';
+        docCustomerPhone.classList.toggle('hidden', !state.customerPhone?.trim());
+      }
       if (docCustomerTaxId) {
-        docCustomerTaxId.textContent = state.customerTaxId ? `Tax ID: ${state.customerTaxId}` : '';
-        docCustomerTaxId.style.display = state.customerTaxId ? 'block' : 'none';
+        docCustomerTaxId.textContent = state.customerTaxId?.trim() ? `GSTIN/Tax ID: ${state.customerTaxId.trim()}` : '';
+        docCustomerTaxId.classList.toggle('hidden', !state.customerTaxId?.trim());
+      }
+      if (docCustomerPan) {
+        docCustomerPan.textContent = state.customerPan?.trim() ? `PAN: ${state.customerPan.trim()}` : '';
+        docCustomerPan.classList.toggle('hidden', !state.customerPan?.trim());
+      }
+      if (docCustomerState) {
+        const csc = state.customerStateCode?.trim() ? ` (Code: ${state.customerStateCode.trim()})` : '';
+        docCustomerState.textContent = state.customerState?.trim() ? `State: ${state.customerState.trim()}${csc}` : '';
+        docCustomerState.classList.toggle('hidden', !state.customerState?.trim());
       }
 
-      if (docInvoiceNumber) docInvoiceNumber.textContent = state.invoiceNumber || 'INV-001';
-      if (docInvoiceDate) docInvoiceDate.textContent = state.invoiceDate || '';
-      if (docInvoiceDueDate) docInvoiceDueDate.textContent = state.dueDate || '';
-      if (docPaymentTerms) docPaymentTerms.textContent = state.paymentTerms || '';
-      if (docPaymentTermsWrap) {
-        docPaymentTermsWrap.style.display = state.paymentTerms ? 'flex' : 'none';
+      // 5. Shipping / Consignee Card (Only if enabled and populated)
+      if (docShipToCard) {
+        const hasShipping =
+          state.shippingEnabled &&
+          (state.shippingName?.trim() || state.shippingAddress?.trim() || state.shippingDestination?.trim());
+
+        if (hasShipping) {
+          docShipToCard.classList.remove('hidden');
+          if (docShipName) {
+            docShipName.textContent = state.shippingName?.trim() || '';
+            docShipName.classList.toggle('hidden', !state.shippingName?.trim());
+          }
+          if (docShipAddress) {
+            docShipAddress.textContent = state.shippingAddress?.trim() || '';
+            docShipAddress.classList.toggle('hidden', !state.shippingAddress?.trim());
+          }
+          if (docShipDestination) {
+            docShipDestination.textContent = state.shippingDestination?.trim() ? `Destination: ${state.shippingDestination.trim()}` : '';
+            docShipDestination.classList.toggle('hidden', !state.shippingDestination?.trim());
+          }
+          if (docShipTaxId) {
+            docShipTaxId.textContent = state.shippingTaxId?.trim() ? `GSTIN: ${state.shippingTaxId.trim()}` : '';
+            docShipTaxId.classList.toggle('hidden', !state.shippingTaxId?.trim());
+          }
+        } else {
+          docShipToCard.classList.add('hidden');
+        }
       }
 
-      if (docNotesText) docNotesText.textContent = state.notes || '';
+      // 6. Order / PO References Strip
+      let hasReferences = false;
+      if (state.refOrderNumber?.trim()) {
+        hasReferences = true;
+        docRefOrder?.classList.remove('hidden');
+        if (docRefOrderVal) docRefOrderVal.textContent = state.refOrderNumber.trim();
+      } else {
+        docRefOrder?.classList.add('hidden');
+      }
 
-      // 2. Line Items Calculation and Table Render
+      if (state.refOrderDate?.trim()) {
+        hasReferences = true;
+        docRefOrderDate?.classList.remove('hidden');
+        if (docRefOrderDateVal) docRefOrderDateVal.textContent = state.refOrderDate.trim();
+      } else {
+        docRefOrderDate?.classList.add('hidden');
+      }
+
+      if (state.refQuoteNumber?.trim()) {
+        hasReferences = true;
+        docRefQuote?.classList.remove('hidden');
+        if (docRefQuoteVal) docRefQuoteVal.textContent = state.refQuoteNumber.trim();
+      } else {
+        docRefQuote?.classList.add('hidden');
+      }
+
+      if (state.refQuoteDate?.trim()) {
+        hasReferences = true;
+        docRefQuoteDate?.classList.remove('hidden');
+        if (docRefQuoteDateVal) docRefQuoteDateVal.textContent = state.refQuoteDate.trim();
+      } else {
+        docRefQuoteDate?.classList.add('hidden');
+      }
+
+      if (docReferencesStrip) {
+        docReferencesStrip.classList.toggle('hidden', !hasReferences);
+      }
+
+      // 7. Dynamic Table Columns & Calculations
       if (!docItemsTbody) return;
       docItemsTbody.innerHTML = '';
 
+      // Check if any row uses HSN, Unit, Discount, or Tax
+      const hasAnyHsn = state.items.some((it) => !!it.hsnSac?.trim());
+      const hasAnyUnit = state.items.some((it) => !!it.unit?.trim());
+      const hasAnyDiscount = state.items.some((it) => it.discountPercent != null && it.discountPercent > 0);
+      const isTaxActive = state.taxMode !== 'none';
+
+      // Toggle Header Columns
+      if (thHsn) thHsn.classList.toggle('hidden', !hasAnyHsn);
+      if (thUnit) thUnit.classList.toggle('hidden', !hasAnyUnit);
+      if (thDiscount) thDiscount.classList.toggle('hidden', !hasAnyDiscount);
+      if (thTax) thTax.classList.toggle('hidden', !isTaxActive);
+
       let subtotalSum = 0;
       let discountSum = 0;
+      let taxableSum = 0;
       let taxSum = 0;
 
-      state.items.forEach((item) => {
+      // Rate for Indian GST
+      const globalGstRate = parseFloat(gstRateInput?.value || '18') || 18;
+      const customTaxRate = parseFloat(customTaxRateInput?.value || '18') || 18;
+
+      state.items.forEach((item, idx) => {
         const qty = Number.isFinite(item.quantity) && item.quantity >= 0 ? item.quantity : 0;
         const price = Number.isFinite(item.unitPrice) && item.unitPrice >= 0 ? item.unitPrice : 0;
-        const discPct = Number.isFinite(item.discountPercent) && item.discountPercent >= 0 ? item.discountPercent : 0;
-        const taxPct = Number.isFinite(item.taxPercent) && item.taxPercent >= 0 ? item.taxPercent : 0;
+        const discPct = item.discountPercent != null && Number.isFinite(item.discountPercent) && item.discountPercent >= 0 ? item.discountPercent : 0;
+
+        let effectiveTaxPct = 0;
+        if (state.taxMode === 'gst') {
+          effectiveTaxPct = item.taxPercent && item.taxPercent > 0 ? item.taxPercent : globalGstRate;
+        } else if (state.taxMode === 'custom') {
+          effectiveTaxPct = item.taxPercent && item.taxPercent > 0 ? item.taxPercent : customTaxRate;
+        }
 
         const rawLineSubtotal = qty * price;
         const lineDiscount = rawLineSubtotal * (discPct / 100);
-        const lineNet = rawLineSubtotal - lineDiscount;
-        const lineTax = lineNet * (taxPct / 100);
-        const lineAmount = lineNet + lineTax;
+        const lineTaxable = Math.max(0, rawLineSubtotal - lineDiscount);
+        const lineTax = isTaxActive ? lineTaxable * (effectiveTaxPct / 100) : 0;
+        const lineTotal = lineTaxable + lineTax;
 
         subtotalSum += rawLineSubtotal;
         discountSum += lineDiscount;
+        taxableSum += lineTaxable;
         taxSum += lineTax;
 
         const tr = document.createElement('tr');
         tr.className = 'text-neutral-800';
+
         tr.innerHTML = `
-          <td class="py-3 pr-4 font-normal">${item.description || '—'}</td>
-          <td class="py-3 px-2 text-right font-mono tabular-nums">${qty}</td>
-          <td class="py-3 px-2 text-right font-mono tabular-nums">${formatMoney(price, state.currency)}</td>
-          <td class="py-3 px-2 text-right font-mono tabular-nums text-neutral-500">${discPct > 0 ? `${discPct}%` : '—'}</td>
-          <td class="py-3 px-2 text-right font-mono tabular-nums text-neutral-500">${taxPct > 0 ? `${taxPct}%` : '—'}</td>
-          <td class="py-3 pl-4 text-right font-mono font-medium text-neutral-900 tabular-nums">${formatMoney(lineAmount, state.currency)}</td>
+          <td class="py-2.5 pr-2 font-mono text-[11px] text-neutral-400 align-top">${idx + 1}</td>
+          <td class="py-2.5 px-2 font-normal text-neutral-900 align-top">
+            ${item.description ? item.description.replace(/\n/g, '<br/>') : '<span class="text-neutral-300">—</span>'}
+          </td>
+          ${hasAnyHsn ? `<td class="py-2.5 px-2 text-right font-mono text-neutral-500 align-top">${item.hsnSac || '—'}</td>` : ''}
+          ${hasAnyUnit ? `<td class="py-2.5 px-2 text-right text-neutral-500 align-top">${item.unit || '—'}</td>` : ''}
+          <td class="py-2.5 px-2 text-right font-mono tabular-nums text-neutral-900 align-top">${qty}</td>
+          <td class="py-2.5 px-2 text-right font-mono tabular-nums text-neutral-900 align-top">${formatMoney(price, state.currency)}</td>
+          ${hasAnyDiscount ? `<td class="py-2.5 px-2 text-right font-mono tabular-nums text-neutral-500 align-top">${discPct > 0 ? `${discPct}%` : '—'}</td>` : ''}
+          ${isTaxActive ? `<td class="py-2.5 px-2 text-right font-mono tabular-nums text-neutral-500 align-top">${effectiveTaxPct > 0 ? `${effectiveTaxPct}%` : '—'}</td>` : ''}
+          <td class="py-2.5 pl-2 text-right font-mono font-medium text-neutral-900 tabular-nums align-top">${formatMoney(lineTotal, state.currency)}</td>
         `;
+
         docItemsTbody.appendChild(tr);
       });
 
-      const finalTotal = Math.max(0, subtotalSum - discountSum + taxSum);
-
+      // 8. Totals Breakdown
       if (docSubtotalVal) docSubtotalVal.textContent = formatMoney(subtotalSum, state.currency);
 
       if (docDiscountRow && docDiscountVal) {
@@ -1061,31 +2415,217 @@ New York, NY 10013</textarea>
         }
       }
 
-      if (docTaxRow && docTaxVal) {
-        if (taxSum > 0) {
-          docTaxRow.classList.remove('hidden');
-          docTaxVal.textContent = formatMoney(taxSum, state.currency);
+      if (docTaxableRow && docTaxableVal) {
+        if (isTaxActive && discountSum > 0) {
+          docTaxableRow.classList.remove('hidden');
+          docTaxableVal.textContent = formatMoney(taxableSum, state.currency);
         } else {
-          docTaxRow.classList.add('hidden');
+          docTaxableRow.classList.add('hidden');
         }
       }
 
+      // Tax Splits (CGST + SGST vs IGST vs Custom)
+      if (docCgstRow) docCgstRow.classList.add('hidden');
+      if (docSgstRow) docSgstRow.classList.add('hidden');
+      if (docIgstRow) docIgstRow.classList.add('hidden');
+      if (docCustomTaxRow) docCustomTaxRow.classList.add('hidden');
+
+      if (state.taxMode === 'gst') {
+        const isIntra = state.gstSupplyType === 'cgst_sgst';
+        const rateLabel = globalGstRate;
+
+        if (isIntra) {
+          const halfRate = rateLabel / 2;
+          const halfTax = taxSum / 2;
+          if (docCgstRow && docCgstVal && docCgstLabel) {
+            docCgstLabel.textContent = `CGST (${halfRate}%)`;
+            docCgstVal.textContent = formatMoney(halfTax, state.currency);
+            docCgstRow.classList.remove('hidden');
+          }
+          if (docSgstRow && docSgstVal && docSgstLabel) {
+            docSgstLabel.textContent = `SGST (${halfRate}%)`;
+            docSgstVal.textContent = formatMoney(halfTax, state.currency);
+            docSgstRow.classList.remove('hidden');
+          }
+        } else {
+          if (docIgstRow && docIgstVal && docIgstLabel) {
+            docIgstLabel.textContent = `IGST (${rateLabel}%)`;
+            docIgstVal.textContent = formatMoney(taxSum, state.currency);
+            docIgstRow.classList.remove('hidden');
+          }
+        }
+      } else if (state.taxMode === 'custom') {
+        if (docCustomTaxRow && docCustomTaxVal && docCustomTaxLabel) {
+          docCustomTaxLabel.textContent = `Tax (${customTaxRate}%)`;
+          docCustomTaxVal.textContent = formatMoney(taxSum, state.currency);
+          docCustomTaxRow.classList.remove('hidden');
+        }
+      }
+
+      let rawTotal = taxableSum + taxSum;
+      let roundOffDiff = 0;
+
+      if (state.enableRoundOff) {
+        const roundedTotal = Math.round(rawTotal);
+        roundOffDiff = roundedTotal - rawTotal;
+        rawTotal = roundedTotal;
+      }
+
+      if (docRoundOffRow && docRoundOffVal) {
+        if (state.enableRoundOff && Math.abs(roundOffDiff) >= 0.005) {
+          docRoundOffRow.classList.remove('hidden');
+          docRoundOffVal.textContent = `${roundOffDiff >= 0 ? '+' : ''}${formatMoney(roundOffDiff, state.currency)}`;
+        } else {
+          docRoundOffRow.classList.add('hidden');
+        }
+      }
+
+      const finalTotal = Math.max(0, rawTotal);
       if (docTotalVal) docTotalVal.textContent = formatMoney(finalTotal, state.currency);
+
+      if (docReverseChargeNotice) {
+        docReverseChargeNotice.classList.toggle('hidden', !state.reverseCharge);
+      }
+
+      // 9. Amount in Words
+      if (docAmountInWordsWrap && docAmountInWordsVal) {
+        if (finalTotal > 0) {
+          const inWords = formatAmountInWords(finalTotal, state.currency);
+          docAmountInWordsVal.textContent = inWords;
+          docAmountInWordsWrap.classList.remove('hidden');
+        } else {
+          docAmountInWordsWrap.classList.add('hidden');
+        }
+      }
+
+      // 10. Bank Details (Only if populated)
+      if (docBankBox) {
+        const hasBank =
+          state.bankDetailsEnabled &&
+          (state.bankName?.trim() || state.bankAccountNumber?.trim() || state.bankUpiId?.trim());
+
+        if (hasBank) {
+          docBankBox.classList.remove('hidden');
+          if (docBankLineName) {
+            docBankLineName.textContent = state.bankName ? `Bank: ${state.bankName.trim()}` : '';
+            docBankLineName.classList.toggle('hidden', !state.bankName?.trim());
+          }
+          if (docBankLineAcct) {
+            docBankLineAcct.textContent = state.bankAccountNumber ? `A/C: ${state.bankAccountNumber.trim()}` : '';
+            docBankLineAcct.classList.toggle('hidden', !state.bankAccountNumber?.trim());
+          }
+          if (docBankLineIfsc) {
+            docBankLineIfsc.textContent = state.bankIfsc ? `IFSC/Routing: ${state.bankIfsc.trim()}` : '';
+            docBankLineIfsc.classList.toggle('hidden', !state.bankIfsc?.trim());
+          }
+          if (docBankLineUpi) {
+            docBankLineUpi.textContent = state.bankUpiId ? `UPI: ${state.bankUpiId.trim()}` : '';
+            docBankLineUpi.classList.toggle('hidden', !state.bankUpiId?.trim());
+          }
+        } else {
+          docBankBox.classList.add('hidden');
+        }
+      }
+
+      // 11. Notes, Terms, Declaration, Jurisdiction
+      if (docNotesBox && docNotesVal) {
+        if (state.notes?.trim()) {
+          docNotesVal.textContent = state.notes.trim();
+          docNotesBox.classList.remove('hidden');
+        } else {
+          docNotesBox.classList.add('hidden');
+        }
+      }
+
+      if (docTermsBox && docTermsVal) {
+        if (state.termsAndConditions?.trim()) {
+          docTermsVal.textContent = state.termsAndConditions.trim();
+          docTermsBox.classList.remove('hidden');
+        } else {
+          docTermsBox.classList.add('hidden');
+        }
+      }
+
+      if (docDeclarationBox && docDeclarationVal) {
+        if (state.declaration?.trim()) {
+          docDeclarationVal.textContent = state.declaration.trim();
+          docDeclarationBox.classList.remove('hidden');
+        } else {
+          docDeclarationBox.classList.add('hidden');
+        }
+      }
+
+      if (docJurisdictionBox) {
+        if (state.jurisdiction?.trim()) {
+          docJurisdictionBox.textContent = state.jurisdiction.trim();
+          docJurisdictionBox.classList.remove('hidden');
+        } else {
+          docJurisdictionBox.classList.add('hidden');
+        }
+      }
+
+      // 12. Signatory Box (Zero footprint if empty)
+      if (docSignatoryBox) {
+        const hasSig = state.signatoryEnabled || state.signatoryName?.trim() || state.signatoryDesignation?.trim();
+        if (hasSig) {
+          docSignatoryBox.classList.remove('hidden');
+          if (docSigFor) {
+            docSigFor.textContent = state.sellerName ? `For ${state.sellerName.trim()}` : 'Authorized Signatory';
+          }
+          if (docSigName) {
+            docSigName.textContent = state.signatoryName?.trim() || '';
+          }
+          if (docSigTitle) {
+            docSigTitle.textContent = state.signatoryDesignation?.trim() || 'Authorized Signatory';
+          }
+        } else {
+          docSignatoryBox.classList.add('hidden');
+        }
+      }
     }
 
     // Bind Top-Level Field Listeners
+    docTypeSelect?.addEventListener('change', (e) => {
+      state.documentType = (e.target as HTMLSelectElement).value as DocumentType;
+      updateVisibilityToggles();
+      updatePreview();
+      saveToStorage();
+    });
+
+    docCustomTitleInput?.addEventListener('input', (e) => {
+      state.customTitle = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+
+    currencySelect?.addEventListener('change', (e) => {
+      state.currency = (e.target as HTMLSelectElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+
+    copyLabelSelect?.addEventListener('change', (e) => {
+      state.copyLabel = (e.target as HTMLSelectElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+
+    // Seller
     sellerNameInput?.addEventListener('input', (e) => {
       state.sellerName = (e.target as HTMLInputElement).value;
+      isSampleActive = false;
       updatePreview();
       saveToStorage();
     });
     sellerAddressInput?.addEventListener('input', (e) => {
       state.sellerAddress = (e.target as HTMLTextAreaElement).value;
+      isSampleActive = false;
       updatePreview();
       saveToStorage();
     });
     sellerEmailInput?.addEventListener('input', (e) => {
       state.sellerEmail = (e.target as HTMLInputElement).value;
+      isSampleActive = false;
       updatePreview();
       saveToStorage();
     });
@@ -1099,19 +2639,37 @@ New York, NY 10013</textarea>
       updatePreview();
       saveToStorage();
     });
+    sellerPanInput?.addEventListener('input', (e) => {
+      state.sellerPan = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    sellerStateInput?.addEventListener('input', (e) => {
+      state.sellerState = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    sellerStateCodeInput?.addEventListener('input', (e) => {
+      state.sellerStateCode = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
     sellerWebsiteInput?.addEventListener('input', (e) => {
       state.sellerWebsite = (e.target as HTMLInputElement).value;
       updatePreview();
       saveToStorage();
     });
 
+    // Customer
     customerCompanyInput?.addEventListener('input', (e) => {
       state.customerCompany = (e.target as HTMLInputElement).value;
+      isSampleActive = false;
       updatePreview();
       saveToStorage();
     });
     customerNameInput?.addEventListener('input', (e) => {
       state.customerName = (e.target as HTMLInputElement).value;
+      isSampleActive = false;
       updatePreview();
       saveToStorage();
     });
@@ -1120,24 +2678,73 @@ New York, NY 10013</textarea>
       updatePreview();
       saveToStorage();
     });
-    customerEmailInput?.addEventListener('input', (e) => {
-      state.customerEmail = (e.target as HTMLInputElement).value;
-      updatePreview();
-      saveToStorage();
-    });
     customerTaxIdInput?.addEventListener('input', (e) => {
       state.customerTaxId = (e.target as HTMLInputElement).value;
       updatePreview();
       saveToStorage();
     });
+    customerPanInput?.addEventListener('input', (e) => {
+      state.customerPan = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    customerEmailInput?.addEventListener('input', (e) => {
+      state.customerEmail = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    customerPhoneInput?.addEventListener('input', (e) => {
+      state.customerPhone = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    customerStateInput?.addEventListener('input', (e) => {
+      state.customerState = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    customerStateCodeInput?.addEventListener('input', (e) => {
+      state.customerStateCode = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
 
+    // Shipping
+    toggleShipTo?.addEventListener('change', (e) => {
+      state.shippingEnabled = (e.target as HTMLInputElement).checked;
+      updateVisibilityToggles();
+      updatePreview();
+      saveToStorage();
+    });
+    shipRecipientInput?.addEventListener('input', (e) => {
+      state.shippingName = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    shipAddressInput?.addEventListener('input', (e) => {
+      state.shippingAddress = (e.target as HTMLTextAreaElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    shipDestinationInput?.addEventListener('input', (e) => {
+      state.shippingDestination = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    shipTaxIdInput?.addEventListener('input', (e) => {
+      state.shippingTaxId = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+
+    // Details & References
     invoiceNumberInput?.addEventListener('input', (e) => {
-      state.invoiceNumber = (e.target as HTMLInputElement).value;
+      state.documentNumber = (e.target as HTMLInputElement).value;
       updatePreview();
       saveToStorage();
     });
     invoiceDateInput?.addEventListener('input', (e) => {
-      state.invoiceDate = (e.target as HTMLInputElement).value;
+      state.documentDate = (e.target as HTMLInputElement).value;
       updatePreview();
       saveToStorage();
     });
@@ -1146,8 +2753,105 @@ New York, NY 10013</textarea>
       updatePreview();
       saveToStorage();
     });
-    invoiceCurrencySelect?.addEventListener('change', (e) => {
-      state.currency = (e.target as HTMLSelectElement).value;
+    placeOfSupplyInput?.addEventListener('input', (e) => {
+      state.placeOfSupply = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    placeOfSupplyCodeInput?.addEventListener('input', (e) => {
+      state.placeOfSupplyCode = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    refOrderNumInput?.addEventListener('input', (e) => {
+      state.refOrderNumber = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    refOrderDateInput?.addEventListener('input', (e) => {
+      state.refOrderDate = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    refQuoteNumInput?.addEventListener('input', (e) => {
+      state.refQuoteNumber = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    refQuoteDateInput?.addEventListener('input', (e) => {
+      state.refQuoteDate = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+
+    // Tax Mode
+    taxModeRadios.forEach((radio) => {
+      radio.addEventListener('change', (e) => {
+        state.taxMode = (e.target as HTMLInputElement).value as TaxMode;
+        updateVisibilityToggles();
+        updatePreview();
+        saveToStorage();
+      });
+    });
+
+    gstSupplyTypeRadios.forEach((radio) => {
+      radio.addEventListener('change', (e) => {
+        state.gstSupplyType = (e.target as HTMLInputElement).value as GstSupplyType;
+        updatePreview();
+        saveToStorage();
+      });
+    });
+
+    customTaxRateInput?.addEventListener('input', () => {
+      updatePreview();
+      saveToStorage();
+    });
+
+    gstRateInput?.addEventListener('change', () => {
+      updatePreview();
+      saveToStorage();
+    });
+
+    gstReverseCharge?.addEventListener('change', (e) => {
+      state.reverseCharge = (e.target as HTMLInputElement).checked;
+      updatePreview();
+      saveToStorage();
+    });
+
+    gstRoundOff?.addEventListener('change', (e) => {
+      state.enableRoundOff = (e.target as HTMLInputElement).checked;
+      updatePreview();
+      saveToStorage();
+    });
+
+    // Banking & Legal
+    bankNameInput?.addEventListener('input', (e) => {
+      state.bankName = (e.target as HTMLInputElement).value;
+      state.bankDetailsEnabled = true;
+      updatePreview();
+      saveToStorage();
+    });
+    bankAccountNameInput?.addEventListener('input', (e) => {
+      state.bankAccountName = (e.target as HTMLInputElement).value;
+      state.bankDetailsEnabled = true;
+      updatePreview();
+      saveToStorage();
+    });
+    bankAccountNumberInput?.addEventListener('input', (e) => {
+      state.bankAccountNumber = (e.target as HTMLInputElement).value;
+      state.bankDetailsEnabled = true;
+      updatePreview();
+      saveToStorage();
+    });
+    bankIfscInput?.addEventListener('input', (e) => {
+      state.bankIfsc = (e.target as HTMLInputElement).value;
+      state.bankDetailsEnabled = true;
+      updatePreview();
+      saveToStorage();
+    });
+    bankUpiIdInput?.addEventListener('input', (e) => {
+      state.bankUpiId = (e.target as HTMLInputElement).value;
+      state.bankDetailsEnabled = true;
       updatePreview();
       saveToStorage();
     });
@@ -1156,18 +2860,113 @@ New York, NY 10013</textarea>
       updatePreview();
       saveToStorage();
     });
+
     invoiceNotesInput?.addEventListener('input', (e) => {
       state.notes = (e.target as HTMLTextAreaElement).value;
       updatePreview();
       saveToStorage();
     });
+    invoiceTermsInput?.addEventListener('input', (e) => {
+      state.termsAndConditions = (e.target as HTMLTextAreaElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    invoiceDeclarationInput?.addEventListener('input', (e) => {
+      state.declaration = (e.target as HTMLTextAreaElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    invoiceJurisdictionInput?.addEventListener('input', (e) => {
+      state.jurisdiction = (e.target as HTMLInputElement).value;
+      updatePreview();
+      saveToStorage();
+    });
+    sigNameInput?.addEventListener('input', (e) => {
+      state.signatoryName = (e.target as HTMLInputElement).value;
+      state.signatoryEnabled = true;
+      updatePreview();
+      saveToStorage();
+    });
+    sigTitleInput?.addEventListener('input', (e) => {
+      state.signatoryDesignation = (e.target as HTMLInputElement).value;
+      state.signatoryEnabled = true;
+      updatePreview();
+      saveToStorage();
+    });
 
-    // Logo Upload Reader (Local DataURL)
+    // Progressive Disclosure Click Helpers
+    function revealField(id: string, focusId?: string) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove('hidden');
+        if (focusId) {
+          const input = document.getElementById(focusId) as HTMLInputElement | null;
+          input?.focus();
+        }
+      }
+    }
+
+    document.getElementById('btn-toggle-seller-tax')?.addEventListener('click', () => revealField('seller-tax-wrap', 'seller-tax-id'));
+    document.getElementById('btn-toggle-seller-pan')?.addEventListener('click', () => revealField('seller-pan-wrap', 'seller-pan'));
+    document.getElementById('btn-toggle-seller-phone')?.addEventListener('click', () => revealField('seller-phone-wrap', 'seller-phone'));
+    document.getElementById('btn-toggle-seller-state')?.addEventListener('click', () => revealField('seller-state-wrap', 'seller-state'));
+    document.getElementById('btn-toggle-seller-web')?.addEventListener('click', () => revealField('seller-web-wrap', 'seller-website'));
+
+    document.getElementById('btn-toggle-cust-address')?.addEventListener('click', () => revealField('customer-address-wrap', 'customer-address'));
+    document.getElementById('btn-toggle-cust-tax')?.addEventListener('click', () => revealField('customer-tax-wrap', 'customer-tax-id'));
+    document.getElementById('btn-toggle-cust-pan')?.addEventListener('click', () => revealField('customer-pan-wrap', 'customer-pan'));
+    document.getElementById('btn-toggle-cust-contact')?.addEventListener('click', () => revealField('customer-contact-wrap', 'customer-email'));
+    document.getElementById('btn-toggle-cust-state')?.addEventListener('click', () => revealField('customer-state-wrap', 'customer-state'));
+
+    document.getElementById('btn-toggle-place-of-supply')?.addEventListener('click', () => revealField('place-of-supply-wrap', 'place-of-supply'));
+    document.getElementById('btn-toggle-order-ref')?.addEventListener('click', () => revealField('order-ref-wrap', 'ref-order-num'));
+    document.getElementById('btn-toggle-quote-ref')?.addEventListener('click', () => revealField('quote-ref-wrap', 'ref-quote-num'));
+
+    btnToggleBanking?.addEventListener('click', () => {
+      state.bankDetailsEnabled = true;
+      revealField('banking-fields-wrap', 'bank-name');
+    });
+
+    document.getElementById('btn-toggle-notes')?.addEventListener('click', () => revealField('notes-wrap', 'invoice-notes'));
+    document.getElementById('btn-toggle-terms')?.addEventListener('click', () => revealField('terms-wrap', 'invoice-terms'));
+    document.getElementById('btn-toggle-declaration')?.addEventListener('click', () => revealField('declaration-wrap', 'invoice-declaration'));
+    document.getElementById('btn-toggle-jurisdiction')?.addEventListener('click', () => revealField('jurisdiction-wrap', 'invoice-jurisdiction'));
+    document.getElementById('btn-toggle-signatory')?.addEventListener('click', () => {
+      state.signatoryEnabled = true;
+      revealField('signatory-wrap', 'sig-name');
+    });
+
+    // Column Toggles in Line Items
+    document.getElementById('btn-col-toggle-hsn')?.addEventListener('click', (e) => {
+      colVisibility.hsn = !colVisibility.hsn;
+      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', colVisibility.hsn);
+      renderEditorLineItems();
+      updatePreview();
+    });
+    document.getElementById('btn-col-toggle-unit')?.addEventListener('click', (e) => {
+      colVisibility.unit = !colVisibility.unit;
+      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', colVisibility.unit);
+      renderEditorLineItems();
+      updatePreview();
+    });
+    document.getElementById('btn-col-toggle-disc')?.addEventListener('click', (e) => {
+      colVisibility.discount = !colVisibility.discount;
+      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', colVisibility.discount);
+      renderEditorLineItems();
+      updatePreview();
+    });
+    document.getElementById('btn-col-toggle-tax')?.addEventListener('click', (e) => {
+      colVisibility.tax = !colVisibility.tax;
+      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', colVisibility.tax);
+      renderEditorLineItems();
+      updatePreview();
+    });
+
+    // Logo Upload
     logoFileInput?.addEventListener('change', (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
-      // Validate size (< 2MB)
       if (file.size > 2 * 1024 * 1024) {
         alert('Please choose an image under 2MB.');
         return;
@@ -1192,13 +2991,15 @@ New York, NY 10013</textarea>
       saveToStorage();
     });
 
-    // Add Item Handler
+    // Add Item
     btnAddLineItem?.addEventListener('click', () => {
       state.items.push({
         id: `item-${Date.now()}`,
-        description: 'New Project Deliverable / Service',
+        description: '',
+        hsnSac: '',
         quantity: 1,
-        unitPrice: 100,
+        unit: '',
+        unitPrice: 0,
         discountPercent: 0,
         taxPercent: 0,
       });
@@ -1207,44 +3008,153 @@ New York, NY 10013</textarea>
       saveToStorage();
     });
 
-    // Clear / Reset Handler
+    // Load Sample Data Handler
+    const btnLoadSample = document.getElementById('btn-load-sample');
+    btnLoadSample?.addEventListener('click', () => {
+      isSampleActive = true;
+      colVisibility.hsn = true;
+      colVisibility.unit = true;
+      colVisibility.discount = true;
+
+      state = {
+        version: 2,
+        documentType: 'quotation',
+        customTitle: '',
+        documentNumber: 'QTE-2026-004',
+        documentDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        currency: 'INR',
+        copyLabel: 'Original for Recipient',
+        placeOfSupply: 'Maharashtra',
+        placeOfSupplyCode: '27',
+
+        // Supplier
+        sellerName: 'GRACEDIVINE SOLUTIONS LLP',
+        sellerLogo: '',
+        sellerAddress: 'Unit 402, Trade Hub Building, Andheri East\nMumbai, Maharashtra 400069',
+        sellerEmail: 'operations@gracedivine.example',
+        sellerPhone: '+91 22 2847 0000',
+        sellerTaxId: '27AADCG1234F1Z5',
+        sellerPan: 'AADCG1234F',
+        sellerState: 'Maharashtra',
+        sellerStateCode: '27',
+        sellerWebsite: 'https://gracedivine.example',
+
+        // Customer
+        customerCompany: 'Vanguard Industrial Automation Ltd',
+        customerName: 'Mr. Rajesh Sharma',
+        customerAddress: 'Plot 14, MIDC Industrial Area, Chakan\nPune, Maharashtra 410501',
+        customerEmail: 'procurement@vanguard.example',
+        customerPhone: '+91 20 6710 0000',
+        customerTaxId: '27AABCU9603R1ZM',
+        customerPan: 'AABCU9603R',
+        customerState: 'Maharashtra',
+        customerStateCode: '27',
+
+        // Shipping
+        shippingEnabled: true,
+        shippingSameAsCustomer: false,
+        shippingName: 'Vanguard Logistics Hub (Plant II)',
+        shippingAddress: 'Gate No. 3, Chakan Phase II, Pune, MH',
+        shippingTaxId: '27AABCU9603R1ZM',
+        shippingDestination: 'Pune Facility',
+
+        // References
+        refOrderNumber: 'PO-IND-2026-892',
+        refOrderDate: new Date().toISOString().split('T')[0],
+        refQuoteNumber: 'QTE-REF-771',
+        refQuoteDate: new Date().toISOString().split('T')[0],
+        refDeliveryNote: '',
+
+        // Tax
+        taxMode: 'gst',
+        gstSupplyType: 'cgst_sgst',
+        reverseCharge: false,
+        enableRoundOff: true,
+
+        // Banking
+        bankDetailsEnabled: true,
+        bankName: 'HDFC Bank Ltd',
+        bankAccountName: 'GRACEDIVINE SOLUTIONS LLP',
+        bankAccountNumber: '50200049281726',
+        bankIfsc: 'HDFC0000240',
+        bankBranch: 'Andheri East Branch',
+        bankUpiId: 'gracedivine@hdfcbank',
+        paymentMethod: 'Bank Transfer / RTGS / UPI',
+        paymentTerms: '50% Advance along with order, balance against delivery',
+
+        // Legal
+        notes: 'Delivery timeline: 2 to 3 weeks from receipt of purchase order and advance payment.',
+        termsAndConditions: '1. Prices are valid for 30 days from quote date.\n2. Goods once dispatched will be subject to transit insurance.\n3. Warranty: 12 months comprehensive OEM support.',
+        declaration: 'We declare that this quotation shows the actual proposed rates and terms for the specified items and that all particulars are true and correct.',
+        jurisdiction: 'Subject to Mumbai Jurisdiction',
+        signatoryEnabled: true,
+        signatoryName: 'Amitabh Sen',
+        signatoryDesignation: 'Managing Partner',
+        signatoryImage: '',
+
+        items: [
+          {
+            id: 'sample-1',
+            description: 'Three Phase Industrial Induction Motor (15kW, 4-Pole, Cast Iron Frame)',
+            hsnSac: '8501',
+            quantity: 2,
+            unit: 'nos',
+            unitPrice: 18500,
+            discountPercent: 5,
+            taxPercent: 18,
+          },
+          {
+            id: 'sample-2',
+            description: 'Variable Frequency Drive (VFD) Controller Panel (IP55 Enclosure with Bypass)',
+            hsnSac: '8537',
+            quantity: 1,
+            unit: 'set',
+            unitPrice: 24500,
+            discountPercent: 0,
+            taxPercent: 18,
+          },
+        ],
+      };
+
+      populateFormFields();
+      renderEditorLineItems();
+      updatePreview();
+      saveToStorage();
+    });
+
+    // Clear Form Handler (Clean Blank State)
     const btnClearDraft = document.getElementById('btn-clear-draft');
     btnClearDraft?.addEventListener('click', () => {
-      const confirmPrompt = root.getAttribute('data-confirm-clear') || 'Are you sure you want to clear this draft? All entered invoice data will be reset.';
+      const confirmPrompt =
+        root.getAttribute('data-confirm-clear') ||
+        'Are you sure you want to clear this draft? All entered document data will be reset.';
       if (confirm(confirmPrompt)) {
         try {
           localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(LEGACY_STORAGE_KEY);
         } catch {}
-        state = {
-          ...defaultState,
-          items: [
-            {
-              id: 'item-1',
-              description: 'Professional Services',
-              quantity: 1,
-              unitPrice: 500,
-              discountPercent: 0,
-              taxPercent: 0,
-            },
-          ],
-        };
+
+        isSampleActive = false;
+        colVisibility.hsn = false;
+        colVisibility.unit = false;
+        colVisibility.discount = false;
+        colVisibility.tax = false;
+
+        state = createBlankState();
         populateFormFields();
         renderEditorLineItems();
         updatePreview();
       }
     });
 
-    // Print & Save Actions
+    // Print & PDF Actions
     const btnPrint = document.getElementById('btn-print-invoice');
     const btnSavePdf = document.getElementById('btn-save-pdf');
 
-    btnPrint?.addEventListener('click', () => {
-      window.print();
-    });
-
-    btnSavePdf?.addEventListener('click', () => {
-      window.print();
-    });
+    btnPrint?.addEventListener('click', () => window.print());
+    btnSavePdf?.addEventListener('click', () => window.print());
 
     // Mobile View Toggle Tabs
     const tabBtnEditor = document.getElementById('tab-btn-editor');
@@ -1252,8 +3162,8 @@ New York, NY 10013</textarea>
     const editorCol = document.getElementById('invoice-editor-col');
     const previewCol = document.getElementById('invoice-preview-col');
 
-    function setMobileView(view: 'editor' | 'preview') {
-      if (view === 'editor') {
+    function setMobileView(mode: 'editor' | 'preview') {
+      if (mode === 'editor') {
         tabBtnEditor?.classList.add('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border');
         tabBtnEditor?.classList.remove('text-[var(--text-secondary)]');
         tabBtnPreview?.classList.remove('bg-[var(--surface-elevated)]', 'text-[var(--text-primary)]', 'border');
@@ -1293,9 +3203,9 @@ New York, NY 10013</textarea>
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initInvoiceGenerator);
+    document.addEventListener('DOMContentLoaded', initBusinessDocumentGenerator);
   } else {
-    initInvoiceGenerator();
+    initBusinessDocumentGenerator();
   }
-  document.addEventListener('astro:page-load', initInvoiceGenerator);
+  document.addEventListener('astro:page-load', initBusinessDocumentGenerator);
 </script>
