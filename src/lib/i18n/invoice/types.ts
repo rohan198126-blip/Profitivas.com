@@ -34,9 +34,38 @@ export interface DocumentLineItem {
 // Backward compatibility alias
 export type InvoiceLineItem = DocumentLineItem;
 
+export type DocumentLayout = 'classic' | 'modern' | 'minimal' | 'compact';
+export type DocumentDensity = 'comfortable' | 'compact';
+
+export interface TableColumnSettings {
+  index: boolean;
+  item: boolean;
+  hsn: boolean;
+  unit: boolean;
+  qty: boolean;
+  rate: boolean;
+  discount: boolean;
+  tax: boolean;
+  amount: boolean;
+}
+
+export interface SectionVisibilitySettings {
+  shipping: boolean;
+  references: boolean;
+  payment: boolean;
+  notes: boolean;
+  terms: boolean;
+  declaration: boolean;
+  signature: boolean;
+}
+
 export interface CommercialDocumentState {
   version: 2;
   documentType: DocumentType;
+  layout: DocumentLayout;
+  density: DocumentDensity;
+  tableColumns: TableColumnSettings;
+  sectionsConfig: SectionVisibilitySettings;
   customTitle?: string;
   documentNumber: string;
   documentDate: string;
@@ -276,6 +305,44 @@ export interface InvoiceTranslations {
     addDeclaration: string;
     addSignature: string;
     addJurisdiction: string;
+  };
+  customizer: {
+    title: string;
+    subtitle: string;
+    layoutLabel: string;
+    layouts: {
+      classic: string;
+      modern: string;
+      minimal: string;
+      compact: string;
+    };
+    densityLabel: string;
+    densities: {
+      comfortable: string;
+      compact: string;
+    };
+    customizeTable: string;
+    customizeSections: string;
+    columns: {
+      index: string;
+      item: string;
+      hsn: string;
+      unit: string;
+      qty: string;
+      rate: string;
+      discount: string;
+      tax: string;
+      amount: string;
+    };
+    sections: {
+      shipping: string;
+      references: string;
+      payment: string;
+      notes: string;
+      terms: string;
+      declaration: string;
+      signature: string;
+    };
   };
   privacyNotice: string;
   faqs: Array<{

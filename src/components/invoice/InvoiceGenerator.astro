@@ -12,6 +12,9 @@ import {
   ShieldCheck,
   CreditCard,
   PenTool,
+  Palette,
+  Sliders,
+  Table,
 } from 'lucide-astro';
 import type { SupportedLocale } from '../../lib/i18n/types';
 import { getInvoiceTranslations, SUPPORTED_CURRENCIES } from '../../lib/i18n/invoice';
@@ -107,6 +110,173 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
           </button>
         </div>
       </div>
+
+      <!-- Document Designer / Customizer -->
+      <section class="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5 space-y-4">
+        <div class="flex items-center justify-between pb-2.5 border-b border-[var(--border)]">
+          <h2 class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] flex items-center gap-2">
+            <Palette class="w-3.5 h-3.5" />
+            <span>{t.customizer.title}</span>
+          </h2>
+          <span class="text-[11px] text-[var(--text-muted)]">{t.customizer.subtitle}</span>
+        </div>
+
+        <!-- Layout Style & Page Density Controls -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Layout Style Picker -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-medium text-[var(--text-secondary)]">
+              {t.customizer.layoutLabel}
+            </label>
+            <div class="grid grid-cols-4 gap-1" id="layout-picker-btns">
+              <button
+                type="button"
+                data-layout="classic"
+                class="btn-layout-choice px-2 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+              >
+                {t.customizer.layouts.classic}
+              </button>
+              <button
+                type="button"
+                data-layout="modern"
+                class="btn-layout-choice px-2 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+              >
+                {t.customizer.layouts.modern}
+              </button>
+              <button
+                type="button"
+                data-layout="minimal"
+                class="btn-layout-choice px-2 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+              >
+                {t.customizer.layouts.minimal}
+              </button>
+              <button
+                type="button"
+                data-layout="compact"
+                class="btn-layout-choice px-2 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+              >
+                {t.customizer.layouts.compact}
+              </button>
+            </div>
+          </div>
+
+          <!-- Density Picker -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-medium text-[var(--text-secondary)]">
+              {t.customizer.densityLabel}
+            </label>
+            <div class="grid grid-cols-2 gap-1.5" id="density-picker-btns">
+              <button
+                type="button"
+                data-density="comfortable"
+                class="btn-density-choice px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+              >
+                {t.customizer.densities.comfortable}
+              </button>
+              <button
+                type="button"
+                data-density="compact"
+                class="btn-density-choice px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-center"
+              >
+                {t.customizer.densities.compact}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customize Table & Sections Accordion / Toggle Panels -->
+        <div class="pt-2 border-t border-[var(--border)] space-y-3">
+          <!-- Table Columns Customization -->
+          <details class="group rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] overflow-hidden">
+            <summary class="flex items-center justify-between p-3 text-xs font-medium text-[var(--text-primary)] cursor-pointer select-none">
+              <span class="flex items-center gap-2">
+                <Table class="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <span>{t.customizer.customizeTable}</span>
+              </span>
+              <span class="text-[11px] text-[var(--text-muted)] group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-3 pt-0 border-t border-[var(--border)] mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="col-toggle-index" class="rounded border-[var(--border)] text-[var(--text-primary)]" checked />
+                <span>{t.customizer.columns.index}</span>
+              </label>
+              <label class="flex items-center gap-2 text-[var(--text-muted)] cursor-not-allowed">
+                <input type="checkbox" id="col-toggle-item" class="rounded border-[var(--border)] text-[var(--text-primary)]" checked disabled />
+                <span>{t.customizer.columns.item}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="col-toggle-hsn" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.columns.hsn}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="col-toggle-unit" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.columns.unit}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="col-toggle-qty" class="rounded border-[var(--border)] text-[var(--text-primary)]" checked />
+                <span>{t.customizer.columns.qty}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="col-toggle-rate" class="rounded border-[var(--border)] text-[var(--text-primary)]" checked />
+                <span>{t.customizer.columns.rate}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="col-toggle-discount" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.columns.discount}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="col-toggle-tax" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.columns.tax}</span>
+              </label>
+              <label class="flex items-center gap-2 text-[var(--text-muted)] cursor-not-allowed">
+                <input type="checkbox" id="col-toggle-amount" class="rounded border-[var(--border)] text-[var(--text-primary)]" checked disabled />
+                <span>{t.customizer.columns.amount}</span>
+              </label>
+            </div>
+          </details>
+
+          <!-- Sections Customization -->
+          <details class="group rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] overflow-hidden">
+            <summary class="flex items-center justify-between p-3 text-xs font-medium text-[var(--text-primary)] cursor-pointer select-none">
+              <span class="flex items-center gap-2">
+                <Sliders class="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <span>{t.customizer.customizeSections}</span>
+              </span>
+              <span class="text-[11px] text-[var(--text-muted)] group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="p-3 pt-0 border-t border-[var(--border)] mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="sec-toggle-shipping" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.sections.shipping}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="sec-toggle-references" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.sections.references}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="sec-toggle-payment" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.sections.payment}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="sec-toggle-notes" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.sections.notes}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="sec-toggle-terms" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.sections.terms}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="sec-toggle-declaration" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.sections.declaration}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-[var(--text-secondary)]">
+                <input type="checkbox" id="sec-toggle-signature" class="rounded border-[var(--border)] text-[var(--text-primary)]" />
+                <span>{t.customizer.sections.signature}</span>
+              </label>
+            </div>
+          </details>
+        </div>
+      </section>
 
       <!-- Progressive Form Sections -->
       <div class="space-y-5">
@@ -1154,18 +1324,18 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
         <!-- Dynamic Items Table -->
         <div id="doc-items-table-wrap" class="py-4 overflow-x-auto">
-          <table class="w-full text-left border-collapse min-w-[360px]">
+          <table class="w-full text-left border-collapse min-w-[360px]" id="doc-items-table">
             <thead id="doc-items-thead">
               <tr class="border-b-2 border-neutral-300 text-xs uppercase font-bold text-neutral-600 tracking-wider">
-                <th class="py-2 pr-2 w-8">#</th>
-                <th class="py-2 px-2.5">{t.document.descHeader}</th>
+                <th id="th-index" class="py-2 pr-2 w-8">#</th>
+                <th id="th-desc" class="py-2 px-2.5 min-w-[36%]">{t.document.descHeader}</th>
                 <th id="th-hsn" class="hidden py-2 px-2.5 text-right w-20">{t.document.hsnHeader}</th>
                 <th id="th-unit" class="hidden py-2 px-2.5 text-right w-16">{t.document.unitHeader}</th>
-                <th class="py-2 px-2.5 text-right w-16">{t.document.qtyHeader}</th>
-                <th class="py-2 px-2.5 text-right w-24">{t.document.priceHeader}</th>
+                <th id="th-qty" class="py-2 px-2.5 text-right w-16">{t.document.qtyHeader}</th>
+                <th id="th-price" class="py-2 px-2.5 text-right w-24">{t.document.priceHeader}</th>
                 <th id="th-discount" class="hidden py-2 px-2.5 text-right w-18">{t.document.discountHeader}</th>
                 <th id="th-tax" class="hidden py-2 px-2.5 text-right w-16">{t.document.taxHeader}</th>
-                <th class="py-2 pl-2.5 text-right w-28">{t.document.amountHeader}</th>
+                <th id="th-amount" class="py-2 pl-2.5 text-right w-28">{t.document.amountHeader}</th>
               </tr>
             </thead>
             <tbody id="doc-items-tbody" class="divide-y divide-neutral-200 text-sm">
@@ -1174,10 +1344,10 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
           </table>
         </div>
 
-        <!-- Lower Financial & Closing Block -->
+        <!-- Lower Financial & Closing Block (Adaptive Grid) -->
         <div id="doc-financial-block" class="pt-4 border-t-2 border-neutral-200 flex flex-col sm:flex-row justify-between items-start gap-6">
-          <!-- Left: Amount in Words, Bank Details, Notes, Terms, Declaration -->
-          <div class="flex-1 space-y-3 text-sm text-neutral-700 w-full max-w-sm">
+          <!-- Left: Amount in Words, Bank Details, Adaptive Notes & Terms, Declaration -->
+          <div id="doc-closing-left" class="flex-1 space-y-3 text-sm text-neutral-700 w-full max-w-sm">
             <!-- Amount in Words -->
             <div id="doc-amount-in-words-wrap" class="hidden p-2.5 rounded border border-neutral-200 bg-neutral-50/80 space-y-0.5">
               <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
@@ -1197,20 +1367,23 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
               <div id="doc-bank-line-upi" class="hidden font-mono text-xs sm:text-[13px] text-neutral-900 font-medium"></div>
             </div>
 
-            <!-- Notes -->
-            <div id="doc-notes-box" class="hidden space-y-1">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
-                {t.document.notesLabel}
-              </span>
-              <p id="doc-notes-val" class="whitespace-pre-line leading-relaxed text-xs sm:text-sm text-neutral-600"></p>
-            </div>
+            <!-- Adaptive Notes & Terms Subgrid (Side-by-Side when both populated) -->
+            <div id="doc-notes-terms-grid" class="grid grid-cols-1 gap-2.5">
+              <!-- Notes -->
+              <div id="doc-notes-box" class="hidden space-y-1">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
+                  {t.document.notesLabel}
+                </span>
+                <p id="doc-notes-val" class="whitespace-pre-line leading-relaxed text-xs sm:text-sm text-neutral-600"></p>
+              </div>
 
-            <!-- Terms & Conditions -->
-            <div id="doc-terms-box" class="hidden space-y-1">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
-                {t.document.termsLabel}
-              </span>
-              <p id="doc-terms-val" class="whitespace-pre-line leading-relaxed text-xs sm:text-sm text-neutral-600"></p>
+              <!-- Terms & Conditions -->
+              <div id="doc-terms-box" class="hidden space-y-1">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
+                  {t.document.termsLabel}
+                </span>
+                <p id="doc-terms-val" class="whitespace-pre-line leading-relaxed text-xs sm:text-sm text-neutral-600"></p>
+              </div>
             </div>
 
             <!-- Declaration -->
@@ -1227,7 +1400,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
           </div>
 
           <!-- Right: Mathematical Totals Breakdown -->
-          <div class="w-full sm:w-72 space-y-1.5 text-sm">
+          <div id="doc-closing-right" class="w-full sm:w-72 space-y-1.5 text-sm">
             <div class="flex justify-between py-1 text-neutral-600">
               <span>{t.document.subtotalLabel}</span>
               <span id="doc-subtotal-val" class="font-mono font-medium text-neutral-900">$0.00</span>
@@ -1299,8 +1472,102 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
   </div>
 </div>
 
-<!-- Print Stylesheet -->
+<!-- Print & Layout Stylesheet -->
 <style is:global>
+  /* Document Layout Presets */
+  #invoice-paper-sheet.doc-layout-classic {
+    border-top: 4px solid #171717;
+  }
+  #invoice-paper-sheet.doc-layout-classic #doc-top-header {
+    border-bottom: 2px solid #171717;
+  }
+  #invoice-paper-sheet.doc-layout-classic #doc-items-thead tr {
+    background-color: #f5f5f4;
+    border-top: 1px solid #171717;
+    border-bottom: 2px solid #171717;
+    color: #171717;
+  }
+
+  #invoice-paper-sheet.doc-layout-modern {
+    border-top: 4px solid #2563eb;
+  }
+  #invoice-paper-sheet.doc-layout-modern #doc-top-header {
+    border-bottom: 1px solid #e2e8f0;
+  }
+  #invoice-paper-sheet.doc-layout-modern #doc-items-thead tr {
+    border-bottom: 2px solid #0f172a;
+    color: #0f172a;
+  }
+  #invoice-paper-sheet.doc-layout-modern #doc-amount-in-words-wrap,
+  #invoice-paper-sheet.doc-layout-modern #doc-bank-box {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+  }
+
+  #invoice-paper-sheet.doc-layout-minimal {
+    border-top: 1px solid #e5e7eb;
+  }
+  #invoice-paper-sheet.doc-layout-minimal #doc-top-header {
+    border-bottom: 1px solid #f3f4f6;
+  }
+  #invoice-paper-sheet.doc-layout-minimal #doc-title {
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #374151;
+  }
+  #invoice-paper-sheet.doc-layout-minimal #doc-items-thead tr {
+    border-bottom: 1px solid #e5e7eb;
+    color: #6b7280;
+  }
+  #invoice-paper-sheet.doc-layout-minimal #doc-amount-in-words-wrap,
+  #invoice-paper-sheet.doc-layout-minimal #doc-bank-box {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  #invoice-paper-sheet.doc-layout-compact {
+    border-top: 3px solid #44403c;
+    padding: 1.5rem !important;
+  }
+  #invoice-paper-sheet.doc-layout-compact #doc-top-header {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #d6d3d1;
+  }
+  #invoice-paper-sheet.doc-layout-compact #doc-entities-row {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #d6d3d1;
+  }
+  #invoice-paper-sheet.doc-layout-compact #doc-items-table-wrap {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  #invoice-paper-sheet.doc-layout-compact #doc-financial-block {
+    padding-top: 0.5rem;
+    border-top: 1px solid #d6d3d1;
+  }
+  #invoice-paper-sheet.doc-layout-compact #doc-footer-closing {
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Document Density Modifiers */
+  #invoice-paper-sheet.doc-density-compact #doc-items-tbody td {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+  }
+  #invoice-paper-sheet.doc-density-compact #doc-items-thead th {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+  }
+
+  #invoice-paper-sheet.doc-density-comfortable #doc-items-tbody td {
+    padding-top: 0.625rem !important;
+    padding-bottom: 0.625rem !important;
+  }
+
   @media print {
     @page {
       size: A4 portrait;
@@ -1409,6 +1676,8 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
   import { SUPPORTED_CURRENCIES } from '../../lib/i18n/invoice';
   import type {
     DocumentType,
+    DocumentLayout,
+    DocumentDensity,
     CommercialDocumentState,
     TaxMode,
     GstSupplyType,
@@ -1433,6 +1702,28 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       return {
         version: 2,
         documentType: 'invoice',
+        layout: 'classic',
+        density: 'comfortable',
+        tableColumns: {
+          index: true,
+          item: true,
+          hsn: false,
+          unit: false,
+          qty: true,
+          rate: true,
+          discount: false,
+          tax: false,
+          amount: true,
+        },
+        sectionsConfig: {
+          shipping: false,
+          references: false,
+          payment: false,
+          notes: false,
+          terms: false,
+          declaration: false,
+          signature: false,
+        },
         customTitle: '',
         documentNumber: 'DOC-001',
         documentDate: today,
@@ -1528,21 +1819,19 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
     let isSampleActive = false;
     let state: CommercialDocumentState = createBlankState();
 
-    // Column visibility toggles in editor
-    const colVisibility = {
-      hsn: false,
-      unit: false,
-      discount: false,
-      tax: false,
-    };
-
     // Restore from localStorage or legacy key
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
-          state = { ...createBlankState(), ...parsed };
+          const blank = createBlankState();
+          state = {
+            ...blank,
+            ...parsed,
+            tableColumns: { ...blank.tableColumns, ...(parsed.tableColumns || {}) },
+            sectionsConfig: { ...blank.sectionsConfig, ...(parsed.sectionsConfig || {}) },
+          };
         }
       } else {
         const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
@@ -1717,6 +2006,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
     const docLogoImg = document.getElementById('doc-logo-img') as HTMLImageElement | null;
 
     // Customer Preview
+    const docBillToCard = document.getElementById('doc-bill-to-card');
     const docCustomerCompany = document.getElementById('doc-customer-company');
     const docCustomerName = document.getElementById('doc-customer-name');
     const docCustomerAddress = document.getElementById('doc-customer-address');
@@ -1744,11 +2034,35 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
     const docRefQuoteDate = document.getElementById('doc-ref-quote-date');
     const docRefQuoteDateVal = document.getElementById('doc-ref-quote-date-val');
 
+    // Customizer Controls
+    const layoutPickerBtns = document.querySelectorAll<HTMLButtonElement>('.btn-layout-choice');
+    const densityPickerBtns = document.querySelectorAll<HTMLButtonElement>('.btn-density-choice');
+    const colToggleIndex = document.getElementById('col-toggle-index') as HTMLInputElement | null;
+    const colToggleHsn = document.getElementById('col-toggle-hsn') as HTMLInputElement | null;
+    const colToggleUnit = document.getElementById('col-toggle-unit') as HTMLInputElement | null;
+    const colToggleQty = document.getElementById('col-toggle-qty') as HTMLInputElement | null;
+    const colToggleRate = document.getElementById('col-toggle-rate') as HTMLInputElement | null;
+    const colToggleDiscount = document.getElementById('col-toggle-discount') as HTMLInputElement | null;
+    const colToggleTax = document.getElementById('col-toggle-tax') as HTMLInputElement | null;
+
+    const secToggleShipping = document.getElementById('sec-toggle-shipping') as HTMLInputElement | null;
+    const secToggleReferences = document.getElementById('sec-toggle-references') as HTMLInputElement | null;
+    const secTogglePayment = document.getElementById('sec-toggle-payment') as HTMLInputElement | null;
+    const secToggleNotes = document.getElementById('sec-toggle-notes') as HTMLInputElement | null;
+    const secToggleTerms = document.getElementById('sec-toggle-terms') as HTMLInputElement | null;
+    const secToggleDeclaration = document.getElementById('sec-toggle-declaration') as HTMLInputElement | null;
+    const secToggleSignature = document.getElementById('sec-toggle-signature') as HTMLInputElement | null;
+
     // Items Preview
+    const paperSheet = document.getElementById('invoice-paper-sheet');
+    const thIndex = document.getElementById('th-index');
     const thHsn = document.getElementById('th-hsn');
     const thUnit = document.getElementById('th-unit');
+    const thQty = document.getElementById('th-qty');
+    const thPrice = document.getElementById('th-price');
     const thDiscount = document.getElementById('th-discount');
     const thTax = document.getElementById('th-tax');
+    const thAmount = document.getElementById('th-amount');
     const docItemsTbody = document.getElementById('doc-items-tbody');
 
     // Totals Preview
@@ -1782,6 +2096,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
     const docBankLineAcct = document.getElementById('doc-bank-line-acct');
     const docBankLineIfsc = document.getElementById('doc-bank-line-ifsc');
     const docBankLineUpi = document.getElementById('doc-bank-line-upi');
+    const notesTermsGrid = document.getElementById('doc-notes-terms-grid');
     const docNotesBox = document.getElementById('doc-notes-box');
     const docNotesVal = document.getElementById('doc-notes-val');
     const docTermsBox = document.getElementById('doc-terms-box');
@@ -1796,6 +2111,45 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
     // Populate Form Fields
     function populateFormFields() {
+      // Customizer UI
+      layoutPickerBtns.forEach((btn) => {
+        const l = btn.getAttribute('data-layout');
+        const isActive = l === (state.layout || 'classic');
+        btn.classList.toggle('bg-[var(--text-primary)]', isActive);
+        btn.classList.toggle('text-[var(--background)]', isActive);
+        btn.classList.toggle('font-semibold', isActive);
+        btn.classList.toggle('shadow-xs', isActive);
+        btn.classList.toggle('bg-[var(--surface-elevated)]', !isActive);
+        btn.classList.toggle('text-[var(--text-secondary)]', !isActive);
+      });
+
+      densityPickerBtns.forEach((btn) => {
+        const d = btn.getAttribute('data-density');
+        const isActive = d === (state.density || 'comfortable');
+        btn.classList.toggle('bg-[var(--text-primary)]', isActive);
+        btn.classList.toggle('text-[var(--background)]', isActive);
+        btn.classList.toggle('font-semibold', isActive);
+        btn.classList.toggle('shadow-xs', isActive);
+        btn.classList.toggle('bg-[var(--surface-elevated)]', !isActive);
+        btn.classList.toggle('text-[var(--text-secondary)]', !isActive);
+      });
+
+      if (colToggleIndex) colToggleIndex.checked = state.tableColumns.index !== false;
+      if (colToggleHsn) colToggleHsn.checked = !!state.tableColumns.hsn;
+      if (colToggleUnit) colToggleUnit.checked = !!state.tableColumns.unit;
+      if (colToggleQty) colToggleQty.checked = state.tableColumns.qty !== false;
+      if (colToggleRate) colToggleRate.checked = state.tableColumns.rate !== false;
+      if (colToggleDiscount) colToggleDiscount.checked = !!state.tableColumns.discount;
+      if (colToggleTax) colToggleTax.checked = !!state.tableColumns.tax;
+
+      if (secToggleShipping) secToggleShipping.checked = !!state.shippingEnabled;
+      if (secToggleReferences) secToggleReferences.checked = !!(state.refOrderNumber || state.refOrderDate || state.refQuoteNumber || state.refQuoteDate || state.sectionsConfig?.references);
+      if (secTogglePayment) secTogglePayment.checked = !!state.bankDetailsEnabled;
+      if (secToggleNotes) secToggleNotes.checked = !!state.notes;
+      if (secToggleTerms) secToggleTerms.checked = !!state.termsAndConditions;
+      if (secToggleDeclaration) secToggleDeclaration.checked = !!state.declaration;
+      if (secToggleSignature) secToggleSignature.checked = !!state.signatoryEnabled;
+
       if (docTypeSelect) docTypeSelect.value = state.documentType;
       if (docCustomTitleInput) docCustomTitleInput.value = state.customTitle || '';
       if (currencySelect) currencySelect.value = state.currency;
@@ -1891,8 +2245,8 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
       // Details
       if (state.placeOfSupply || state.placeOfSupplyCode) document.getElementById('place-of-supply-wrap')?.classList.remove('hidden');
-      if (state.refOrderNumber || state.refOrderDate) document.getElementById('order-ref-wrap')?.classList.remove('hidden');
-      if (state.refQuoteNumber || state.refQuoteDate) document.getElementById('quote-ref-wrap')?.classList.remove('hidden');
+      if (state.refOrderNumber || state.refOrderDate || state.sectionsConfig?.references) document.getElementById('order-ref-wrap')?.classList.remove('hidden');
+      if (state.refQuoteNumber || state.refQuoteDate || state.sectionsConfig?.references) document.getElementById('quote-ref-wrap')?.classList.remove('hidden');
 
       // Tax Panels
       if (customTaxPanel) customTaxPanel.classList.toggle('hidden', state.taxMode !== 'custom');
@@ -1902,11 +2256,11 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       if (state.bankDetailsEnabled || state.bankName || state.bankAccountNumber || state.bankUpiId) {
         bankingFieldsWrap?.classList.remove('hidden');
       }
-      if (state.notes) document.getElementById('notes-wrap')?.classList.remove('hidden');
-      if (state.termsAndConditions) document.getElementById('terms-wrap')?.classList.remove('hidden');
-      if (state.declaration) document.getElementById('declaration-wrap')?.classList.remove('hidden');
+      if (state.notes || state.sectionsConfig?.notes) document.getElementById('notes-wrap')?.classList.remove('hidden');
+      if (state.termsAndConditions || state.sectionsConfig?.terms) document.getElementById('terms-wrap')?.classList.remove('hidden');
+      if (state.declaration || state.sectionsConfig?.declaration) document.getElementById('declaration-wrap')?.classList.remove('hidden');
       if (state.jurisdiction) document.getElementById('jurisdiction-wrap')?.classList.remove('hidden');
-      if (state.signatoryEnabled || state.signatoryName || state.signatoryDesignation) {
+      if (state.signatoryEnabled || state.signatoryName || state.signatoryDesignation || state.sectionsConfig?.signature) {
         document.getElementById('signatory-wrap')?.classList.remove('hidden');
       }
     }
@@ -1932,6 +2286,14 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       if (!lineItemsContainer) return;
       lineItemsContainer.innerHTML = '';
 
+      const showIndex = state.tableColumns.index !== false;
+      const showHsn = !!state.tableColumns.hsn;
+      const showUnit = !!state.tableColumns.unit;
+      const showQty = state.tableColumns.qty !== false;
+      const showRate = state.tableColumns.rate !== false;
+      const showDisc = !!state.tableColumns.discount;
+      const showTax = !!state.tableColumns.tax;
+
       state.items.forEach((item, index) => {
         const row = document.createElement('div');
         row.className = 'p-3.5 rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] space-y-3';
@@ -1944,7 +2306,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
         row.innerHTML = `
           <div class="flex items-center justify-between gap-2">
-            <span class="text-[11px] font-mono text-[var(--text-muted)]">#${index + 1}</span>
+            <span class="text-[11px] font-mono text-[var(--text-muted)] ${showIndex ? '' : 'hidden'}">#${index + 1}</span>
             ${
               state.items.length > 1
                 ? `<button type="button" class="btn-remove-item p-1 text-[var(--text-muted)] hover:text-[var(--negative-text)] transition-colors cursor-pointer" data-id="${item.id}" title="Remove item">
@@ -1963,7 +2325,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
             />
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <div>
+            <div class="${showQty ? '' : 'hidden'}">
               <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Qty</label>
               <input
                 type="number"
@@ -1974,7 +2336,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
                 data-id="${item.id}"
               />
             </div>
-            <div>
+            <div class="${showRate ? '' : 'hidden'}">
               <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Rate</label>
               <input
                 type="number"
@@ -1985,7 +2347,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
                 data-id="${item.id}"
               />
             </div>
-            <div class="${colVisibility.hsn ? '' : 'hidden'}">
+            <div class="${showHsn ? '' : 'hidden'}">
               <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">HSN/SAC</label>
               <input
                 type="text"
@@ -1995,7 +2357,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
                 data-id="${item.id}"
               />
             </div>
-            <div class="${colVisibility.unit ? '' : 'hidden'}">
+            <div class="${showUnit ? '' : 'hidden'}">
               <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Unit</label>
               <input
                 type="text"
@@ -2005,7 +2367,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
                 data-id="${item.id}"
               />
             </div>
-            <div class="${colVisibility.discount ? '' : 'hidden'}">
+            <div class="${showDisc ? '' : 'hidden'}">
               <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Disc %</label>
               <input
                 type="number"
@@ -2017,7 +2379,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
                 data-id="${item.id}"
               />
             </div>
-            <div class="${colVisibility.tax ? '' : 'hidden'}">
+            <div class="${showTax ? '' : 'hidden'}">
               <label class="block text-[10px] text-[var(--text-muted)] uppercase mb-1">Tax %</label>
               <input
                 type="number"
@@ -2173,6 +2535,20 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
     // Update Live Document Preview (Zero Visual Footprint)
     function updatePreview() {
+      // Apply layout and density preset classes to paperSheet
+      if (paperSheet) {
+        paperSheet.classList.remove(
+          'doc-layout-classic',
+          'doc-layout-modern',
+          'doc-layout-minimal',
+          'doc-layout-compact',
+          'doc-density-comfortable',
+          'doc-density-compact'
+        );
+        paperSheet.classList.add(`doc-layout-${state.layout || 'classic'}`);
+        paperSheet.classList.add(`doc-density-${state.density || 'comfortable'}`);
+      }
+
       // 1. Watermark Sample Badge
       if (docSampleBadge) {
         docSampleBadge.classList.toggle('hidden', !isSampleActive);
@@ -2314,12 +2690,16 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         docCustomerState.classList.toggle('hidden', !state.customerState?.trim());
       }
 
-      // 5. Shipping / Consignee Card (Only if enabled and populated)
-      if (docShipToCard) {
-        const hasShipping =
-          state.shippingEnabled &&
-          (state.shippingName?.trim() || state.shippingAddress?.trim() || state.shippingDestination?.trim());
+      // 5. Shipping / Consignee Card (Adaptive Bill To / Ship To grid)
+      const hasShipping =
+        (state.shippingEnabled || state.sectionsConfig?.shipping) &&
+        (state.shippingName?.trim() || state.shippingAddress?.trim() || state.shippingDestination?.trim());
 
+      if (docBillToCard) {
+        docBillToCard.classList.toggle('sm:col-span-2', !hasShipping);
+      }
+
+      if (docShipToCard) {
         if (hasShipping) {
           docShipToCard.classList.remove('hidden');
           if (docShipName) {
@@ -2345,7 +2725,8 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
       // 6. Order / PO References Strip
       let hasReferences = false;
-      if (state.refOrderNumber?.trim()) {
+      const refEnabled = state.sectionsConfig?.references !== false;
+      if (refEnabled && state.refOrderNumber?.trim()) {
         hasReferences = true;
         docRefOrder?.classList.remove('hidden');
         if (docRefOrderVal) docRefOrderVal.textContent = state.refOrderNumber.trim();
@@ -2353,7 +2734,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         docRefOrder?.classList.add('hidden');
       }
 
-      if (state.refOrderDate?.trim()) {
+      if (refEnabled && state.refOrderDate?.trim()) {
         hasReferences = true;
         docRefOrderDate?.classList.remove('hidden');
         if (docRefOrderDateVal) docRefOrderDateVal.textContent = state.refOrderDate.trim();
@@ -2361,7 +2742,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         docRefOrderDate?.classList.add('hidden');
       }
 
-      if (state.refQuoteNumber?.trim()) {
+      if (refEnabled && state.refQuoteNumber?.trim()) {
         hasReferences = true;
         docRefQuote?.classList.remove('hidden');
         if (docRefQuoteVal) docRefQuoteVal.textContent = state.refQuoteNumber.trim();
@@ -2369,7 +2750,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         docRefQuote?.classList.add('hidden');
       }
 
-      if (state.refQuoteDate?.trim()) {
+      if (refEnabled && state.refQuoteDate?.trim()) {
         hasReferences = true;
         docRefQuoteDate?.classList.remove('hidden');
         if (docRefQuoteDateVal) docRefQuoteDateVal.textContent = state.refQuoteDate.trim();
@@ -2385,17 +2766,25 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       if (!docItemsTbody) return;
       docItemsTbody.innerHTML = '';
 
-      // Check if any row uses HSN, Unit, Discount, or Tax
-      const hasAnyHsn = state.items.some((it) => !!it.hsnSac?.trim());
-      const hasAnyUnit = state.items.some((it) => !!it.unit?.trim());
-      const hasAnyDiscount = state.items.some((it) => it.discountPercent != null && it.discountPercent > 0);
-      const isTaxActive = state.taxMode !== 'none';
+      // Check if columns should be shown based on state.tableColumns or item values
+      const showIndex = state.tableColumns?.index !== false;
+      const showHsn = !!state.tableColumns?.hsn || state.items.some((it) => !!it.hsnSac?.trim());
+      const showUnit = !!state.tableColumns?.unit || state.items.some((it) => !!it.unit?.trim());
+      const showQty = state.tableColumns?.qty !== false;
+      const showRate = state.tableColumns?.rate !== false;
+      const showDiscount = !!state.tableColumns?.discount || state.items.some((it) => it.discountPercent != null && it.discountPercent > 0);
+      const isTaxActive = !!state.tableColumns?.tax || state.taxMode !== 'none';
+      const showAmount = state.tableColumns?.amount !== false;
 
       // Toggle Header Columns
-      if (thHsn) thHsn.classList.toggle('hidden', !hasAnyHsn);
-      if (thUnit) thUnit.classList.toggle('hidden', !hasAnyUnit);
-      if (thDiscount) thDiscount.classList.toggle('hidden', !hasAnyDiscount);
+      if (thIndex) thIndex.classList.toggle('hidden', !showIndex);
+      if (thHsn) thHsn.classList.toggle('hidden', !showHsn);
+      if (thUnit) thUnit.classList.toggle('hidden', !showUnit);
+      if (thQty) thQty.classList.toggle('hidden', !showQty);
+      if (thPrice) thPrice.classList.toggle('hidden', !showRate);
+      if (thDiscount) thDiscount.classList.toggle('hidden', !showDiscount);
       if (thTax) thTax.classList.toggle('hidden', !isTaxActive);
+      if (thAmount) thAmount.classList.toggle('hidden', !showAmount);
 
       let subtotalSum = 0;
       let discountSum = 0;
@@ -2433,17 +2822,17 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         tr.className = 'text-neutral-800';
 
         tr.innerHTML = `
-          <td class="py-2.5 pr-2 font-mono text-xs text-neutral-400 align-top">${idx + 1}</td>
+          ${showIndex ? `<td class="py-2.5 pr-2 font-mono text-xs text-neutral-400 align-top">${idx + 1}</td>` : ''}
           <td class="py-2.5 px-2.5 font-normal text-neutral-900 align-top text-sm leading-relaxed">
             ${item.description ? item.description.replace(/\n/g, '<br/>') : '<span class="text-neutral-300">—</span>'}
           </td>
-          ${hasAnyHsn ? `<td class="py-2.5 px-2.5 text-right font-mono text-xs sm:text-[13px] text-neutral-600 align-top">${item.hsnSac || '—'}</td>` : ''}
-          ${hasAnyUnit ? `<td class="py-2.5 px-2.5 text-right text-xs sm:text-sm text-neutral-600 align-top">${item.unit || '—'}</td>` : ''}
-          <td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-sm text-neutral-900 align-top">${qty}</td>
-          <td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-sm text-neutral-900 align-top">${formatMoney(price, state.currency)}</td>
-          ${hasAnyDiscount ? `<td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-xs sm:text-sm text-neutral-600 align-top">${discPct > 0 ? `${discPct}%` : '—'}</td>` : ''}
+          ${showHsn ? `<td class="py-2.5 px-2.5 text-right font-mono text-xs sm:text-[13px] text-neutral-600 align-top">${item.hsnSac || '—'}</td>` : ''}
+          ${showUnit ? `<td class="py-2.5 px-2.5 text-right text-xs sm:text-sm text-neutral-600 align-top">${item.unit || '—'}</td>` : ''}
+          ${showQty ? `<td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-sm text-neutral-900 align-top">${qty}</td>` : ''}
+          ${showRate ? `<td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-sm text-neutral-900 align-top">${formatMoney(price, state.currency)}</td>` : ''}
+          ${showDiscount ? `<td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-xs sm:text-sm text-neutral-600 align-top">${discPct > 0 ? `${discPct}%` : '—'}</td>` : ''}
           ${isTaxActive ? `<td class="py-2.5 px-2.5 text-right font-mono tabular-nums text-xs sm:text-sm text-neutral-600 align-top">${effectiveTaxPct > 0 ? `${effectiveTaxPct}%` : '—'}</td>` : ''}
-          <td class="py-2.5 pl-2.5 text-right font-mono font-semibold text-sm text-neutral-900 tabular-nums align-top">${formatMoney(lineTotal, state.currency)}</td>
+          ${showAmount ? `<td class="py-2.5 pl-2.5 text-right font-mono font-semibold text-sm text-neutral-900 tabular-nums align-top">${formatMoney(lineTotal, state.currency)}</td>` : ''}
         `;
 
         docItemsTbody.appendChild(tr);
@@ -2544,10 +2933,11 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         }
       }
 
-      // 10. Bank Details (Only if populated)
+      // 10. Bank Details (Only if enabled and populated)
       if (docBankBox) {
         const hasBank =
           state.bankDetailsEnabled &&
+          state.sectionsConfig?.payment !== false &&
           (state.bankName?.trim() || state.bankAccountNumber?.trim() || state.bankUpiId?.trim());
 
         if (hasBank) {
@@ -2574,8 +2964,15 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       }
 
       // 11. Notes, Terms, Declaration, Jurisdiction
+      const hasNotes = !!(state.sectionsConfig?.notes !== false && state.notes?.trim());
+      const hasTerms = !!(state.sectionsConfig?.terms !== false && state.termsAndConditions?.trim());
+
+      if (notesTermsGrid) {
+        notesTermsGrid.classList.toggle('sm:grid-cols-2', hasNotes && hasTerms);
+      }
+
       if (docNotesBox && docNotesVal) {
-        if (state.notes?.trim()) {
+        if (hasNotes && state.notes) {
           docNotesVal.textContent = state.notes.trim();
           docNotesBox.classList.remove('hidden');
         } else {
@@ -2584,7 +2981,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       }
 
       if (docTermsBox && docTermsVal) {
-        if (state.termsAndConditions?.trim()) {
+        if (hasTerms && state.termsAndConditions) {
           docTermsVal.textContent = state.termsAndConditions.trim();
           docTermsBox.classList.remove('hidden');
         } else {
@@ -2593,7 +2990,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       }
 
       if (docDeclarationBox && docDeclarationVal) {
-        if (state.declaration?.trim()) {
+        if (state.sectionsConfig?.declaration !== false && state.declaration?.trim()) {
           docDeclarationVal.textContent = state.declaration.trim();
           docDeclarationBox.classList.remove('hidden');
         } else {
@@ -2612,7 +3009,9 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
       // 12. Signatory Box (Zero footprint if empty)
       if (docSignatoryBox) {
-        const hasSig = state.signatoryEnabled || state.signatoryName?.trim() || state.signatoryDesignation?.trim();
+        const hasSig =
+          state.sectionsConfig?.signature !== false &&
+          (state.signatoryEnabled || state.signatoryName?.trim() || state.signatoryDesignation?.trim());
         if (hasSig) {
           docSignatoryBox.classList.remove('hidden');
           if (docSigFor) {
@@ -2991,30 +3390,152 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       revealField('signatory-wrap', 'sig-name');
     });
 
-    // Column Toggles in Line Items
-    document.getElementById('btn-col-toggle-hsn')?.addEventListener('click', (e) => {
-      colVisibility.hsn = !colVisibility.hsn;
-      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', colVisibility.hsn);
+    // Customizer Listeners: Layout & Density
+    layoutPickerBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const l = btn.getAttribute('data-layout') as DocumentLayout;
+        if (l) {
+          state.layout = l;
+          populateFormFields();
+          updatePreview();
+          saveToStorage();
+        }
+      });
+    });
+
+    densityPickerBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const d = btn.getAttribute('data-density') as DocumentDensity;
+        if (d) {
+          state.density = d;
+          populateFormFields();
+          updatePreview();
+          saveToStorage();
+        }
+      });
+    });
+
+    // Customizer Listeners: Table Columns
+    colToggleIndex?.addEventListener('change', (e) => {
+      state.tableColumns.index = (e.target as HTMLInputElement).checked;
       renderEditorLineItems();
       updatePreview();
+      saveToStorage();
+    });
+    colToggleHsn?.addEventListener('change', (e) => {
+      state.tableColumns.hsn = (e.target as HTMLInputElement).checked;
+      renderEditorLineItems();
+      updatePreview();
+      saveToStorage();
+    });
+    colToggleUnit?.addEventListener('change', (e) => {
+      state.tableColumns.unit = (e.target as HTMLInputElement).checked;
+      renderEditorLineItems();
+      updatePreview();
+      saveToStorage();
+    });
+    colToggleQty?.addEventListener('change', (e) => {
+      state.tableColumns.qty = (e.target as HTMLInputElement).checked;
+      renderEditorLineItems();
+      updatePreview();
+      saveToStorage();
+    });
+    colToggleRate?.addEventListener('change', (e) => {
+      state.tableColumns.rate = (e.target as HTMLInputElement).checked;
+      renderEditorLineItems();
+      updatePreview();
+      saveToStorage();
+    });
+    colToggleDiscount?.addEventListener('change', (e) => {
+      state.tableColumns.discount = (e.target as HTMLInputElement).checked;
+      renderEditorLineItems();
+      updatePreview();
+      saveToStorage();
+    });
+    colToggleTax?.addEventListener('change', (e) => {
+      state.tableColumns.tax = (e.target as HTMLInputElement).checked;
+      renderEditorLineItems();
+      updatePreview();
+      saveToStorage();
+    });
+
+    // Customizer Listeners: Document Sections
+    secToggleShipping?.addEventListener('change', (e) => {
+      const checked = (e.target as HTMLInputElement).checked;
+      state.shippingEnabled = checked;
+      state.sectionsConfig.shipping = checked;
+      if (toggleShipTo) toggleShipTo.checked = checked;
+      updateVisibilityToggles();
+      updatePreview();
+      saveToStorage();
+    });
+    secToggleReferences?.addEventListener('change', (e) => {
+      state.sectionsConfig.references = (e.target as HTMLInputElement).checked;
+      updatePreview();
+      saveToStorage();
+    });
+    secTogglePayment?.addEventListener('change', (e) => {
+      const checked = (e.target as HTMLInputElement).checked;
+      state.bankDetailsEnabled = checked;
+      state.sectionsConfig.payment = checked;
+      updatePreview();
+      saveToStorage();
+    });
+    secToggleNotes?.addEventListener('change', (e) => {
+      state.sectionsConfig.notes = (e.target as HTMLInputElement).checked;
+      updatePreview();
+      saveToStorage();
+    });
+    secToggleTerms?.addEventListener('change', (e) => {
+      state.sectionsConfig.terms = (e.target as HTMLInputElement).checked;
+      updatePreview();
+      saveToStorage();
+    });
+    secToggleDeclaration?.addEventListener('change', (e) => {
+      state.sectionsConfig.declaration = (e.target as HTMLInputElement).checked;
+      updatePreview();
+      saveToStorage();
+    });
+    secToggleSignature?.addEventListener('change', (e) => {
+      const checked = (e.target as HTMLInputElement).checked;
+      state.signatoryEnabled = checked;
+      state.sectionsConfig.signature = checked;
+      updatePreview();
+      saveToStorage();
+    });
+
+    // Column Quick-Toggles in Line Items header
+    document.getElementById('btn-col-toggle-hsn')?.addEventListener('click', (e) => {
+      state.tableColumns.hsn = !state.tableColumns.hsn;
+      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', state.tableColumns.hsn);
+      if (colToggleHsn) colToggleHsn.checked = state.tableColumns.hsn;
+      renderEditorLineItems();
+      updatePreview();
+      saveToStorage();
     });
     document.getElementById('btn-col-toggle-unit')?.addEventListener('click', (e) => {
-      colVisibility.unit = !colVisibility.unit;
-      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', colVisibility.unit);
+      state.tableColumns.unit = !state.tableColumns.unit;
+      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', state.tableColumns.unit);
+      if (colToggleUnit) colToggleUnit.checked = state.tableColumns.unit;
       renderEditorLineItems();
       updatePreview();
+      saveToStorage();
     });
     document.getElementById('btn-col-toggle-disc')?.addEventListener('click', (e) => {
-      colVisibility.discount = !colVisibility.discount;
-      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', colVisibility.discount);
+      state.tableColumns.discount = !state.tableColumns.discount;
+      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', state.tableColumns.discount);
+      if (colToggleDiscount) colToggleDiscount.checked = state.tableColumns.discount;
       renderEditorLineItems();
       updatePreview();
+      saveToStorage();
     });
     document.getElementById('btn-col-toggle-tax')?.addEventListener('click', (e) => {
-      colVisibility.tax = !colVisibility.tax;
-      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', colVisibility.tax);
+      state.tableColumns.tax = !state.tableColumns.tax;
+      (e.currentTarget as HTMLElement).classList.toggle('border-[var(--text-primary)]', state.tableColumns.tax);
+      if (colToggleTax) colToggleTax.checked = state.tableColumns.tax;
       renderEditorLineItems();
       updatePreview();
+      saveToStorage();
     });
 
     // Logo Upload
@@ -3067,13 +3588,32 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
     const btnLoadSample = document.getElementById('btn-load-sample');
     btnLoadSample?.addEventListener('click', () => {
       isSampleActive = true;
-      colVisibility.hsn = false;
-      colVisibility.unit = true;
-      colVisibility.discount = true;
 
       state = {
         version: 2,
         documentType: 'invoice',
+        layout: 'modern',
+        density: 'comfortable',
+        tableColumns: {
+          index: true,
+          item: true,
+          hsn: false,
+          unit: true,
+          qty: true,
+          rate: true,
+          discount: true,
+          tax: false,
+          amount: true,
+        },
+        sectionsConfig: {
+          shipping: false,
+          references: true,
+          payment: true,
+          notes: true,
+          terms: true,
+          declaration: true,
+          signature: true,
+        },
         customTitle: '',
         documentNumber: 'INV-2026-001',
         documentDate: new Date().toISOString().split('T')[0],
@@ -3192,11 +3732,6 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         } catch {}
 
         isSampleActive = false;
-        colVisibility.hsn = false;
-        colVisibility.unit = false;
-        colVisibility.discount = false;
-        colVisibility.tax = false;
-
         state = createBlankState();
         populateFormFields();
         renderEditorLineItems();
