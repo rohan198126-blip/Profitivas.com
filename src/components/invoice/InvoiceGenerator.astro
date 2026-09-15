@@ -1344,127 +1344,128 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
           </table>
         </div>
 
-        <!-- Lower Financial & Closing Block (Adaptive Grid) -->
-        <div id="doc-financial-block" class="pt-4 border-t-2 border-neutral-200 flex flex-col sm:flex-row justify-between items-start gap-6">
-          <!-- Left: Amount in Words, Bank Details, Adaptive Notes & Terms, Declaration -->
-          <div id="doc-closing-left" class="flex-1 space-y-3 text-sm text-neutral-700 w-full max-w-sm">
-            <!-- Amount in Words -->
-            <div id="doc-amount-in-words-wrap" class="hidden p-2.5 rounded border border-neutral-200 bg-neutral-50/80 space-y-0.5">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
+        <!-- ADAPTIVE LOWER DOCUMENT SECTIONS -->
+        <div id="doc-adaptive-closing-sections" class="space-y-2.5 pt-2">
+          <!-- ROW 1: Financial Totals & Amount In Words -->
+          <div id="doc-financial-row" class="pt-3 border-t-2 border-neutral-300 flex flex-col sm:flex-row justify-between items-start gap-4">
+            <!-- Left: Amount in Words -->
+            <div id="doc-amount-in-words-wrap" class="hidden flex-1 max-w-sm p-2 rounded bg-neutral-50/80 border border-neutral-200">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-0.5">
                 {t.document.amountInWordsLabel}
               </span>
-              <p id="doc-amount-in-words-val" class="font-medium text-neutral-900 leading-normal"></p>
+              <p id="doc-amount-in-words-val" class="font-medium text-neutral-900 text-xs sm:text-[13px] leading-relaxed"></p>
             </div>
 
-            <!-- Bank & UPI Details -->
-            <div id="doc-bank-box" class="hidden p-3 rounded border border-neutral-200 bg-neutral-50/80 space-y-1">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
+            <!-- Right: Totals Breakdown -->
+            <div id="doc-closing-right" class="w-full sm:w-72 space-y-0.5 text-xs sm:text-sm ml-auto">
+              <div class="flex justify-between py-0.5 text-neutral-600">
+                <span>{t.document.subtotalLabel}</span>
+                <span id="doc-subtotal-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+              </div>
+
+              <div id="doc-discount-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+                <span>{t.document.discountTotalLabel}</span>
+                <span id="doc-discount-val" class="font-mono font-medium text-neutral-900">-$0.00</span>
+              </div>
+
+              <div id="doc-taxable-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+                <span>{t.document.taxableTotalLabel}</span>
+                <span id="doc-taxable-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+              </div>
+
+              <div id="doc-cgst-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+                <span id="doc-cgst-label">CGST</span>
+                <span id="doc-cgst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+              </div>
+
+              <div id="doc-sgst-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+                <span id="doc-sgst-label">SGST</span>
+                <span id="doc-sgst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+              </div>
+
+              <div id="doc-igst-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+                <span id="doc-igst-label">IGST</span>
+                <span id="doc-igst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+              </div>
+
+              <div id="doc-custom-tax-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+                <span id="doc-custom-tax-label">Tax</span>
+                <span id="doc-custom-tax-val" class="font-mono font-medium text-neutral-900">$0.00</span>
+              </div>
+
+              <div id="doc-round-off-row" class="hidden flex justify-between py-0.5 text-neutral-600">
+                <span>{t.document.roundOffLabel}</span>
+                <span id="doc-round-off-val" class="font-mono font-medium text-neutral-900">+$0.00</span>
+              </div>
+
+              <div class="flex justify-between py-1 border-t-2 border-neutral-900 text-sm sm:text-base font-bold text-neutral-900 mt-1">
+                <span>{t.document.totalLabel}</span>
+                <span id="doc-total-val" class="font-mono text-base sm:text-lg font-black text-neutral-900">$0.00</span>
+              </div>
+
+              <div id="doc-reverse-charge-notice" class="hidden pt-0.5 text-[11px] text-neutral-500 italic text-right">
+                Tax payable under reverse charge
+              </div>
+            </div>
+          </div>
+
+          <!-- ROW 2: Payment Details & Notes (Side-by-Side 2-Column Grid) -->
+          <div id="doc-payment-notes-row" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-neutral-200">
+            <!-- Payment / Bank Details -->
+            <div id="doc-bank-box" class="hidden p-2 rounded bg-neutral-50/80 border border-neutral-200 text-xs space-y-0.5">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-0.5">
                 {t.document.bankDetailsLabel}
               </span>
               <div id="doc-bank-line-name" class="hidden font-semibold text-neutral-900"></div>
-              <div id="doc-bank-line-acct" class="hidden font-mono text-xs sm:text-[13px] text-neutral-800"></div>
-              <div id="doc-bank-line-ifsc" class="hidden font-mono text-xs sm:text-[13px] text-neutral-800"></div>
-              <div id="doc-bank-line-upi" class="hidden font-mono text-xs sm:text-[13px] text-neutral-900 font-medium"></div>
+              <div id="doc-bank-line-acct" class="hidden font-mono text-neutral-800"></div>
+              <div id="doc-bank-line-ifsc" class="hidden font-mono text-neutral-800"></div>
+              <div id="doc-bank-line-upi" class="hidden font-mono text-neutral-900 font-medium"></div>
             </div>
 
-            <!-- Adaptive Notes & Terms Subgrid (Side-by-Side when both populated) -->
-            <div id="doc-notes-terms-grid" class="grid grid-cols-1 gap-2.5">
-              <!-- Notes -->
-              <div id="doc-notes-box" class="hidden space-y-1">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
-                  {t.document.notesLabel}
-                </span>
-                <p id="doc-notes-val" class="whitespace-pre-line leading-relaxed text-xs sm:text-sm text-neutral-600"></p>
-              </div>
-
-              <!-- Terms & Conditions -->
-              <div id="doc-terms-box" class="hidden space-y-1">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
-                  {t.document.termsLabel}
-                </span>
-                <p id="doc-terms-val" class="whitespace-pre-line leading-relaxed text-xs sm:text-sm text-neutral-600"></p>
-              </div>
-            </div>
-
-            <!-- Declaration -->
-            <div id="doc-declaration-box" class="hidden space-y-1">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
-                {t.document.declarationLabel}
+            <!-- Notes -->
+            <div id="doc-notes-box" class="hidden p-2 rounded bg-neutral-50/80 border border-neutral-200 text-xs space-y-0.5">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block mb-0.5">
+                {t.document.notesLabel}
               </span>
-              <p id="doc-declaration-val" class="italic text-xs sm:text-[13px] leading-relaxed text-neutral-500"></p>
-            </div>
-
-            <!-- Jurisdiction -->
-            <div id="doc-jurisdiction-box" class="hidden text-xs sm:text-[13px] font-medium text-neutral-600 pt-0.5">
+              <p id="doc-notes-val" class="whitespace-pre-line leading-relaxed text-neutral-600"></p>
             </div>
           </div>
 
-          <!-- Right: Mathematical Totals Breakdown -->
-          <div id="doc-closing-right" class="w-full sm:w-72 space-y-1.5 text-sm">
-            <div class="flex justify-between py-1 text-neutral-600">
-              <span>{t.document.subtotalLabel}</span>
-              <span id="doc-subtotal-val" class="font-mono font-medium text-neutral-900">$0.00</span>
-            </div>
-
-            <div id="doc-discount-row" class="hidden flex justify-between py-1 text-neutral-600">
-              <span>{t.document.discountTotalLabel}</span>
-              <span id="doc-discount-val" class="font-mono font-medium text-neutral-900">-$0.00</span>
-            </div>
-
-            <div id="doc-taxable-row" class="hidden flex justify-between py-1 text-neutral-600">
-              <span>{t.document.taxableTotalLabel}</span>
-              <span id="doc-taxable-val" class="font-mono font-medium text-neutral-900">$0.00</span>
-            </div>
-
-            <div id="doc-cgst-row" class="hidden flex justify-between py-1 text-neutral-600">
-              <span id="doc-cgst-label">CGST</span>
-              <span id="doc-cgst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
-            </div>
-
-            <div id="doc-sgst-row" class="hidden flex justify-between py-1 text-neutral-600">
-              <span id="doc-sgst-label">SGST</span>
-              <span id="doc-sgst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
-            </div>
-
-            <div id="doc-igst-row" class="hidden flex justify-between py-1 text-neutral-600">
-              <span id="doc-igst-label">IGST</span>
-              <span id="doc-igst-val" class="font-mono font-medium text-neutral-900">$0.00</span>
-            </div>
-
-            <div id="doc-custom-tax-row" class="hidden flex justify-between py-1 text-neutral-600">
-              <span id="doc-custom-tax-label">Tax</span>
-              <span id="doc-custom-tax-val" class="font-mono font-medium text-neutral-900">$0.00</span>
-            </div>
-
-            <div id="doc-round-off-row" class="hidden flex justify-between py-1 text-neutral-600">
-              <span>{t.document.roundOffLabel}</span>
-              <span id="doc-round-off-val" class="font-mono font-medium text-neutral-900">+$0.00</span>
-            </div>
-
-            <div class="flex justify-between py-2 border-t-2 border-neutral-900 text-base sm:text-lg font-bold text-neutral-900">
-              <span>{t.document.totalLabel}</span>
-              <span id="doc-total-val" class="font-mono text-lg sm:text-xl font-black text-neutral-900">$0.00</span>
-            </div>
-
-            <div id="doc-reverse-charge-notice" class="hidden pt-1 text-xs text-neutral-500 italic text-right">
-              Tax payable under reverse charge
+          <!-- ROW 3: Terms and Conditions -->
+          <div id="doc-terms-row" class="hidden pt-1.5 border-t border-neutral-100">
+            <div id="doc-terms-box" class="text-xs space-y-0.5">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
+                {t.document.termsLabel}
+              </span>
+              <p id="doc-terms-val" class="whitespace-pre-line leading-relaxed text-neutral-600 text-[11px] sm:text-xs"></p>
             </div>
           </div>
-        </div>
 
-        <!-- Document Signatory & Computer Generated Footer -->
-        <div id="doc-footer-closing" class="pt-6 border-t border-neutral-200 mt-6 flex flex-col sm:flex-row justify-between items-end gap-4 text-xs">
-          <div id="doc-computer-gen-notice" class="text-neutral-400 italic text-xs">
-            {t.document.computerGeneratedNotice}
-          </div>
-
-          <div id="doc-signatory-box" class="hidden text-right min-w-[180px] space-y-1">
-            <div id="doc-sig-for" class="font-medium text-neutral-800 text-xs sm:text-sm">For Your Business</div>
-            <div class="h-10 flex items-end justify-end">
-              <div class="w-36 border-b border-neutral-400"></div>
+          <!-- ROW 4: Closing Execution: Declaration + Jurisdiction + Notice on Left, Signature on Right -->
+          <div id="doc-execution-row" class="pt-2 border-t border-neutral-200 flex flex-col sm:flex-row justify-between items-end gap-3 text-xs">
+            <!-- Left Closing Legal Group -->
+            <div id="doc-legal-left-group" class="flex-1 space-y-1 max-w-sm">
+              <div id="doc-declaration-box" class="hidden">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
+                  {t.document.declarationLabel}
+                </span>
+                <p id="doc-declaration-val" class="italic text-[11px] leading-relaxed text-neutral-500"></p>
+              </div>
+              <div id="doc-jurisdiction-box" class="hidden text-[11px] font-medium text-neutral-600"></div>
+              <div id="doc-computer-gen-notice" class="text-neutral-400 italic text-[11px]">
+                {t.document.computerGeneratedNotice}
+              </div>
             </div>
-            <div id="doc-sig-name" class="font-bold text-neutral-900 text-sm sm:text-base"></div>
-            <div id="doc-sig-title" class="text-neutral-500 text-xs">Authorized Signatory</div>
+
+            <!-- Right: Compact Authorized Signatory -->
+            <div id="doc-signatory-box" class="hidden text-right min-w-[160px] space-y-0.5 shrink-0">
+              <div id="doc-sig-for" class="font-medium text-neutral-800 text-xs">For Your Business</div>
+              <div class="h-6 flex items-end justify-end">
+                <div class="w-32 border-b border-neutral-400"></div>
+              </div>
+              <div id="doc-sig-name" class="font-bold text-neutral-900 text-xs sm:text-sm"></div>
+              <div id="doc-sig-title" class="text-neutral-500 text-[11px]">Authorized Signatory</div>
+            </div>
           </div>
         </div>
       </div>
@@ -1571,7 +1572,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
   @media print {
     @page {
       size: A4 portrait;
-      margin: 10mm 12mm;
+      margin: 8mm 10mm;
     }
 
     * {
@@ -1599,8 +1600,8 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       color: #000000 !important;
       padding: 0 !important;
       margin: 0 !important;
-      font-size: 13.5px !important; /* ~10.2pt, standard readable print font */
-      line-height: 1.45 !important;
+      font-size: 13px !important; /* ~9.8pt, readable, elegant, comfortable */
+      line-height: 1.38 !important;
     }
 
     main {
@@ -1634,16 +1635,19 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       max-width: 100% !important;
       background: #ffffff !important;
       color: #111111 !important;
-      font-size: 13.5px !important;
-      line-height: 1.45 !important;
+      font-size: 13px !important;
+      line-height: 1.38 !important;
+      overflow: visible !important;
     }
 
     /* Keep essential sections together on one page */
     #doc-top-header,
     #doc-entities-row,
     #doc-references-strip,
-    #doc-financial-block,
-    #doc-footer-closing,
+    #doc-financial-row,
+    #doc-payment-notes-row,
+    #doc-terms-row,
+    #doc-execution-row,
     tr {
       break-inside: avoid !important;
       page-break-inside: avoid !important;
@@ -1651,22 +1655,56 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
 
     /* Clean, balanced print spacing */
     #doc-top-header {
-      padding-bottom: 12px !important;
+      padding-bottom: 8px !important;
     }
     #doc-entities-row {
-      padding-top: 10px !important;
-      padding-bottom: 10px !important;
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+      gap: 12px !important;
+    }
+    #doc-references-strip {
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
     }
     #doc-items-table-wrap {
-      padding-top: 10px !important;
-      padding-bottom: 10px !important;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
     }
-    #doc-financial-block {
-      padding-top: 10px !important;
+    #doc-items-tbody td {
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
+      font-size: 12.5px !important;
     }
-    #doc-footer-closing {
-      padding-top: 12px !important;
-      margin-top: 12px !important;
+    #doc-items-thead th {
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
+      font-size: 11px !important;
+    }
+
+    #doc-adaptive-closing-sections {
+      padding-top: 6px !important;
+    }
+    #doc-financial-row {
+      padding-top: 6px !important;
+      gap: 12px !important;
+    }
+    #doc-payment-notes-row {
+      padding-top: 6px !important;
+      gap: 12px !important;
+    }
+    #doc-terms-row {
+      padding-top: 4px !important;
+    }
+    #doc-execution-row {
+      padding-top: 6px !important;
+      gap: 12px !important;
+    }
+    #doc-closing-right > div {
+      padding-top: 1px !important;
+      padding-bottom: 1px !important;
+    }
+    #doc-signatory-box .h-6 {
+      height: 20px !important;
     }
   }
 </style>
@@ -2096,7 +2134,9 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
     const docBankLineAcct = document.getElementById('doc-bank-line-acct');
     const docBankLineIfsc = document.getElementById('doc-bank-line-ifsc');
     const docBankLineUpi = document.getElementById('doc-bank-line-upi');
-    const notesTermsGrid = document.getElementById('doc-notes-terms-grid');
+    const docPaymentNotesRow = document.getElementById('doc-payment-notes-row');
+    const docTermsRow = document.getElementById('doc-terms-row');
+    const docExecutionRow = document.getElementById('doc-execution-row');
     const docNotesBox = document.getElementById('doc-notes-box');
     const docNotesVal = document.getElementById('doc-notes-val');
     const docTermsBox = document.getElementById('doc-terms-box');
@@ -2933,15 +2973,21 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         }
       }
 
-      // 10. Bank Details (Only if enabled and populated)
-      if (docBankBox) {
-        const hasBank =
-          state.bankDetailsEnabled &&
-          state.sectionsConfig?.payment !== false &&
-          (state.bankName?.trim() || state.bankAccountNumber?.trim() || state.bankUpiId?.trim());
+      // 10. Payment Details & Notes Row (Side-by-side 2-column grid when both active)
+      const hasBank =
+        state.bankDetailsEnabled &&
+        state.sectionsConfig?.payment !== false &&
+        Boolean(state.bankName?.trim() || state.bankAccountNumber?.trim() || state.bankUpiId?.trim());
+      const hasNotes = Boolean(state.sectionsConfig?.notes !== false && state.notes?.trim());
 
+      if (docPaymentNotesRow) {
+        docPaymentNotesRow.classList.toggle('hidden', !hasBank && !hasNotes);
+      }
+
+      if (docBankBox) {
         if (hasBank) {
           docBankBox.classList.remove('hidden');
+          docBankBox.classList.toggle('sm:col-span-2', !hasNotes);
           if (docBankLineName) {
             docBankLineName.textContent = state.bankName ? `Bank: ${state.bankName.trim()}` : '';
             docBankLineName.classList.toggle('hidden', !state.bankName?.trim());
@@ -2963,23 +3009,21 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         }
       }
 
-      // 11. Notes, Terms, Declaration, Jurisdiction
-      const hasNotes = !!(state.sectionsConfig?.notes !== false && state.notes?.trim());
-      const hasTerms = !!(state.sectionsConfig?.terms !== false && state.termsAndConditions?.trim());
-
-      if (notesTermsGrid) {
-        notesTermsGrid.classList.toggle('sm:grid-cols-2', hasNotes && hasTerms);
-      }
-
       if (docNotesBox && docNotesVal) {
         if (hasNotes && state.notes) {
           docNotesVal.textContent = state.notes.trim();
           docNotesBox.classList.remove('hidden');
+          docNotesBox.classList.toggle('sm:col-span-2', !hasBank);
         } else {
           docNotesBox.classList.add('hidden');
         }
       }
 
+      // 11. Terms and Conditions Row
+      const hasTerms = Boolean(state.sectionsConfig?.terms !== false && state.termsAndConditions?.trim());
+      if (docTermsRow) {
+        docTermsRow.classList.toggle('hidden', !hasTerms);
+      }
       if (docTermsBox && docTermsVal) {
         if (hasTerms && state.termsAndConditions) {
           docTermsVal.textContent = state.termsAndConditions.trim();
@@ -2989,6 +3033,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         }
       }
 
+      // 12. Execution Row: Declaration, Jurisdiction, Notice on Left; Signatory on Right
       if (docDeclarationBox && docDeclarationVal) {
         if (state.sectionsConfig?.declaration !== false && state.declaration?.trim()) {
           docDeclarationVal.textContent = state.declaration.trim();
@@ -3007,11 +3052,11 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         }
       }
 
-      // 12. Signatory Box (Zero footprint if empty)
+      const hasSig = Boolean(
+        state.sectionsConfig?.signature !== false &&
+        (state.signatoryEnabled || state.signatoryName?.trim() || state.signatoryDesignation?.trim())
+      );
       if (docSignatoryBox) {
-        const hasSig =
-          state.sectionsConfig?.signature !== false &&
-          (state.signatoryEnabled || state.signatoryName?.trim() || state.signatoryDesignation?.trim());
         if (hasSig) {
           docSignatoryBox.classList.remove('hidden');
           if (docSigFor) {
@@ -3026,6 +3071,14 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         } else {
           docSignatoryBox.classList.add('hidden');
         }
+      }
+
+      if (docExecutionRow) {
+        const hasLegal = Boolean(
+          (state.sectionsConfig?.declaration !== false && state.declaration?.trim()) ||
+          state.jurisdiction?.trim()
+        );
+        docExecutionRow.classList.toggle('hidden', !hasLegal && !hasSig);
       }
     }
 
