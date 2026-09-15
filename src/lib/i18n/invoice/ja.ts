@@ -105,6 +105,7 @@ export const jaInvoice: InvoiceTranslations = {
     signatoryName: '発行責任者氏名',
     signatoryTitle: '役職名',
     notesPlaceholder: 'お振込手数料は貴社にてご負担願います。今後ともよろしくお願い申し上げます。',
+    termsPlaceholder: '1. お支払い条件、有効期限、または提供条件...',
   },
   document: {
     invoiceTitle: '請 求 書',
@@ -163,6 +164,7 @@ export const jaInvoice: InvoiceTranslations = {
     addTax: '+ 消費税を追加',
     addNotes: '+ 備考を追加',
     addTerms: '+ 取引条件を追加',
+    removeTerms: '取引条件を削除',
     addDeclaration: '+ 誓約文を追加',
     addSignature: '+ 責任者氏名を追加',
     addJurisdiction: '+ 管轄を追加',

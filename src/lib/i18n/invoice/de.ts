@@ -105,6 +105,7 @@ export const deInvoice: InvoiceTranslations = {
     signatoryName: 'Name des Zeichnungsberechtigten',
     signatoryTitle: 'Funktion / Position',
     notesPlaceholder: 'Zahlbar innerhalb von 14 Tagen ohne Abzug. Vielen Dank für Ihren Auftrag!',
+    termsPlaceholder: '1. Zahlungsbedingungen, Gültigkeitsdauer oder Leistungsbedingungen...',
   },
   document: {
     invoiceTitle: 'RECHNUNG',
@@ -163,6 +164,7 @@ export const deInvoice: InvoiceTranslations = {
     addTax: '+ Steuer Hinzufügen',
     addNotes: '+ Hinweise Hinzufügen',
     addTerms: '+ AGB Hinzufügen',
+    removeTerms: 'AGB Entfernen',
     addDeclaration: '+ Erklärung Hinzufügen',
     addSignature: '+ Unterschrift Hinzufügen',
     addJurisdiction: '+ Gerichtsstand Hinzufügen',

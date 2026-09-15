@@ -1114,17 +1114,41 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
             ></textarea>
           </div>
 
-          <!-- Terms & Conditions -->
-          <div id="terms-wrap" class="hidden space-y-1.5">
-            <label for="invoice-terms" class="block text-xs font-medium text-[var(--text-secondary)]">
-              {t.fields.terms}
-            </label>
-            <textarea
-              id="invoice-terms"
-              rows="2"
-              class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
-              placeholder="1. Payment terms, validity period, or service conditions..."
-            ></textarea>
+          <!-- Terms & Conditions Optional Section -->
+          <div id="terms-section-container" class="space-y-1.5">
+            <!-- When Disabled -->
+            <div id="terms-disabled-view">
+              <button
+                type="button"
+                id="btn-toggle-terms"
+                class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer inline-flex items-center gap-1.5 focus:outline-none focus:ring-1 focus:ring-[var(--border-focus)]"
+              >
+                <span>{t.actions.addTerms}</span>
+              </button>
+            </div>
+
+            <!-- When Enabled -->
+            <div id="terms-wrap" class="hidden space-y-1.5">
+              <label for="invoice-terms" class="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                {t.fields.terms}
+              </label>
+              <textarea
+                id="invoice-terms"
+                rows="2"
+                class="w-full rounded-lg border border-[var(--border)] bg-[var(--input-background)] px-3 py-2 text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--text-primary)] resize-none"
+                placeholder={t.fields.termsPlaceholder}
+              ></textarea>
+              <div class="flex justify-start">
+                <button
+                  type="button"
+                  id="btn-remove-terms"
+                  class="text-xs text-[var(--text-muted)] hover:text-[var(--negative-text)] transition-colors cursor-pointer inline-flex items-center gap-1 focus:outline-none focus:ring-1 focus:ring-[var(--border-focus)] rounded py-0.5"
+                >
+                  <span aria-hidden="true">✕</span>
+                  <span>{t.actions.removeTerms}</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Declaration -->
@@ -1185,9 +1209,6 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
           <div class="pt-2 flex flex-wrap gap-2 text-xs">
             <button type="button" id="btn-toggle-notes" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
               {t.actions.addNotes}
-            </button>
-            <button type="button" id="btn-toggle-terms" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
-              {t.actions.addTerms}
             </button>
             <button type="button" id="btn-toggle-declaration" class="px-2.5 py-1 rounded-md border border-dashed border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-focus)] transition-colors cursor-pointer">
               {t.actions.addDeclaration}
@@ -2226,7 +2247,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       if (secToggleReferences) secToggleReferences.checked = !!(state.refOrderNumber || state.refOrderDate || state.refQuoteNumber || state.refQuoteDate || state.sectionsConfig?.references);
       if (secTogglePayment) secTogglePayment.checked = Boolean(state.bankDetailsEnabled && state.sectionsConfig?.payment !== false);
       if (secToggleNotes) secToggleNotes.checked = Boolean(state.sectionsConfig?.notes !== false && (state.notes?.trim() || state.sectionsConfig?.notes));
-      if (secToggleTerms) secToggleTerms.checked = Boolean(state.sectionsConfig?.terms !== false && (state.termsAndConditions?.trim() || state.sectionsConfig?.terms));
+      if (secToggleTerms) secToggleTerms.checked = Boolean(state.sectionsConfig?.terms);
       if (secToggleDeclaration) secToggleDeclaration.checked = Boolean(state.sectionsConfig?.declaration !== false && (state.declaration?.trim() || state.sectionsConfig?.declaration));
       if (secToggleSignature) secToggleSignature.checked = Boolean(state.signatoryEnabled && state.sectionsConfig?.signature !== false);
 
@@ -2338,7 +2359,9 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         bankingFieldsWrap.classList.toggle('hidden', !hasBankFields);
       }
       document.getElementById('notes-wrap')?.classList.toggle('hidden', !state.notes?.trim());
-      document.getElementById('terms-wrap')?.classList.toggle('hidden', !state.termsAndConditions?.trim());
+      const isTermsEnabled = Boolean(state.sectionsConfig?.terms);
+      document.getElementById('terms-disabled-view')?.classList.toggle('hidden', isTermsEnabled);
+      document.getElementById('terms-wrap')?.classList.toggle('hidden', !isTermsEnabled);
       document.getElementById('declaration-wrap')?.classList.toggle('hidden', !state.declaration?.trim());
       document.getElementById('jurisdiction-wrap')?.classList.toggle('hidden', !state.jurisdiction?.trim());
       document.getElementById('signatory-wrap')?.classList.toggle('hidden', !state.signatoryEnabled && !state.signatoryName?.trim() && !state.signatoryDesignation?.trim());
@@ -3059,8 +3082,8 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
         }
       }
 
-      // 11. Terms and Conditions Row (Zero footprint if empty)
-      const hasTerms = Boolean(state.sectionsConfig?.terms !== false && state.termsAndConditions?.trim());
+      // 11. Terms and Conditions Row (Zero footprint if empty or disabled)
+      const hasTerms = Boolean(state.sectionsConfig?.terms && state.termsAndConditions?.trim());
       if (docTermsRow) {
         docTermsRow.classList.toggle('hidden', !hasTerms);
       }
@@ -3070,6 +3093,7 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
           docTermsBox.classList.remove('hidden');
         } else {
           docTermsBox.classList.add('hidden');
+          docTermsVal.textContent = '';
         }
       }
 
@@ -3516,8 +3540,20 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
     document.getElementById('btn-toggle-terms')?.addEventListener('click', () => {
       state.sectionsConfig.terms = true;
       if (secToggleTerms) secToggleTerms.checked = true;
-      revealField('terms-wrap', 'invoice-terms');
+      updateVisibilityToggles();
+      invoiceTermsInput?.focus();
+      updatePreview();
       saveToStorage();
+    });
+    document.getElementById('btn-remove-terms')?.addEventListener('click', () => {
+      state.sectionsConfig.terms = false;
+      state.termsAndConditions = '';
+      if (invoiceTermsInput) invoiceTermsInput.value = '';
+      if (secToggleTerms) secToggleTerms.checked = false;
+      updateVisibilityToggles();
+      updatePreview();
+      saveToStorage();
+      document.getElementById('btn-toggle-terms')?.focus();
     });
     document.getElementById('btn-toggle-declaration')?.addEventListener('click', () => {
       state.sectionsConfig.declaration = true;
@@ -3633,7 +3669,13 @@ const docTypeOptions: Array<{ value: DocumentType; label: string }> = [
       saveToStorage();
     });
     secToggleTerms?.addEventListener('change', (e) => {
-      state.sectionsConfig.terms = (e.target as HTMLInputElement).checked;
+      const checked = (e.target as HTMLInputElement).checked;
+      state.sectionsConfig.terms = checked;
+      if (!checked) {
+        state.termsAndConditions = '';
+        if (invoiceTermsInput) invoiceTermsInput.value = '';
+      }
+      updateVisibilityToggles();
       updatePreview();
       saveToStorage();
     });

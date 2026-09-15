@@ -105,6 +105,7 @@ export const ptInvoice: InvoiceTranslations = {
     signatoryName: 'Nome do Responsável / Assinante',
     signatoryTitle: 'Cargo / Função',
     notesPlaceholder: 'Condições comerciais, prazos de entrega ou dados de pagamento...',
+    termsPlaceholder: '1. Condições de pagamento, prazo de validade ou termos do serviço...',
   },
   document: {
     invoiceTitle: 'FATURA',
@@ -163,6 +164,7 @@ export const ptInvoice: InvoiceTranslations = {
     addTax: '+ Adicionar Imposto',
     addNotes: '+ Adicionar Observações',
     addTerms: '+ Adicionar Termos',
+    removeTerms: 'Remover Termos',
     addDeclaration: '+ Adicionar Declaração',
     addSignature: '+ Adicionar Assinatura',
     addJurisdiction: '+ Adicionar Jurisdição',

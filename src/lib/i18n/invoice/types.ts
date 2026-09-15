@@ -244,6 +244,7 @@ export interface InvoiceTranslations {
     signatoryName: string;
     signatoryTitle: string;
     notesPlaceholder: string;
+    termsPlaceholder?: string;
   };
   document: {
     invoiceTitle: string;
@@ -302,6 +303,7 @@ export interface InvoiceTranslations {
     addTax: string;
     addNotes: string;
     addTerms: string;
+    removeTerms: string;
     addDeclaration: string;
     addSignature: string;
     addJurisdiction: string;

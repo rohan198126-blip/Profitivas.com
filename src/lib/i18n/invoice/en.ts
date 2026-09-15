@@ -105,6 +105,7 @@ export const enInvoice: InvoiceTranslations = {
     signatoryName: 'Authorized Signatory Name',
     signatoryTitle: 'Designation / Title',
     notesPlaceholder: 'Add any special instructions, delivery details, or client notes...',
+    termsPlaceholder: '1. Payment terms, validity period, or service conditions...',
   },
   document: {
     invoiceTitle: 'INVOICE',
@@ -163,6 +164,7 @@ export const enInvoice: InvoiceTranslations = {
     addTax: '+ Add Tax',
     addNotes: '+ Add Notes',
     addTerms: '+ Add Terms & Conditions',
+    removeTerms: 'Remove Terms & Conditions',
     addDeclaration: '+ Add Declaration',
     addSignature: '+ Add Authorized Signature',
     addJurisdiction: '+ Add Jurisdiction',

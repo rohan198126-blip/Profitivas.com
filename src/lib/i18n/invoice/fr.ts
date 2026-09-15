@@ -105,6 +105,7 @@ export const frInvoice: InvoiceTranslations = {
     signatoryName: 'Nom du Signataire Autorisé',
     signatoryTitle: 'Fonction / Titre',
     notesPlaceholder: 'Conditions d\'escompte, garanties ou mentions légales...',
+    termsPlaceholder: '1. Conditions de paiement, durée de validité ou modalités du service...',
   },
   document: {
     invoiceTitle: 'FACTURE',
@@ -163,6 +164,7 @@ export const frInvoice: InvoiceTranslations = {
     addTax: '+ Ajouter TVA',
     addNotes: '+ Ajouter Notes',
     addTerms: '+ Ajouter Conditions',
+    removeTerms: 'Supprimer Conditions',
     addDeclaration: '+ Ajouter Déclaration',
     addSignature: '+ Ajouter Signature',
     addJurisdiction: '+ Ajouter Juridiction',

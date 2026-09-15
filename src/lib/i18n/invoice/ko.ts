@@ -105,6 +105,7 @@ export const koInvoice: InvoiceTranslations = {
     signatoryName: '발행 책임자 성명',
     signatoryTitle: '직위 / 직책',
     notesPlaceholder: '발행일로부터 30일 이내 입금 부탁드립니다. 이용해 주셔서 감사합니다!',
+    termsPlaceholder: '1. 결제 조건, 유효 기간 또는 서비스 조건...',
   },
   document: {
     invoiceTitle: '청 구 서',
@@ -163,6 +164,7 @@ export const koInvoice: InvoiceTranslations = {
     addTax: '+ 세율 추가',
     addNotes: '+ 참고사항 추가',
     addTerms: '+ 거래약관 추가',
+    removeTerms: '거래약관 삭제',
     addDeclaration: '+ 서약문 추가',
     addSignature: '+ 책임자 서명 추가',
     addJurisdiction: '+ 관할법원 추가',
